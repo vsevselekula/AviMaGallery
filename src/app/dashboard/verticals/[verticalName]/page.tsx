@@ -6,7 +6,6 @@ import { Vertical, Campaign, TeamMember } from '@/lib/types';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { getVerticalColorClass } from '@/lib/utils';
 import { CampaignList } from '@/components/features/CampaignList';
-import Image from 'next/image';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 
 interface VerticalPageProps {
@@ -37,7 +36,7 @@ export default function VerticalPage({ params }: VerticalPageProps) {
     };
 
     fetchUserRole();
-  }, []);
+  }, [supabase]);
 
   useEffect(() => {
     const fetchVerticalData = async () => {
@@ -78,7 +77,7 @@ export default function VerticalPage({ params }: VerticalPageProps) {
     };
 
     fetchVerticalData();
-  }, [params.verticalName, router]);
+  }, [params.verticalName, router, supabase]);
 
   if (loading) {
     return (
@@ -104,8 +103,6 @@ export default function VerticalPage({ params }: VerticalPageProps) {
       </main>
     );
   }
-
-  const verticalColorStyle = getVerticalColorClass(vertical.name);
 
   return (
     <main className="min-h-screen bg-gray-900 p-8">

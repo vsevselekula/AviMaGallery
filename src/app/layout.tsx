@@ -1,17 +1,13 @@
 import type { Metadata } from 'next';
-import { Inter, Manrope } from 'next/font/google';
+// import { Inter } from 'next/font/google'; // Удален неиспользуемый импорт Inter
 import './globals.css';
 import { LayoutWrapper } from '@/components/layout/LayoutWrapper';
 
-const inter = Inter({ subsets: ['latin', 'cyrillic'] });
-const manrope = Manrope({ 
-  subsets: ['latin', 'cyrillic'],
-  variable: '--font-manrope',
-});
+// const inter = Inter({ subsets: ['latin'] }); // Удалена неиспользуемая переменная inter
 
 export const metadata: Metadata = {
-  title: 'Рекламные кампании',
-  description: 'Управление рекламными кампаниями',
+  title: 'Avito Gallery',
+  description: 'Управление рекламными кампаниями Avito',
 };
 
 export default function RootLayout({
@@ -20,8 +16,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ru" className={manrope.variable}>
-      <body className={`${manrope.className} antialiased`}>
+    <html lang="ru">
+      <body>
         <LayoutWrapper>{children}</LayoutWrapper>
       </body>
     </html>

@@ -14,17 +14,83 @@ import {
   Title
 } from 'chart.js';
 import { Doughnut, Bar } from 'react-chartjs-2';
-import { format, isPast, isFuture, isWithinInterval } from 'date-fns';
+import { format, isPast, isThisWeek, isWithinInterval } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { getVerticalColorClass } from '@/lib/utils';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
 
+interface AnalyticsData {
+  totalCampaigns: number;
+  activeCampaigns: number;
+  upcomingCampaigns: number;
+  pastCampaigns: number;
+  campaignsByVertical: any;
+  campaignsByStatus: any;
+  campaignsByChannel: any;
+  campaignsOverTime: any;
+}
+
+// Функция для обработки кампаний и получения аналитических данных
+const processCampaignsForAnalytics = (campaigns: Campaign[]) => {
+  const now = new Date();
+  let activeCount = 0;
+  let upcomingCount = 0;
+  let pastCount = 0;
+
+  const campaignsByVertical: { [key: string]: number } = {};
+  const campaignsByStatus: { [key: string]: number } = {};
+  const campaignsByChannel: { [key: string]: number } = {};
+  const campaignsOverTime: { [key: string]: number } = {};
+
+  campaigns.forEach((campaign) => {
+    const startDate = new Date(campaign.flight_period.start_date);
+    const endDate = new Date(campaign.flight_period.end_date);
+
+    if (isPast(endDate)) {
+      pastCount++;
+    } else if (isThisWeek(startDate)) {
+      activeCount++;
+    } else if (startDate > now) {
+      upcomingCount++;
+    }
+
+    // Агрегация по вертикалям
+    campaignsByVertical[campaign.campaign_vertical] = (campaignsByVertical[campaign.campaign_vertical] || 0) + 1;
+
+    // Агрегация по статусам
+    campaignsByStatus[campaign.status] = (campaignsByStatus[campaign.status] || 0) + 1;
+
+    // Агрегация по каналам
+    campaign.channels.forEach((channel) => {
+      campaignsByChannel[channel] = (campaignsByChannel[channel] || 0) + 1;
+    });
+
+    // Агрегация по времени (например, по месяцам)
+    const monthYear = format(startDate, 'MM/yyyy');
+    campaignsOverTime[monthYear] = (campaignsOverTime[monthYear] || 0) + 1;
+  });
+
+  const totalCampaigns = campaigns.length;
+
+  return {
+    totalCampaigns,
+    activeCampaigns: activeCount,
+    upcomingCampaigns: upcomingCount,
+    pastCampaigns: pastCount,
+    campaignsByVertical,
+    campaignsByStatus,
+    campaignsByChannel,
+    campaignsOverTime,
+  };
+};
+
 export default function Analytics() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
   const supabase = createClientComponentClient();
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
 
   useEffect(() => {
     const fetchCampaigns = async () => {
@@ -40,12 +106,13 @@ export default function Analytics() {
       } else {
         console.log('Successfully fetched campaigns for Analytics page:', data);
         setCampaigns(data as Campaign[]);
+        setAnalyticsData(processCampaignsForAnalytics(data as Campaign[]));
       }
       setLoading(false);
     };
 
     fetchCampaigns();
-  }, []);
+  }, [supabase]);
 
   const { 
     totalCampaigns, 
