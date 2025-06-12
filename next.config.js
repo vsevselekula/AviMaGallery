@@ -11,6 +11,10 @@ const nextConfig = {
     ],
     domains: ['wutftnrkjkbgqhxqgpqs.supabase.co'],
   },
+  output: 'standalone',
+  experimental: {
+    serverActions: true,
+  },
 };
 
 module.exports = nextConfig; 
