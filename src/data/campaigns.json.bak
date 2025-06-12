@@ -1,0 +1,519 @@
+[
+  {
+    "campaign_type": "T2",
+    "campaign_vertical": "Товары",
+    "campaign_name": "Ведите бизнес по своим правилам",
+    "flight_period": {
+      "start_date": "2024-10-14",
+      "end_date": "2024-11-15"
+    },
+    "geo": "РФ",
+    "audience": "Про селлеры, 25-45, опытные онлайн-коммерсанты, работающие через маркетплейсы и компании-ритейлеры, владельцы интернет-магазинов, владельцы оффлайн-точек, которые являются новичками в онлайн продажах.",
+    "objectives": [
+      "Рассказать профессиональным продавцам о том, что Авито — эффективная площадка для продаж",
+      "Привлечь новых pro продавцов"
+    ],
+    "key_message": "ведите бизнес/продавайте по своим правилам",
+    "channels": ["OLV", "Banners", "DOOH", "медиафасад", "радио"],
+    "materials": ["OLV", "Banners", "DOOH", "медиафасад", "радио"],
+    "links": [
+      {
+        "label": "Карточка проекта",
+        "url": "https://docs.google.com/document/d/1ZcroPwdEabkKH50ZhxU3wSy9u6VMIFmz/edit"
+      }
+    ],
+    "attachments": [
+      {
+        "label": "Avito_20sec_planD_HD_TV_221124.mp4",
+        "url": "https://drive.google.com/file/d/1BkNhlv5jjhgFLG0Swdh9csIhAbdayulU/view?usp=drive_link"
+      },
+      {
+        "label": "Banners",
+        "url": "https://drive.google.com/drive/folders/15pJacsMDbyakV8lc6pmb3_YZnr-hOfpk?usp=drive_link"
+      },
+      {
+        "label": "DOOH",
+        "url": "https://drive.google.com/file/d/12afkNPa0MLeXdWzjTbs2pD1pAlkCCxJE/view?usp=drive_link"
+      },
+      {
+        "label": "медиафасад",
+        "url": "https://drive.google.com/file/d/1saPGdRYNZROoApEF6Qo_3exnxnpRNZ_G/view?usp=drive_link"
+      },
+      {
+        "label": "радио",
+        "url": "https://drive.google.com/drive/folders/1Je-MH3qIaSo1D18I9q-BsMlWyA4vD17v?usp=drive_link"
+      }
+    ]
+  },
+  {
+    "campaign_type": "T2",
+    "campaign_vertical": "Услуги",
+    "campaign_name": "Услуги",
+    "flight_period": {
+      "start_date": "2024-11-01",
+      "end_date": "2024-12-20"
+    },
+    "geo": "Мск и Спб",
+    "audience": "Заказчики услуг, ALL 25-45",
+    "objectives": [
+      "Не просто запустить Т2, а сделать интегрированную РК со спецпроектом в сердце"
+    ],
+    "key_message": "Начиная с Авито Услуг, вы без лишнего стресса начнете решать любую вашу задачу",
+    "channels": ["ООН", "МФ", "Радио", "OLV", "Digital", "Метро", "Спецпроект", "BTL"],
+    "materials": ["ОЛВ", "ООН"],
+    "links": [
+      {
+        "label": "Карточка проекта",
+        "url": "https://docs.google.com/document/d/1N3xW45hfvdiuiU25QDAX58uBCClgeb7bsmJq4yDP-lU/edit?tab=t.0#heading=h.gxqanwmlmc9f"
+      }
+    ],
+    "attachments": [
+      {
+        "label": "ОЛВ",
+        "url": "https://drive.google.com/drive/folders/1ke4K6gBo0T60W7FDpkPyujNgFnIyTidz?usp=drive_link"
+      },
+      {
+        "label": "ООН",
+        "url": "https://drive.google.com/drive/folders/1VeL-Yc3UOXY5fPQLh8xGfi6udsOJpC4E?usp=drive_link"
+      }
+    ]
+  },
+  {
+    "campaign_type": "T1",
+    "campaign_vertical": "Товары",
+    "campaign_name": "Black Friday",
+    "flight_period": {
+      "start_date": "2024-11-08",
+      "end_date": "2024-12-01"
+    },
+    "geo": "",
+    "audience": "18-54, М/Ж",
+    "objectives": [],
+    "key_message": "Скидки людям от людей …и товары за 99 рублей.",
+    "channels": ["TV", "ООН", "МФ", "Метро", "Радио", "Digital", "Special Project"],
+    "materials": [
+      "ТВ (20'' & 10'')",
+      "KV teaser & reveal",
+      "OOH/ DOOH",
+      "Метро мск",
+      "Метро спб",
+      "Radio",
+      "Digital banners",
+      "Special Project"
+    ],
+    "links": [
+      {
+        "label": "ТВ (20'' & 10'')",
+        "url": "https://disk.yandex.ru/d/VwQv945M_iJEOg"
+      },
+      {
+        "label": "KV teaser & reveal",
+        "url": "https://www.figma.com/design/Vd5oOi4ET13xjXyHKBxokd/Avito_Xvatamba?node-id=0-1&node-type=canvas&t=gLEyXF08eCVYTY6J-0"
+      },
+      {
+        "label": "OOH/ DOOH",
+        "url": "https://disk.yandex.ru/d/DZ4NYmE7cj3hwQ"
+      },
+      {
+        "label": "Метро мск",
+        "url": "https://drive.google.com/file/d/1l69VRqqApeq5lKQ2eI7mI5bYJ2mo2jYg/view?usp=sharing"
+      },
+      {
+        "label": "Метро спб",
+        "url": "https://drive.google.com/file/d/1p7GSIPcTixpvHPxRzvkVyUv--R9CDYYz/view"
+      },
+      {
+        "label": "Radio",
+        "url": "https://drive.google.com/file/d/1gYz_WJ_Xhrp_H0I7tdWens1hPYp5Es3I/view?usp=sharing"
+      },
+      {
+        "label": "Digital banners",
+        "url": "https://disk.yandex.ru/d/c5cL5Fu3-qG37g"
+      },
+      {
+        "label": "Special Project",
+        "url": "https://docs.google.com/presentation/d/1ufmfDbWLsNnhxKkqYaytO-WbaMXKI3unxzL2kCYhwxw/edit?usp=sharing"
+      }
+    ],
+    "attachments": []
+  },
+  {
+    "campaign_type": "T2",
+    "campaign_vertical": "Авто",
+    "campaign_name": "Авито Авто Select — флайт 2",
+    "flight_period": {
+      "start_date": "2024-11-18",
+      "end_date": "2024-12-29"
+    },
+    "geo": "МСК и СПб",
+    "audience": "Мужчины 25-55, с доходом выше среднего, планируют или находятся в процессе покупки авто от 2 000 000 ₽",
+    "objectives": [
+      "Интегрировать промо-оффер (100% кэшбек на ОСАГО) в ролик первого флайта и KV"
+    ],
+    "key_message": "Дарим ОСАГО при покупке автомобиля в Селекте",
+    "channels": ["TV/OLV 20/10 сек", "digital banners", "perf", "radio 20 сек", "OOH", "DOOH", "MF"],
+    "materials": ["Avito_20sec_planD_HD_TV_221124.mp4", "CleanShot 2024-11-07 at 13.13.04@2x.png"],
+    "links": [
+      {
+        "label": "Avito_20sec_planD_HD_TV_221124.mp4",
+        "url": "https://mt.avito.ru/avito/channels/t1t2-campaign-launches"
+      },
+      {
+        "label": "CleanShot 2024-11-07 at 13.13.04@2x.png",
+        "url": "https://mt.avito.ru/avito/channels/t1t2-campaign-launches"
+      }
+    ],
+    "attachments": [
+      {
+        "label": "Avito_20sec_planD_HD_TV_221124.mp4",
+        "url": "https://mt.avito.ru/avito/channels/t1t2-campaign-launches"
+      },
+      {
+        "label": "CleanShot 2024-11-07 at 13.13.04@2x.png",
+        "url": "https://mt.avito.ru/avito/channels/t1t2-campaign-launches"
+      }
+    ]
+  },
+  {
+    "campaign_type": "T1",
+    "campaign_vertical": "Товары",
+    "campaign_name": "EL&LS-C2C SALE",
+    "flight_period": {
+      "start_date": "2024-12-02",
+      "end_date": "2024-12-22"
+    },
+    "geo": "",
+    "audience": "18-54, М/Ж",
+    "objectives": [],
+    "key_message": "Скидки людям от людей и шанс выиграть квартиру",
+    "channels": ["ТВ", "ООН", "Радио", "Digital (OLV, banners)", "АнА", "Спец (блогеры)"],
+    "materials": ["ТВ/ОЛВ", "Радио", "Наружка", "Баннеры"],
+    "links": [
+      {
+        "label": "ТВ/ОЛВ",
+        "url": "https://drive.google.com/drive/folders/1-YQcIf9uohKkArEC5iMV4Wce1mvMR0Fj?usp=share_link"
+      },
+      {
+        "label": "Радио",
+        "url": "https://drive.google.com/drive/folders/1b0CyUG-NRUUdrivreXx5mAVzfznICыZq?usp=share_link"
+      },
+      {
+        "label": "Наружка",
+        "url": "https://drive.google.com/drive/folders/1wkcYQJi_dJrQlC0ftXdlU7_dkiTYapbq?usp=share_link"
+      },
+      {
+        "label": "Баннеры",
+        "url": "https://drive.google.com/drive/folders/1ThlNOoMHu-LS8lPR71WNdb7NdlNS92CE?usp=share_link"
+      }
+    ],
+    "attachments": []
+  },
+  {
+    "campaign_type": "T1",
+    "campaign_vertical": "Авто",
+    "campaign_name": "Used Cars + ОСАГО",
+    "flight_period": {
+      "start_date": "2025-01-20",
+      "end_date": "2025-03-16"
+    },
+    "geo": "Мск + Спб и области",
+    "audience": "Мужчины 25-55, с доходом выше среднего, планируют или находятся в процессе покупки авто от 2 000 000 ₽",
+    "objectives": [
+      "Uplift buyers +5% TOM Used Cars,Buy, Capitals — 70% YE 2025 vs. 67% YE 2024",
+      "Consideration, Used Cars,Buy, Capitals — 79% YE 2025 vs. 76% YE 2024"
+    ],
+    "key_message": "Дарим ОСАГО при покупке авто",
+    "channels": ["TV/OLV 20/10 сек", "OOH/DOOH", "Digital banners + AoA", "Radio", "Perf", "SMM", "CRM", "Product"],
+    "materials": ["ТВ", "ООН", "Радио", "Digital banners", "SMM integrations", "Product banners"],
+    "links": [
+      {
+        "label": "тык",
+        "url": "https://drive.google.com/drive/u/0/folders/1SXaQMTVl77NbGPYVOQSAobxYyhKHqZWd"
+      },
+      {
+        "label": "пре-тест КВ",
+        "url": "https://cf.avito.ru/pages/viewpage.action?pageId=492756913"
+      }
+    ],
+    "attachments": []
+  },
+  {
+    "campaign_type": "T1",
+    "campaign_vertical": "Товары",
+    "campaign_name": "Гендерная распродажа",
+    "flight_period": {
+      "start_date": "2025-02-10",
+      "end_date": "2025-03-02"
+    },
+    "geo": "",
+    "audience": "18-54, М/Ж",
+    "objectives": [],
+    "key_message": "Скидки людям от людей и шанс выиграть квартиру",
+    "channels": ["ТВ", "ООН", "Радио", "Digital (OLV, banners)", "АнА", "Спец (блогеры)"],
+    "materials": ["ТВ/ОЛВ", "Радио", "Наружка", "Баннеры"],
+    "links": [
+      {
+        "label": "ТВ/ОЛВ",
+        "url": "https://drive.google.com/drive/folders/1-YQcIf9uohKkArEC5iMV4Wce1mvMR0Fj?usp=share_link"
+      },
+      {
+        "label": "Радио",
+        "url": "https://drive.google.com/drive/folders/1b0CyUG-NRUUdrivreXx5mAVzfznICыZq?usp=share_link"
+      },
+      {
+        "label": "Наружка",
+        "url": "https://drive.google.com/drive/folders/1wkcYQJi_dJrQlC0ftXdlU7_dкиTYapбq?usp=share_link"
+      },
+      {
+        "label": "Баннеры",
+        "url": "https://drive.google.com/drive/folders/1ThlNOoMHu-LS8lPR71WNdb7NdlNS92CE?usp=share_link"
+      }
+    ],
+    "attachments": []
+  },
+  {
+    "campaign_type": "T1",
+    "campaign_vertical": "Товары",
+    "campaign_name": "Fashion (Lifestyle)",
+    "flight_period": {
+      "start_date": "2025-03-01",
+      "end_date": "2025-03-31"
+    },
+    "geo": "",
+    "audience": "",
+    "objectives": [],
+    "key_message": "Выбирайте уникальные вещи с историей и заказывайте их с доставкой",
+    "channels": ["ТВ", "OOH", "OLV", "digital-баннеры", "Performance", "SP & BTL", "Influence", "PR", "Product nav"],
+    "materials": ["Нац.ТВ", "Спонсорство", "OOH", "OLV", "digital-баннеры"],
+    "links": [
+      {
+        "label": "Карточка проекта",
+        "url": "https://docs.google.com/document/d/1L3F1w55vYlCAfu0-s5jzkCD3yY4iu6KKDGkGcnlM3-o/edit?tab=t.0#heading=h.gxqanwmlmc9f"
+      }
+    ],
+    "attachments": []
+  },
+  {
+    "campaign_type": "T1",
+    "campaign_vertical": "Работа",
+    "campaign_name": "B2C Офисные",
+    "flight_period": {
+      "start_date": "2025-03-03",
+      "end_date": "2025-04-30"
+    },
+    "geo": "8 регионов РФ",
+    "audience": "25-55, м/ж, офисный сегмент, пользователи hh.ru",
+    "objectives": [],
+    "key_message": "Найдите свое место на Авито Работе - теперь и в офисе",
+    "channels": ["ТВ (Рег)", "ООН/DOOH (Рег)", "OLV", "Radio", "digital-баннеры", "SP & BTL", "Influence", "PR", "Co-promo Альфа Банк"],
+    "materials": ["ТВ (Рег)", "ООН", "DOOH", "OLV", "Radio", "digital-баннеры"],
+    "links": [
+      {
+        "label": "ТВ (Рег)",
+        "url": "https://disk.yandex.ru/d/2XXIfH-6IvF0Ow"
+      }
+    ],
+    "attachments": []
+  },
+  {
+    "campaign_type": "T2",
+    "campaign_vertical": "Работа",
+    "campaign_name": "B2B",
+    "flight_period": {
+      "start_date": "2025-03-03",
+      "end_date": "2025-04-30"
+    },
+    "geo": "",
+    "audience": "ЛПРы микро-малого и средне-крупного бизнеса",
+    "objectives": [],
+    "key_message": "С Авито Работой вы сфокусируетесь на важных вещах и освободите ресурсы для развития бизнеса",
+    "channels": ["OLV", "Radio", "digital-баннеры", "SP", "SMM", "Influence", "in-product"],
+    "materials": ["OLV", "Radio", "digital-баннеры"],
+    "links": [
+      {
+        "label": "Карточка проекта",
+        "url": "https://docs.google.com/document/d/1KsI2ZN81kQMFL8HHz2QDokOvum8wnOgA/edit?usp=sharing&ouid=108964518780326432416&rtpof=true&sd=true"
+      }
+    ],
+    "attachments": []
+  },
+  {
+    "campaign_type": "T1",
+    "campaign_vertical": "Авто",
+    "campaign_name": "Avito SpareParts & Car Services",
+    "flight_period": {
+      "start_date": "2025-03-01",
+      "end_date": "2025-05-15"
+    },
+    "geo": "16 ключевых регионов",
+    "audience": "Некомпетентные экономные автовладельцы",
+    "objectives": [],
+    "key_message": "Установите шины в месте покупки с услугой бесплатного шиномонтажа",
+    "channels": ["TV", "ООН", "DOOH", "radio", "OLV", "banner ads", "internal channels"],
+    "materials": ["TV", "ООН/DOOH", "radio", "OLV", "banner ads"],
+    "links": [
+      {
+        "label": "TV",
+        "url": "https://drive.google.com/file/d/1r_Snw0u41yYmXyHffmQMLU-XnZoVemn5/view?usp=drive_link"
+      }
+    ],
+    "attachments": []
+  },
+  {
+    "campaign_type": "T2",
+    "campaign_vertical": "Товары",
+    "campaign_name": "Электроники (Реком)",
+    "flight_period": {
+      "start_date": "2025-03-10",
+      "end_date": "2025-04-13"
+    },
+    "geo": "",
+    "audience": "",
+    "objectives": [],
+    "key_message": "Техника бывает лишней. Деньги — нет.",
+    "channels": ["OLV", "OOH", "DOOH", "Radio", "digital-баннеры", "Perf", "АнА"],
+    "materials": ["OLV", "OOH", "DOOH", "Radio", "digital-баннеры"],
+    "links": [
+      {
+        "label": "Сервис выкупа",
+        "url": "https://www.avito.ru/electronics-buyout"
+      }
+    ],
+    "attachments": []
+  },
+  {
+    "campaign_type": "T2",
+    "campaign_vertical": "Авто",
+    "campaign_name": "Cashback",
+    "flight_period": {
+      "start_date": "2025-03-17",
+      "end_date": "2025-05-18"
+    },
+    "geo": "Москва и Питер",
+    "audience": "Покупатели автомобиля, сомневающиеся перед покупкой",
+    "objectives": [],
+    "key_message": "Получите кэшбэк 50 000 ₽ при покупке автомобиля на Авито Авто",
+    "channels": ["TV", "OLV", "DOOH", "MF", "Radio", "Banners", "Perf"],
+    "materials": ["TV", "игровой OLV", "графический OLV", "DOOH/MF", "Radio", "Banners", "Perf"],
+    "links": [
+      {
+        "label": "TV",
+        "url": "https://drive.google.com/drive/folders/13Bqe92ClkrwNJTeWuSH1O1Nd7MfiE06j?usp=drive_link"
+      }
+    ],
+    "attachments": []
+  },
+  {
+    "campaign_type": "T1",
+    "campaign_vertical": "Недвижимость",
+    "campaign_name": "Путешествия",
+    "flight_period": {
+      "start_date": "2025-04-01",
+      "end_date": "2025-05-31"
+    },
+    "geo": "",
+    "audience": "",
+    "objectives": [],
+    "key_message": "Самый большой выбор жилья для хороших историй",
+    "channels": ["TV", "OLV", "Метро", "OOH", "баннеры", "DOOH", "MF"],
+    "materials": ["TV", "OLV", "Метро", "OOH"],
+    "links": [
+      {
+        "label": "TV",
+        "url": "https://disk.yandex.ru/d/R6r9fMRHpRKdOQ"
+      }
+    ],
+    "attachments": []
+  },
+  {
+    "campaign_type": "T1",
+    "campaign_vertical": "Услуги",
+    "campaign_name": "Major Repair",
+    "flight_period": {
+      "start_date": "2025-04-01",
+      "end_date": "2025-05-11"
+    },
+    "geo": "",
+    "audience": "",
+    "objectives": [
+      "Переключить аудиторию из оффлайна в онлайн",
+      "Продемонстрировать T&S-фичи: проверенные документы, работа по договору, отзывы и рейтинг мастеров"
+    ],
+    "key_message": "Ну, а с кем еще строить?",
+    "channels": ["ТВ", "ООН", "Метро", "OLV", "Digital"],
+    "materials": ["ТВ", "ООН", "Метро", "OLV", "Digital"],
+    "links": [
+      {
+        "label": "Карточка проекта",
+        "url": "https://docs.google.com/document/d/1iTJwOdtiAujgdgZH2He76wFPD5LmqghM_riE7k_QTt8/edit"
+      }
+    ],
+    "attachments": []
+  },
+  {
+    "campaign_type": "T1",
+    "campaign_vertical": "Авито",
+    "campaign_name": "Манифест",
+    "flight_period": {
+      "start_date": "2025-04-02",
+      "end_date": "2025-04-30"
+    },
+    "geo": "",
+    "audience": "",
+    "objectives": [],
+    "key_message": "Авито — это то место, где случаются хорошие истории с каждым из нас",
+    "channels": ["TV", "OLV", "OOH", "МФ", "Баннеры"],
+    "materials": ["TV", "OLV", "OOH", "МФ", "Баннеры"],
+    "links": [
+      {
+        "label": "лендинг",
+        "url": "https://good.avito.com/"
+      }
+    ],
+    "attachments": []
+  },
+  {
+    "campaign_type": "T1",
+    "campaign_vertical": "Услуги",
+    "campaign_name": "Construction April",
+    "flight_period": {
+      "start_date": "2025-04-15",
+      "end_date": "2025-05-15"
+    },
+    "geo": "",
+    "audience": "Мужчины, хозяйственные умельцы, 30-54",
+    "objectives": [],
+    "key_message": "Начиная с Авито Услуг, вы без напряжения сможете делегировать задачи по ремонту и строительству",
+    "channels": ["ТВ", "ООН", "Радио", "Digital"],
+    "materials": ["ТВ", "ООН", "Радио", "Digital"],
+    "links": [
+      {
+        "label": "ТВ",
+        "url": "https://disk.yandex.ru/d/T5afB4QFY5ltRA"
+      }
+    ],
+    "attachments": []
+  },
+  {
+    "campaign_type": "T1",
+    "campaign_vertical": "Авто",
+    "campaign_name": "First car & first repair",
+    "flight_period": {
+      "start_date": "2025-05-12",
+      "end_date": "2025-08-03"
+    },
+    "geo": "вся Россия",
+    "audience": "Автовладельцы, М/Ж 70/30, возраст 25-40 (+ усиление до 30)",
+    "objectives": [],
+    "key_message": "Жать на Авито Авто при любой поломке",
+    "channels": ["ТВ", "Радио", "Digital", "OLV", "спецпроект", "блогеры", "игра"],
+    "materials": ["ТВ", "OLV", "Digital", "Radio"],
+    "links": [
+      {
+        "label": "ТВ",
+        "url": "https://drive.google.com/file/d/1Bu6s2103qvI-AKG4wDFKltKCJ_erz2yb/view?usp=drive_link"
+      }
+    ],
+    "attachments": []
+  }
+] 
