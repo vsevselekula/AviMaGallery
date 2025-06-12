@@ -1,6 +1,7 @@
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { supabase } from '@/lib/supabase';
+import Image from 'next/image';
 
 interface ImageUploadProps {
   currentImage?: string;
@@ -27,16 +28,19 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
       // Загружаем файл в Supabase Storage
       const fileExt = file.name.split('.').pop();
       const fileName = `${campaignId}-${Math.random()}.${fileExt}`;
-      const { data, error } = await supabase.storage
+      const filePath = `${fileName}`;
+      const { error: uploadError } = await supabase.storage
         .from('campaign-images')
-        .upload(fileName, file);
+        .upload(filePath, file);
 
-      if (error) throw error;
+      if (uploadError) {
+        throw uploadError;
+      }
 
       // Получаем публичный URL
       const { data: { publicUrl } } = supabase.storage
         .from('campaign-images')
-        .getPublicUrl(fileName);
+        .getPublicUrl(filePath);
 
       onImageUpload(publicUrl);
     } catch (err) {
@@ -55,14 +59,14 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
   });
 
   const handlePaste = useCallback(async (e: React.ClipboardEvent) => {
-    const items = e.clipboardData.items;
+    const items = Array.from(e.clipboardData.items);
     for (const item of items) {
       if (item.type.indexOf('image') === 0) {
         const file = item.getAsFile();
         if (file) {
           const dataTransfer = new DataTransfer();
           dataTransfer.items.add(file);
-          await onDrop(dataTransfer.files);
+          await onDrop(Array.from(dataTransfer.files));
         }
       }
     }
@@ -108,10 +112,12 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
         <input {...getInputProps()} disabled={isUploading} />
         {currentImage ? (
           <div className="relative">
-            <img
+            <Image
               src={currentImage}
               alt="Текущее изображение"
-              className="max-h-48 mx-auto rounded-lg"
+              width={400}
+              height={300}
+              className="max-h-48 mx-auto rounded-lg object-contain"
             />
             <p className="mt-2 text-sm text-gray-500">
               Перетащите новое изображение или кликните для выбора

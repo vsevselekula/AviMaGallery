@@ -1,39 +1,16 @@
 'use client';
 
-import { CampaignList } from '@/components/features/CampaignList';
-import { Campaign } from '@/lib/types';
 import { useState, useEffect } from 'react';
+import { Campaign } from '@/lib/types';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { CampaignList } from '@/components/features/CampaignList';
 
 export default function CampaignsPage() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
   const supabase = createClientComponentClient();
 
   useEffect(() => {
-    const fetchUserRole = async () => {
-      const { data: { user: supabaseUser } } = await supabase.auth.getUser();
-      if (supabaseUser) {
-        const { data: roleData } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', supabaseUser.id)
-          .single();
-        if (roleData) {
-          setIsAdmin(roleData.role === 'admin' || roleData.role === 'super_admin');
-        }
-      }
-    };
-
-    fetchUserRole();
-  }, []);
-
-  useEffect(() => {
     const fetchCampaigns = async () => {
-      setLoading(true);
-      console.log('Fetching campaigns from Supabase...');
       const { data, error } = await supabase
         .from('campaigns')
         .select('*')
@@ -42,14 +19,12 @@ export default function CampaignsPage() {
       if (error) {
         console.error('Error fetching campaigns:', error);
       } else {
-        console.log('Successfully fetched campaigns:', data);
         setCampaigns(data as Campaign[]);
       }
-      setLoading(false);
     };
 
     fetchCampaigns();
-  }, []);
+  }, [supabase]);
 
   const handleCampaignUpdated = (updatedCampaign: Campaign) => {
     setCampaigns(prevCampaigns =>
@@ -59,23 +34,14 @@ export default function CampaignsPage() {
     );
   };
 
-  if (loading) {
-    return (
-      <main className="min-h-screen bg-gray-900 p-8 flex flex-col items-center justify-center text-white text-xl">
-        <LoadingSpinner />
-        <p className="mt-4">Загрузка кампаний...</p>
-      </main>
-    );
-  }
-
   return (
-    <main className="min-h-screen bg-gray-900 p-8">
+    <main className="flex-1 p-8">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white mb-2">Рекламные кампании</h1>
-        <p className="text-gray-400">Управление и мониторинг рекламных кампаний</p>
+        <h1 className="text-2xl font-bold text-white mb-2">Все кампании</h1>
+        <p className="text-gray-400">Управление рекламными кампаниями</p>
       </div>
 
-      <CampaignList campaigns={campaigns} onCampaignUpdated={handleCampaignUpdated} isAdmin={isAdmin} />
+      <CampaignList campaigns={campaigns} onCampaignUpdated={handleCampaignUpdated} />
     </main>
   );
 } 

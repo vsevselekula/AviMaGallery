@@ -2,10 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { Campaign } from '@/lib/types';
-import { format } from 'date-fns';
-import { ru } from 'date-fns/locale';
 import { CampaignModal } from './CampaignModal';
-import { cn, getVerticalColorClass } from '@/lib/utils';
 import { CampaignCard } from './CampaignCard';
 
 interface CampaignListProps {
@@ -14,10 +11,9 @@ interface CampaignListProps {
   description?: string;
   hideVerticalFilter?: boolean;
   onCampaignUpdated?: (updatedCampaign: Campaign) => void;
-  isAdmin?: boolean;
 }
 
-export function CampaignList({ campaigns, title, description, hideVerticalFilter, onCampaignUpdated, isAdmin = false }: CampaignListProps) {
+export function CampaignList({ campaigns, title, description, hideVerticalFilter, onCampaignUpdated }: CampaignListProps) {
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState<string>('');
@@ -116,7 +112,6 @@ export function CampaignList({ campaigns, title, description, hideVerticalFilter
           campaign={selectedCampaign}
           onClose={() => setSelectedCampaign(null)}
           onCampaignUpdated={handleCampaignUpdated}
-          isAdmin={isAdmin}
         />
       )}
     </div>

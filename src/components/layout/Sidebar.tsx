@@ -2,22 +2,20 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { cn, getVerticalColorClass } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { LogoutButton } from '@/components/features/auth/LogoutButton';
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
-import type { User as SupabaseUser } from '@supabase/supabase-js';
-import verticalsData from '@/data/verticals.json';
-import { Vertical } from '@/lib/types';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 interface UserProfileInSidebar {
   id: string;
   email: string;
-  role: 'viewer' | 'editor' | 'super_admin';
+  role: string;
 }
 
 interface SidebarProps {
-  isMobileMenuOpen: boolean;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
 const menuItems = [
@@ -73,17 +71,16 @@ const getRoleDisplay = (role: string) => {
   }
 };
 
-export function Sidebar({ isMobileMenuOpen }: SidebarProps) {
+export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const [user, setUser] = useState<UserProfileInSidebar | null>(null);
-  const [isVerticalsDropdownOpen, setIsVerticalsDropdownOpen] = useState(false);
+  const supabase = createClientComponentClient();
 
   useEffect(() => {
     const fetchUserAndProfile = async () => {
       const { data: { user: supabaseUser } } = await supabase.auth.getUser();
 
       if (supabaseUser) {
-        // Fetch user role from the 'user_roles' table
         const { data: roleData, error: roleError } = await supabase
           .from('user_roles')
           .select('role')
@@ -92,7 +89,6 @@ export function Sidebar({ isMobileMenuOpen }: SidebarProps) {
 
         if (roleError) {
           console.error('Error fetching user role:', roleError);
-          // Fallback to 'viewer' if role cannot be fetched
           setUser({ id: supabaseUser.id, email: supabaseUser.email || '', role: 'viewer' });
         } else {
           setUser({ id: supabaseUser.id, email: supabaseUser.email || '', role: roleData.role });
@@ -106,7 +102,6 @@ export function Sidebar({ isMobileMenuOpen }: SidebarProps) {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
-        // Re-fetch profile on auth state change to ensure role is up-to-date
         fetchUserAndProfile(); 
       } else {
         setUser(null);
@@ -116,16 +111,24 @@ export function Sidebar({ isMobileMenuOpen }: SidebarProps) {
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [supabase]);
 
   return (
     <aside className={cn(
       "fixed left-0 top-0 h-screen bg-gray-800 text-white p-4 transition-transform duration-300 z-50",
-      isMobileMenuOpen ? "translate-x-0" : "-translate-x-full",
-      "md:w-64 md:translate-x-0"
+      "md:w-64 md:translate-x-0",
+      isOpen ? 'translate-x-0' : '-translate-x-full'
     )}>
       <div className="mb-8 flex items-center justify-between">
         <h1 className="text-2xl font-bold">Avito Gallery</h1>
+        <button
+          onClick={onClose}
+          className="lg:hidden text-gray-400 hover:text-white"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
 
       <nav>
@@ -146,55 +149,6 @@ export function Sidebar({ isMobileMenuOpen }: SidebarProps) {
               </Link>
             </li>
           ))}
-
-          {/* Verticals Dropdown */}
-          {/* <li>
-            <button
-              onClick={() => setIsVerticalsDropdownOpen(!isVerticalsDropdownOpen)}
-              className={cn(
-                'flex items-center gap-3 px-4 py-2 rounded-lg transition-colors w-full text-left',
-                isVerticalsDropdownOpen
-                  ? 'bg-blue-500 text-white'
-                  : 'hover:bg-gray-700',
-              )}
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-              </svg>
-              <span className="block">Вертикали</span>
-              {
-                <svg
-                  className={cn("w-4 h-4 ml-auto transition-transform", isVerticalsDropdownOpen ? "rotate-90" : "")}
-                  fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              }
-            </button>
-            {isVerticalsDropdownOpen && (
-              <ul className="ml-8 mt-2 space-y-1">
-                {(verticalsData as Vertical[]).map(vertical => (
-                  <li key={vertical.id}>
-                    <Link
-                      href={`/dashboard/verticals/${encodeURIComponent(vertical.name)}`}
-                      className={cn(
-                        'flex items-center gap-2 px-4 py-2 rounded-lg transition-colors',
-                        pathname === `/dashboard/verticals/${encodeURIComponent(vertical.name)}`
-                          ? 'bg-blue-600 text-white'
-                          : 'hover:bg-gray-700',
-                      )}
-                    >
-                      <div 
-                        className="w-3 h-3 rounded-full"
-                        style={getVerticalColorClass(vertical.name)}
-                      ></div>
-                      <span>{vertical.name}</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </li> */}
         </ul>
       </nav>
 

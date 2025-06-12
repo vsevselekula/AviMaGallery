@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { cn } from '@/lib/utils';
 
 interface VideoPlayerProps {
   videoUrl: string;
@@ -73,9 +74,13 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     <div className="relative w-full aspect-video">
       <iframe
         src={embedUrl}
-        className="absolute inset-0 w-full h-full rounded-lg"
+        className={cn(
+          "absolute inset-0 w-full h-full rounded-lg",
+          "border-0"
+        )}
         allow="autoplay"
         allowFullScreen
+        title="Video player"
       />
     </div>
   );

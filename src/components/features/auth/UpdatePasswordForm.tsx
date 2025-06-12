@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
 
 export function UpdatePasswordForm() {
   const router = useRouter();

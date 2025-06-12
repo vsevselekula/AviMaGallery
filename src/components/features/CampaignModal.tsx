@@ -1,15 +1,15 @@
 'use client';
 
-import { Campaign } from '@/lib/types';
+import { Campaign, Vertical } from '@/lib/types';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import { cn, getVerticalColorClass } from '@/lib/utils';
+import { getVerticalColorClass } from '@/lib/utils';
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import verticalsData from '@/data/verticals.json';
-import { Vertical } from '@/lib/types';
 import { ImageUpload } from './ImageUpload';
 import { VideoPlayer } from './VideoPlayer';
+import Image from 'next/image';
 
 interface UserProfile {
   id: string;
@@ -21,10 +21,9 @@ interface CampaignModalProps {
   campaign: Campaign;
   onClose: () => void;
   onCampaignUpdated?: (updatedCampaign: Campaign) => void;
-  isAdmin: boolean;
 }
 
-export function CampaignModal({ campaign, onClose, onCampaignUpdated, isAdmin }: CampaignModalProps) {
+export function CampaignModal({ campaign, onClose, onCampaignUpdated }: CampaignModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editedCampaign, setEditedCampaign] = useState<Campaign>(campaign);
@@ -179,13 +178,6 @@ export function CampaignModal({ campaign, onClose, onCampaignUpdated, isAdmin }:
     }));
   };
 
-  const handleVideoUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEditedCampaign(prev => ({
-      ...prev,
-      video_url: e.target.value,
-    }));
-  };
-
   const handleVideoTypeChange = useCallback((type: 'google_drive' | 'yandex_disk' | undefined) => {
     setEditedCampaign(prev => ({
       ...prev,
@@ -215,11 +207,12 @@ export function CampaignModal({ campaign, onClose, onCampaignUpdated, isAdmin }:
         )}
 
         {editedCampaign.image_url && (
-          <div className="relative w-full aspect-video rounded-t-lg overflow-hidden">
-            <img
+          <div className="relative w-full h-48">
+            <Image
               src={editedCampaign.image_url}
-              alt={editedCampaign.campaign_name}
-              className="w-full h-full object-cover"
+              alt="Campaign preview"
+              fill
+              className="object-cover rounded-lg"
             />
           </div>
         )}
