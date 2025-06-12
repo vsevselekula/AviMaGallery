@@ -21,7 +21,18 @@ export async function generateStaticParams() {
   }
 }
 
-export default async function VerticalPage({ params }: { params: { verticalName: string } }) {
+interface PageParams {
+  verticalName: string;
+}
+
+interface PageProps {
+  params: Promise<PageParams>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}
+
+export default async function VerticalPage(props: PageProps) {
+  const params = await props.params;
+  
   const { data: vertical } = await supabase
     .from('verticals')
     .select('*')

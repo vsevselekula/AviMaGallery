@@ -20,12 +20,12 @@ export function CampaignCard({ campaign, className }: CampaignCardProps) {
     >
       <div className="relative aspect-[16/9] overflow-hidden rounded-lg">
         {hasImage && campaign.image_url ? (
-          <div className="relative w-full aspect-video rounded-t-lg overflow-hidden">
+          <div className="relative w-full h-full">
             <Image
               src={campaign.image_url}
               alt={campaign.campaign_name}
+              style={{ objectFit: 'cover' }}
               fill
-              className="object-cover"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               priority
             />

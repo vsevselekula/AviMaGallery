@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { TestAccounts } from './TestAccounts';
 
 export function LoginForm() {
   const router = useRouter();
@@ -45,18 +44,12 @@ export function LoginForm() {
     }
   };
 
-  const handleUseTestAccount = (email: string, password: string) => {
-    console.log('LoginForm - Setting test account:', { email });
-    setEmail(email);
-    setPassword(password);
-  };
-
   return (
-    <div className="w-full max-w-md space-y-8">
+    <div className="w-full space-y-6">
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-4">
           <div>
-            <label htmlFor="email" className="sr-only">
+            <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">
               Email
             </label>
             <Input
@@ -65,13 +58,14 @@ export function LoginForm() {
               type="email"
               autoComplete="email"
               required
-              placeholder="Email"
+              placeholder="Введите ваш email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:ring-indigo-500 focus:border-indigo-500"
             />
           </div>
           <div>
-            <label htmlFor="password" className="sr-only">
+            <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">
               Пароль
             </label>
             <Input
@@ -80,25 +74,28 @@ export function LoginForm() {
               type="password"
               autoComplete="current-password"
               required
-              placeholder="Пароль"
+              placeholder="Введите ваш пароль"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:ring-indigo-500 focus:border-indigo-500"
             />
           </div>
         </div>
 
         {error && (
-          <div className="rounded-md bg-red-50 p-4">
-            <p className="text-sm text-red-700">{error}</p>
+          <div className="rounded-md bg-red-900/50 p-4 border border-red-500">
+            <p className="text-sm text-red-200">{error}</p>
           </div>
         )}
 
-        <Button type="submit" className="w-full" disabled={isLoading}>
+        <Button 
+          type="submit" 
+          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md transition-colors" 
+          disabled={isLoading}
+        >
           {isLoading ? 'Вход...' : 'Войти'}
         </Button>
       </form>
-
-      <TestAccounts onUseAccount={handleUseTestAccount} />
     </div>
   );
 } 

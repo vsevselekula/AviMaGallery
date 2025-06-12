@@ -13,11 +13,6 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const pathname = usePathname();
 
-  // Не показываем сайдбар на страницах аутентификации
-  if (pathname.startsWith('/auth')) {
-    return <>{children}</>;
-  }
-
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 1024) {
@@ -31,6 +26,11 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Не показываем сайдбар на страницах аутентификации
+  if (pathname.startsWith('/auth')) {
+    return <>{children}</>;
+  }
 
   return (
     <div className="flex h-screen bg-gray-900">

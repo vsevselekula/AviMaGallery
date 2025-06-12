@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',
@@ -12,16 +13,7 @@ const nextConfig = {
     domains: ['wutftnrkjkbgqhxqgpqs.supabase.co'],
   },
   output: 'export',
-  experimental: {
-    serverActions: false,
-  },
   trailingSlash: true,
-  async generateStaticParams() {
-    return {
-      '/': {},
-      '/_not-found': {},
-    }
-  },
 };
 
 module.exports = nextConfig; 
