@@ -1,17 +1,5 @@
-'use client';
-
-import { useState, useEffect } from 'react';
-import { Campaign } from '@/lib/types';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { CampaignList } from '@/components/features/CampaignList';
 import { createClient } from '@supabase/supabase-js';
 import { VerticalClient } from './VerticalClient';
-
-interface Vertical {
-  id: string;
-  name: string;
-  description: string;
-}
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
