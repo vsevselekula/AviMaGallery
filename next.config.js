@@ -11,9 +11,9 @@ const nextConfig = {
     ],
     domains: ['wutftnrkjkbgqhxqgpqs.supabase.co'],
   },
-  output: 'standalone',
+  output: 'export',
   experimental: {
-    serverActions: true,
+    serverActions: false,
   },
   trailingSlash: true,
   async generateStaticParams() {
