@@ -15,6 +15,13 @@ const nextConfig = {
   experimental: {
     serverActions: true,
   },
+  trailingSlash: true,
+  async generateStaticParams() {
+    return {
+      '/': {},
+      '/_not-found': {},
+    }
+  },
 };
 
 module.exports = nextConfig; 
