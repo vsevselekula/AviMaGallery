@@ -3,6 +3,7 @@
 import Sidebar from './Sidebar';
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
+import { usePathname } from 'next/navigation';
 
 interface LayoutWrapperProps {
   children: React.ReactNode;
@@ -10,6 +11,12 @@ interface LayoutWrapperProps {
 
 export function LayoutWrapper({ children }: LayoutWrapperProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const pathname = usePathname();
+
+  // Не показываем сайдбар на страницах аутентификации
+  if (pathname.startsWith('/auth')) {
+    return <>{children}</>;
+  }
 
   useEffect(() => {
     const handleResize = () => {
