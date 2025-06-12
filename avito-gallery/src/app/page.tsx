@@ -14,10 +14,24 @@ export default async function Home() {
     .select('*')
     .order('created_at', { ascending: false });
 
+  const handleCampaignUpdated = async (updatedCampaign: Campaign) => {
+    'use server';
+    await supabase
+      .from('campaigns')
+      .update(updatedCampaign)
+      .eq('id', updatedCampaign.id);
+  };
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <HeroBanner campaigns={campaigns as Campaign[]} />
-      <CampaignList campaigns={campaigns as Campaign[]} />
+      <HeroBanner 
+        campaigns={campaigns as Campaign[]} 
+        onCampaignUpdated={handleCampaignUpdated}
+      />
+      <CampaignList 
+        campaigns={campaigns as Campaign[]} 
+        onCampaignUpdated={handleCampaignUpdated}
+      />
     </main>
   );
 }
