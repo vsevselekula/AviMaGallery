@@ -4,6 +4,19 @@ import { useState, useEffect } from 'react';
 import { Campaign } from '@/lib/types';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { CampaignList } from '@/components/features/CampaignList';
+import { getCampaigns } from '@/lib/api/campaigns';
+
+export async function generateStaticParams() {
+  try {
+    const campaigns = await getCampaigns();
+    return campaigns.map((campaign) => ({
+      id: campaign.id.toString(),
+    }));
+  } catch (error) {
+    console.error('Error generating static params:', error);
+    return [];
+  }
+}
 
 export default function CampaignsPage() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
