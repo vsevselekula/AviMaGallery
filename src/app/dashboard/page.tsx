@@ -28,8 +28,8 @@ export default function DashboardPage() {
   }, [supabase]);
 
   const handleCampaignUpdated = (updatedCampaign: Campaign) => {
-    setCampaigns(prevCampaigns =>
-      prevCampaigns.map(campaign =>
+    setCampaigns((prevCampaigns) =>
+      prevCampaigns.map((campaign) =>
         campaign.id === updatedCampaign.id ? updatedCampaign : campaign
       )
     );
@@ -37,9 +37,12 @@ export default function DashboardPage() {
 
   return (
     <div className="flex-1">
-      <HeroBanner campaigns={campaigns} onCampaignUpdated={handleCampaignUpdated} />
+      <HeroBanner
+        campaigns={campaigns}
+        onCampaignUpdated={handleCampaignUpdated}
+      />
       <div className="px-8 mt-8">
-        <CampaignList 
+        <CampaignList
           campaigns={campaigns}
           title="Все кампании"
           onCampaignUpdated={handleCampaignUpdated}
@@ -47,4 +50,4 @@ export default function DashboardPage() {
       </div>
     </div>
   );
-} 
+}

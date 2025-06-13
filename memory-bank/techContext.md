@@ -1,6 +1,7 @@
 # Технический контекст
 
 ## Технологии
+
 - Next.js 14
 - React 18
 - TypeScript
@@ -10,6 +11,7 @@
 - dotenv
 
 ## Разработка
+
 - Node.js
 - npm
 - TypeScript
@@ -17,6 +19,7 @@
 - Prettier
 
 ## База данных
+
 - Supabase (PostgreSQL)
 - Таблицы:
   - users
@@ -25,12 +28,15 @@
   - user_roles
 
 ## Переменные окружения
+
 - NEXT_PUBLIC_SUPABASE_URL
 - NEXT_PUBLIC_SUPABASE_ANON_KEY
 - SUPABASE_SERVICE_ROLE_KEY
 
 ## Структура данных
+
 ### Вертикали (verticals)
+
 - id: TEXT (например, "vertical-1")
 - name: TEXT
 - description: TEXT
@@ -38,6 +44,7 @@
 - team_members: JSONB
 
 ### Кампании (campaigns)
+
 - id: UUID
 - campaign_name: TEXT
 - flight_period: JSONB
@@ -50,6 +57,7 @@
 - video_type: TEXT (enum: 'google_drive', 'yandex_disk')
 
 ### Пользователи (users)
+
 - id: UUID
 - email: TEXT
 - role: TEXT
@@ -61,12 +69,14 @@
 - position: TEXT
 
 ## Скрипты
+
 - `scripts/importVerticals.ts`: Импорт данных вертикалей в Supabase
   - Использует dotenv для загрузки переменных окружения
   - Читает данные из `src/data/verticals.json`
   - Импортирует данные в таблицу `verticals`
 
 ## Зависимости
+
 - @supabase/supabase-js
 - @supabase/auth-helpers-nextjs
 - chart.js
@@ -76,6 +86,7 @@
 - ts-node
 
 ## Ограничения
+
 - Необходимо обеспечить правильную обработку ошибок при загрузке данных из Supabase
 - Требуется реализовать механизм обновления данных при их изменении
 - Нужно добавить валидацию данных при импорте
@@ -83,6 +94,7 @@
 - Проблемы с отображением видео из Google Диска
 
 ## Настройка окружения
+
 1. Установить зависимости: `npm install`
 2. Создать файл `.env.local` с необходимыми переменными окружения
 3. Запустить скрипт импорта вертикалей: `npx ts-node scripts/importVerticals.ts`
@@ -91,6 +103,7 @@
 ## Стек технологий
 
 ### Frontend
+
 - React 18
 - TypeScript
 - Next.js 14 (App Router). **Настроена поддержка внешних доменов изображений (images.unsplash.com) в next.config.js с использованием `images.remotePatterns`.**
@@ -105,6 +118,7 @@
 - **Адаптивный сайдбар: На мобильных устройствах реализовано бургер-меню, на десктопах сайдбар всегда раскрыт.**
 
 ### Backend
+
 - Supabase
   - Authentication
   - Database (включая таблицы для профилей пользователей, их ролей, вертикалей и членов команды)
@@ -114,12 +128,14 @@
   - Edge Functions
 
 ### Инструменты разработки
+
 - ESLint
 - Prettier
 - Husky
 - Jest + React Testing Library
 
 ## Структура проекта
+
 ```
 src/
 ├── app/                    # Next.js App Router
@@ -142,6 +158,7 @@ src/
 ```
 
 ## Зависимости
+
 ```json
 {
   "dependencies": {
@@ -161,6 +178,7 @@ src/
 ```
 
 ## Конфигурация Supabase
+
 - Регион: eu-central-1
 - Аутентификация: Email (без подтверждения)
 - База данных: PostgreSQL (включая таблицу для профилей пользователей)
@@ -168,13 +186,16 @@ src/
 - Edge Functions
 
 ## Политики RLS
+
 ### Таблица campaigns
+
 - SELECT: `true` (публичный доступ)
 - INSERT: `auth.role() = 'authenticated'`
 - UPDATE: `auth.role() = 'authenticated'`
 - DELETE: `auth.role() = 'authenticated'`
 
 ### Бакет campaign-images
+
 - SELECT: `true` (публичный доступ)
 - INSERT: `auth.role() = 'authenticated'`
 - UPDATE: `auth.role() = 'authenticated'`

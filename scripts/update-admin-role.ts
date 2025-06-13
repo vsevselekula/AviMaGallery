@@ -12,7 +12,8 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 if (!supabaseUrl || !supabaseServiceKey) {
   console.error('\nMissing environment variables:');
   if (!supabaseUrl) console.error('- NEXT_PUBLIC_SUPABASE_URL is missing');
-  if (!supabaseServiceKey) console.error('- SUPABASE_SERVICE_ROLE_KEY is missing');
+  if (!supabaseServiceKey)
+    console.error('- SUPABASE_SERVICE_ROLE_KEY is missing');
   process.exit(1);
 }
 
@@ -20,21 +21,22 @@ if (!supabaseUrl || !supabaseServiceKey) {
 const supabase = createClient(supabaseUrl, supabaseServiceKey, {
   auth: {
     autoRefreshToken: false,
-    persistSession: false
-  }
+    persistSession: false,
+  },
 });
 
 async function updateAdminRole() {
   try {
     // Получаем список всех пользователей
-    const { data: allUsers, error: listError } = await supabase.auth.admin.listUsers();
+    const { data: allUsers, error: listError } =
+      await supabase.auth.admin.listUsers();
     if (listError) {
       console.error('Error listing users:', listError);
       return;
     }
 
     // Находим пользователя с email admin@test.com
-    const adminUser = allUsers?.users.find(u => u.email === 'admin@test.com');
+    const adminUser = allUsers?.users.find((u) => u.email === 'admin@test.com');
     if (!adminUser) {
       console.error('Admin user not found');
       return;
@@ -64,4 +66,4 @@ updateAdminRole()
   .catch((error) => {
     console.error('Error:', error);
     process.exit(1);
-  }); 
+  });

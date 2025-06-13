@@ -6,7 +6,10 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-export async function updateCampaign(campaignId: string, updatedCampaign: Campaign): Promise<Campaign> {
+export async function updateCampaign(
+  campaignId: string,
+  updatedCampaign: Campaign
+): Promise<Campaign> {
   const { data, error } = await supabase
     .from('campaigns')
     .update({
@@ -39,9 +42,7 @@ export async function updateCampaign(campaignId: string, updatedCampaign: Campai
 }
 
 export async function getCampaigns(): Promise<Campaign[]> {
-  const { data, error } = await supabase
-    .from('campaigns')
-    .select('*');
+  const { data, error } = await supabase.from('campaigns').select('*');
 
   if (error) {
     throw new Error(error.message);
@@ -66,4 +67,4 @@ export async function getCampaignById(id: string): Promise<Campaign> {
   }
 
   return data;
-} 
+}

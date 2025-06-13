@@ -50,7 +50,9 @@ describe('LoginForm', () => {
   });
 
   it('вызывает signInWithPassword и перенаправляет при успешном входе', async () => {
-    (supabase.auth.signInWithPassword as jest.Mock).mockResolvedValueOnce({ error: null });
+    (supabase.auth.signInWithPassword as jest.Mock).mockResolvedValueOnce({
+      error: null,
+    });
 
     render(<LoginForm />);
     const emailInput = screen.getByPlaceholderText('Email');
@@ -73,7 +75,9 @@ describe('LoginForm', () => {
 
   it('отображает ошибку при неудачном входе', async () => {
     const error = new Error('Неверные учетные данные');
-    (supabase.auth.signInWithPassword as jest.Mock).mockResolvedValueOnce({ error });
+    (supabase.auth.signInWithPassword as jest.Mock).mockResolvedValueOnce({
+      error,
+    });
 
     render(<LoginForm />);
     const emailInput = screen.getByPlaceholderText('Email');
@@ -98,4 +102,4 @@ describe('LoginForm', () => {
     expect(screen.getByPlaceholderText('Email')).toBeRequired();
     expect(screen.getByPlaceholderText('Пароль')).toBeRequired();
   });
-}); 
+});

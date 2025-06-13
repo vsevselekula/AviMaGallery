@@ -25,20 +25,26 @@ async function importVerticals() {
 
     for (const vertical of verticalsData) {
       // Убедимся, что team_members корректно преобразуется в JSONB
-      const { data, error } = await supabase
-        .from('verticals')
-        .upsert({
+      const { data, error } = await supabase.from('verticals').upsert(
+        {
           id: vertical.id,
           name: vertical.name,
           description: vertical.description,
           main_image: vertical.main_image,
           team_members: vertical.team_members, // Supabase автоматически обработает как JSONB
-        }, { onConflict: 'id', ignoreDuplicates: false });
+        },
+        { onConflict: 'id', ignoreDuplicates: false }
+      );
 
       if (error) {
-        console.error(`Ошибка при импорте вертикали ${vertical.name}:`, error.message);
+        console.error(
+          `Ошибка при импорте вертикали ${vertical.name}:`,
+          error.message
+        );
       } else {
-        console.log(`Успешно импортирована/обновлена вертикаль: ${vertical.name}`);
+        console.log(
+          `Успешно импортирована/обновлена вертикаль: ${vertical.name}`
+        );
       }
     }
     console.log('Импорт вертикалей завершен.');
@@ -47,4 +53,4 @@ async function importVerticals() {
   }
 }
 
-importVerticals(); 
+importVerticals();

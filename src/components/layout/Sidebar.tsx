@@ -19,31 +19,69 @@ interface SidebarProps {
 }
 
 const menuItems = [
-  { 
+  {
     href: '/dashboard',
     label: 'Домашняя страница',
     icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2 2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+      <svg
+        className="w-5 h-5"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2 2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+        />
       </svg>
     ),
   },
-  { 
+  {
     href: '/dashboard/analytics',
     label: 'Аналитика',
     icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+      <svg
+        className="w-5 h-5"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"
+        />
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"
+        />
       </svg>
     ),
   },
-  { 
+  {
     href: '/dashboard/calendar',
     label: 'Календарь РК',
     icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      <svg
+        className="w-5 h-5"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+        />
       </svg>
     ),
   },
@@ -77,8 +115,15 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const supabase = createClientComponentClient();
 
   useEffect(() => {
+    if (pathname.startsWith('/auth')) {
+      setUser(null);
+      return;
+    }
+
     const fetchUserAndProfile = async () => {
-      const { data: { user: supabaseUser } } = await supabase.auth.getUser();
+      const {
+        data: { user: supabaseUser },
+      } = await supabase.auth.getUser();
 
       if (supabaseUser) {
         const { data: roleData, error: roleError } = await supabase
@@ -87,11 +132,18 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           .eq('user_id', supabaseUser.id)
           .single();
 
-        if (roleError) {
-          console.error('Error fetching user role:', roleError);
-          setUser({ id: supabaseUser.id, email: supabaseUser.email || '', role: 'viewer' });
+        if (roleError || !roleData?.role) {
+          setUser({
+            id: supabaseUser.id,
+            email: supabaseUser.email || '',
+            role: 'viewer',
+          });
         } else {
-          setUser({ id: supabaseUser.id, email: supabaseUser.email || '', role: roleData.role });
+          setUser({
+            id: supabaseUser.id,
+            email: supabaseUser.email || '',
+            role: roleData.role,
+          });
         }
       } else {
         setUser(null);
@@ -100,9 +152,11 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
     fetchUserAndProfile();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
-        fetchUserAndProfile(); 
+        fetchUserAndProfile();
       } else {
         setUser(null);
       }
@@ -111,22 +165,34 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     return () => {
       subscription.unsubscribe();
     };
-  }, [supabase]);
+  }, [supabase, pathname]);
 
   return (
-    <aside className={cn(
-      "fixed left-0 top-0 h-screen bg-gray-800 text-white p-4 transition-transform duration-300 z-50",
-      "md:w-64 md:translate-x-0",
-      isOpen ? 'translate-x-0' : '-translate-x-full'
-    )}>
+    <aside
+      className={cn(
+        'fixed left-0 top-0 h-screen bg-gray-800 text-white p-4 transition-transform duration-300 z-50',
+        'md:w-64 md:translate-x-0',
+        isOpen ? 'translate-x-0' : '-translate-x-full'
+      )}
+    >
       <div className="mb-8 flex items-center justify-between">
         <h1 className="text-2xl font-bold">Avito Gallery</h1>
         <button
           onClick={onClose}
           className="lg:hidden text-gray-400 hover:text-white"
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </button>
       </div>
@@ -141,7 +207,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                   'flex items-center gap-3 px-4 py-2 rounded-lg transition-colors',
                   pathname === item.href
                     ? 'bg-blue-500 text-white'
-                    : 'hover:bg-gray-700',
+                    : 'hover:bg-gray-700'
                 )}
               >
                 {item.icon}
@@ -162,7 +228,9 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 </div>
                 <div>
                   <p className="text-sm font-medium">{user.email}</p>
-                  <p className="text-xs text-gray-400">{getRoleDisplay(user.role)}</p>
+                  <p className="text-xs text-gray-400">
+                    {getRoleDisplay(user.role)}
+                  </p>
                 </div>
               </div>
             </Link>
@@ -179,4 +247,4 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       </div>
     </aside>
   );
-} 
+}

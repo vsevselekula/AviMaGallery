@@ -12,8 +12,8 @@ export function CampaignsClient({ initialCampaigns }: CampaignsClientProps) {
   const [campaigns, setCampaigns] = useState<Campaign[]>(initialCampaigns);
 
   const handleCampaignUpdated = (updatedCampaign: Campaign) => {
-    setCampaigns(prevCampaigns =>
-      prevCampaigns.map(campaign =>
+    setCampaigns((prevCampaigns) =>
+      prevCampaigns.map((campaign) =>
         campaign.id === updatedCampaign.id ? updatedCampaign : campaign
       )
     );
@@ -26,7 +26,10 @@ export function CampaignsClient({ initialCampaigns }: CampaignsClientProps) {
         <p className="text-gray-400">Управление рекламными кампаниями</p>
       </div>
 
-      <CampaignList campaigns={campaigns} onCampaignUpdated={handleCampaignUpdated} />
+      <CampaignList
+        campaigns={campaigns}
+        onCampaignUpdated={handleCampaignUpdated}
+      />
     </main>
   );
-} 
+}

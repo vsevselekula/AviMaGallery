@@ -31,12 +31,8 @@ export function LogoutButton({ className }: LogoutButtonProps) {
   };
 
   return (
-    <Button
-      onClick={handleLogout}
-      disabled={loading}
-      className={className}
-    >
+    <Button onClick={handleLogout} disabled={loading} className={className}>
       {loading ? 'Выход...' : 'Выйти'}
     </Button>
   );
-} 
+}

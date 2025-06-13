@@ -8,4 +8,4 @@ declare global {
       toBeRequired(): R;
     }
   }
-} 
+}

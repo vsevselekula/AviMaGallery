@@ -34,4 +34,4 @@ export interface Campaign {
   image_url?: string;
   video_url?: string;
   video_type?: 'google_drive' | 'yandex_disk';
-} 
+}

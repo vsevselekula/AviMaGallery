@@ -9,8 +9,8 @@ const spinnerVariants = {
   animate: {
     transition: {
       staggerChildren: 0.1, // Задержка между анимациями дочерних элементов
-      repeat: Infinity,   // Бесконечный цикл для контейнера
-      duration: 1,        // Общая длительность одного цикла анимации
+      repeat: Infinity, // Бесконечный цикл для контейнера
+      duration: 1, // Общая длительность одного цикла анимации
     },
   },
 };
@@ -24,7 +24,7 @@ const circleAnimation = {
   },
   animate: (i: number) => ({
     opacity: [0, 1, 0], // Появление и исчезновение
-    scale: [0, 1, 0],   // Изменение размера
+    scale: [0, 1, 0], // Изменение размера
     x: [
       0,
       Math.cos((i * 90 * Math.PI) / 180) * centerOffset,
@@ -75,4 +75,4 @@ export function LoadingSpinner() {
       ))}
     </motion.div>
   );
-} 
+}

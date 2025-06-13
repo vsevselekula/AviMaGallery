@@ -36,21 +36,21 @@ describe('LogoutButton', () => {
   it('отображает состояние загрузки при нажатии', async () => {
     render(<LogoutButton />);
     const button = screen.getByText('Выйти');
-    
+
     fireEvent.click(button);
-    
+
     expect(screen.getByText('Выход...')).toBeInTheDocument();
     expect(button).toBeDisabled();
   });
 
   it('вызывает signOut и перенаправляет на страницу входа при успешном выходе', async () => {
     (supabase.auth.signOut as jest.Mock).mockResolvedValueOnce({ error: null });
-    
+
     render(<LogoutButton />);
     const button = screen.getByText('Выйти');
-    
+
     fireEvent.click(button);
-    
+
     await waitFor(() => {
       expect(supabase.auth.signOut).toHaveBeenCalled();
       expect(mockRouter.push).toHaveBeenCalledWith('/auth/login');
@@ -62,16 +62,19 @@ describe('LogoutButton', () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
     const error = new Error('Ошибка выхода');
     (supabase.auth.signOut as jest.Mock).mockRejectedValueOnce(error);
-    
+
     render(<LogoutButton />);
     const button = screen.getByText('Выйти');
-    
+
     fireEvent.click(button);
-    
+
     await waitFor(() => {
-      expect(consoleErrorSpy).toHaveBeenCalledWith('Ошибка при выходе из системы:', error);
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'Ошибка при выходе из системы:',
+        error
+      );
     });
-    
+
     consoleErrorSpy.mockRestore();
   });
 
@@ -81,4 +84,4 @@ describe('LogoutButton', () => {
     const button = screen.getByText('Выйти');
     expect(button).toHaveClass(className);
   });
-}); 
+});

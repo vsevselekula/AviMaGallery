@@ -24,4 +24,4 @@ describe('Button', () => {
     const button = screen.getByText('Click me');
     expect(button).toHaveClass('custom-class');
   });
-}); 
+});

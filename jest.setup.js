@@ -15,4 +15,4 @@ jest.mock('next/image', () => ({
     // eslint-disable-next-line jsx-a11y/alt-text
     return <img {...props} />;
   },
-})); 
+}));

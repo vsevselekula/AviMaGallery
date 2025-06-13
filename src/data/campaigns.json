@@ -14,20 +14,8 @@
       "Привлечь новых pro продавцов"
     ],
     "key_message": "ведите бизнес/продавайте по своим правилам",
-    "channels": [
-      "OLV",
-      "Banners",
-      "DOOH",
-      "медиафасад",
-      "радио"
-    ],
-    "materials": [
-      "OLV",
-      "Banners",
-      "DOOH",
-      "медиафасад",
-      "радио"
-    ],
+    "channels": ["OLV", "Banners", "DOOH", "медиафасад", "радио"],
+    "materials": ["OLV", "Banners", "DOOH", "медиафасад", "радио"],
     "links": [
       {
         "label": "Карточка проекта",
@@ -81,10 +69,7 @@
       "Спецпроект",
       "BTL"
     ],
-    "materials": [
-      "ОЛВ",
-      "ООН"
-    ],
+    "materials": ["ОЛВ", "ООН"],
     "links": [
       {
         "label": "Карточка проекта",
@@ -237,12 +222,7 @@
       "АнА",
       "Спец (блогеры)"
     ],
-    "materials": [
-      "ТВ/ОЛВ",
-      "Радио",
-      "Наружка",
-      "Баннеры"
-    ],
+    "materials": ["ТВ/ОЛВ", "Радио", "Наружка", "Баннеры"],
     "links": [
       {
         "label": "ТВ/ОЛВ",
@@ -328,12 +308,7 @@
       "АнА",
       "Спец (блогеры)"
     ],
-    "materials": [
-      "ТВ/ОЛВ",
-      "Радио",
-      "Наружка",
-      "Баннеры"
-    ],
+    "materials": ["ТВ/ОЛВ", "Радио", "Наружка", "Баннеры"],
     "links": [
       {
         "label": "ТВ/ОЛВ",
@@ -377,13 +352,7 @@
       "PR",
       "Product nav"
     ],
-    "materials": [
-      "Нац.ТВ",
-      "Спонсорство",
-      "OOH",
-      "OLV",
-      "digital-баннеры"
-    ],
+    "materials": ["Нац.ТВ", "Спонсорство", "OOH", "OLV", "digital-баннеры"],
     "links": [
       {
         "label": "Карточка проекта",
@@ -415,14 +384,7 @@
       "PR",
       "Co-promo Альфа Банк"
     ],
-    "materials": [
-      "ТВ (Рег)",
-      "ООН",
-      "DOOH",
-      "OLV",
-      "Radio",
-      "digital-баннеры"
-    ],
+    "materials": ["ТВ (Рег)", "ООН", "DOOH", "OLV", "Radio", "digital-баннеры"],
     "links": [
       {
         "label": "ТВ (Рег)",
@@ -452,11 +414,7 @@
       "Influence",
       "in-product"
     ],
-    "materials": [
-      "OLV",
-      "Radio",
-      "digital-баннеры"
-    ],
+    "materials": ["OLV", "Radio", "digital-баннеры"],
     "links": [
       {
         "label": "Карточка проекта",
@@ -486,13 +444,7 @@
       "banner ads",
       "internal channels"
     ],
-    "materials": [
-      "TV",
-      "ООН/DOOH",
-      "radio",
-      "OLV",
-      "banner ads"
-    ],
+    "materials": ["TV", "ООН/DOOH", "radio", "OLV", "banner ads"],
     "links": [
       {
         "label": "TV",
@@ -522,13 +474,7 @@
       "Perf",
       "АнА"
     ],
-    "materials": [
-      "OLV",
-      "OOH",
-      "DOOH",
-      "Radio",
-      "digital-баннеры"
-    ],
+    "materials": ["OLV", "OOH", "DOOH", "Radio", "digital-баннеры"],
     "links": [
       {
         "label": "Сервис выкупа",
@@ -549,15 +495,7 @@
     "audience": "Покупатели автомобиля, сомневающиеся перед покупкой",
     "objectives": [],
     "key_message": "Получите кэшбэк 50 000 ₽ при покупке автомобиля на Авито Авто",
-    "channels": [
-      "TV",
-      "OLV",
-      "DOOH",
-      "MF",
-      "Radio",
-      "Banners",
-      "Perf"
-    ],
+    "channels": ["TV", "OLV", "DOOH", "MF", "Radio", "Banners", "Perf"],
     "materials": [
       "TV",
       "игровой OLV",
@@ -587,21 +525,8 @@
     "audience": "",
     "objectives": [],
     "key_message": "Самый большой выбор жилья для хороших историй",
-    "channels": [
-      "TV",
-      "OLV",
-      "Метро",
-      "OOH",
-      "баннеры",
-      "DOOH",
-      "MF"
-    ],
-    "materials": [
-      "TV",
-      "OLV",
-      "Метро",
-      "OOH"
-    ],
+    "channels": ["TV", "OLV", "Метро", "OOH", "баннеры", "DOOH", "MF"],
+    "materials": ["TV", "OLV", "Метро", "OOH"],
     "links": [
       {
         "label": "TV",
@@ -625,20 +550,8 @@
       "Продемонстрировать T&S-фичи: проверенные документы, работа по договору, отзывы и рейтинг мастеров"
     ],
     "key_message": "Ну, а с кем еще строить?",
-    "channels": [
-      "ТВ",
-      "ООН",
-      "Метро",
-      "OLV",
-      "Digital"
-    ],
-    "materials": [
-      "ТВ",
-      "ООН",
-      "Метро",
-      "OLV",
-      "Digital"
-    ],
+    "channels": ["ТВ", "ООН", "Метро", "OLV", "Digital"],
+    "materials": ["ТВ", "ООН", "Метро", "OLV", "Digital"],
     "links": [
       {
         "label": "Карточка проекта",
@@ -659,20 +572,8 @@
     "audience": "",
     "objectives": [],
     "key_message": "Авито — это то место, где случаются хорошие истории с каждым из нас",
-    "channels": [
-      "TV",
-      "OLV",
-      "OOH",
-      "МФ",
-      "Баннеры"
-    ],
-    "materials": [
-      "TV",
-      "OLV",
-      "OOH",
-      "МФ",
-      "Баннеры"
-    ],
+    "channels": ["TV", "OLV", "OOH", "МФ", "Баннеры"],
+    "materials": ["TV", "OLV", "OOH", "МФ", "Баннеры"],
     "links": [
       {
         "label": "лендинг",
@@ -693,18 +594,8 @@
     "audience": "Мужчины, хозяйственные умельцы, 30-54",
     "objectives": [],
     "key_message": "Начиная с Авито Услуг, вы без напряжения сможете делегировать задачи по ремонту и строительству",
-    "channels": [
-      "ТВ",
-      "ООН",
-      "Радио",
-      "Digital"
-    ],
-    "materials": [
-      "ТВ",
-      "ООН",
-      "Радио",
-      "Digital"
-    ],
+    "channels": ["ТВ", "ООН", "Радио", "Digital"],
+    "materials": ["ТВ", "ООН", "Радио", "Digital"],
     "links": [
       {
         "label": "ТВ",
@@ -734,12 +625,7 @@
       "блогеры",
       "игра"
     ],
-    "materials": [
-      "ТВ",
-      "OLV",
-      "Digital",
-      "Radio"
-    ],
+    "materials": ["ТВ", "OLV", "Digital", "Radio"],
     "links": [
       {
         "label": "ТВ",
@@ -760,18 +646,8 @@
     "audience": "селлеры машин 2 млн+",
     "objectives": [],
     "key_message": "выгодно продать авто",
-    "channels": [
-      "TV",
-      "OOH",
-      "OLV",
-      "Digital"
-    ],
-    "materials": [
-      "TV",
-      "OOH",
-      "OLV",
-      "Digital"
-    ],
+    "channels": ["TV", "OOH", "OLV", "Digital"],
+    "materials": ["TV", "OOH", "OLV", "Digital"],
     "links": [
       {
         "label": "Бриф",
@@ -797,18 +673,8 @@
     "audience": "вся Россия, 25-45 лет, мужчины и женщины в равных пропорциях. По сегментам: синие и офисные профессии",
     "objectives": [],
     "key_message": "На Авито такой большой выбор вакансий, что ты всегда сможешь найти то, что подходит именно тебе",
-    "channels": [
-      "TV",
-      "OOH",
-      "OLV",
-      "Digital"
-    ],
-    "materials": [
-      "TV",
-      "OOH",
-      "OLV",
-      "Digital"
-    ],
+    "channels": ["TV", "OOH", "OLV", "Digital"],
+    "materials": ["TV", "OOH", "OLV", "Digital"],
     "links": [
       {
         "label": "Бриф",
@@ -842,18 +708,8 @@
     "audience": "вся Россия с фокусом на студенческие города, 14-24 лет, М/Ж — ученики старших классов или студенты (ВУЗы, ССУЗы). Сегмент: преимущественно синие воротнички",
     "objectives": [],
     "key_message": "Найди подработку на лето на Авито",
-    "channels": [
-      "TV",
-      "OOH",
-      "OLV",
-      "Digital"
-    ],
-    "materials": [
-      "TV",
-      "OOH",
-      "OLV",
-      "Digital"
-    ],
+    "channels": ["TV", "OOH", "OLV", "Digital"],
+    "materials": ["TV", "OOH", "OLV", "Digital"],
     "links": [
       {
         "label": "Бриф",
@@ -887,14 +743,8 @@
     "audience": "18-45, М/Ж, вся РФ. Регулярно покупают онлайн продукты из целевой категории",
     "objectives": [],
     "key_message": "Покупайте брендовые вещи от х руб",
-    "channels": [
-      "OLV",
-      "Digital banners"
-    ],
-    "materials": [
-      "OLV",
-      "Digital banners"
-    ],
+    "channels": ["OLV", "Digital banners"],
+    "materials": ["OLV", "Digital banners"],
     "links": [
       {
         "label": "Бриф",
@@ -924,14 +774,8 @@
     "audience": "М/Ж, 18-34, МСК, СПБ. Регулярно покупают одежду брендовую онлайн, но не рассматривают вариант покупки на сайтах объявлений / Авито",
     "objectives": [],
     "key_message": "На Авито можно уверенно покупать оригинальную одежду ушедших брендов под любой бюджет",
-    "channels": [
-      "OLV",
-      "Digital banners"
-    ],
-    "materials": [
-      "OLV",
-      "Digital banners"
-    ],
+    "channels": ["OLV", "Digital banners"],
+    "materials": ["OLV", "Digital banners"],
     "links": [
       {
         "label": "Бриф",
@@ -961,16 +805,8 @@
     "audience": "Широкий соц.дем: 30-55, М, вся РФ",
     "objectives": [],
     "key_message": "Покупайте все для ремонта и строительства/дачи по ценам ХХХ% ниже рынка.",
-    "channels": [
-      "TV",
-      "OOH/DOOH",
-      "AoA banners"
-    ],
-    "materials": [
-      "TV",
-      "OOH/DOOH",
-      "AoA banners"
-    ],
+    "channels": ["TV", "OOH/DOOH", "AoA banners"],
+    "materials": ["TV", "OOH/DOOH", "AoA banners"],
     "links": [
       {
         "label": "Бриф",
@@ -1046,18 +882,8 @@
       "Повысить привычку заказывать услуги онлайн"
     ],
     "key_message": "Мастера для ваших свершений / Мастера для ваших событий",
-    "channels": [
-      "TV",
-      "OLV",
-      "OOH",
-      "Digital"
-    ],
-    "materials": [
-      "TV",
-      "OLV",
-      "OOH",
-      "Digital"
-    ],
+    "channels": ["TV", "OLV", "OOH", "Digital"],
+    "materials": ["TV", "OLV", "OOH", "Digital"],
     "links": [
       {
         "label": "Бриф",
@@ -1078,14 +904,8 @@
     "audience": "Сантехника: 20-35 лет, М/Ж 50/50, семьи с детьми; Стройка: 35-50 лет, М, доход средний+, семейные с детьми",
     "objectives": [],
     "key_message": "На Авито есть высококлассные товары по выгодным ценам; новые и БУ товары по выгодным ценам",
-    "channels": [
-      "OLV",
-      "Digital banners"
-    ],
-    "materials": [
-      "OLV",
-      "Digital banners"
-    ],
+    "channels": ["OLV", "Digital banners"],
+    "materials": ["OLV", "Digital banners"],
     "links": [
       {
         "label": "Бриф",
@@ -1161,12 +981,7 @@
       "Digital banners",
       "Digital special project"
     ],
-    "materials": [
-      "TV",
-      "OOH",
-      "OLV",
-      "Digital banners"
-    ],
+    "materials": ["TV", "OOH", "OLV", "Digital banners"],
     "links": [
       {
         "label": "Бриф",
@@ -1187,21 +1002,8 @@
     "audience": "м/ж 25-55 с опытом работы. Рабочие и линейный персонал",
     "objectives": [],
     "key_message": "Большой выбор вакансий от проверенных работодателей",
-    "channels": [
-      "TV",
-      "OOH",
-      "DOOH",
-      "OLV",
-      "Digital banners",
-      "radio"
-    ],
-    "materials": [
-      "TV",
-      "OOH",
-      "DOOH",
-      "OLV",
-      "Digital banners"
-    ],
+    "channels": ["TV", "OOH", "DOOH", "OLV", "Digital banners", "radio"],
+    "materials": ["TV", "OOH", "DOOH", "OLV", "Digital banners"],
     "links": [
       {
         "label": "Бриф",
@@ -1222,20 +1024,8 @@
     "audience": "М/Ж 25-55 лет; владельцы авто, ищущие историю машины",
     "objectives": [],
     "key_message": "Авто проверено, вы уверены",
-    "channels": [
-      "TV",
-      "OOH",
-      "DOOH",
-      "OLV",
-      "Digital banners"
-    ],
-    "materials": [
-      "TV",
-      "OOH",
-      "DOOH",
-      "OLV",
-      "Digital banners"
-    ],
+    "channels": ["TV", "OOH", "DOOH", "OLV", "Digital banners"],
+    "materials": ["TV", "OOH", "DOOH", "OLV", "Digital banners"],
     "links": [
       {
         "label": "Бриф",
@@ -1261,16 +1051,8 @@
     "audience": "частные исполнители и микро-/малые компании",
     "objectives": [],
     "key_message": "На Авито вы сможете без лишних трудностей и сомнений пройти путь от размещения объявления до сотен успешных сделок",
-    "channels": [
-      "OOH",
-      "OLV",
-      "Digital"
-    ],
-    "materials": [
-      "OOH",
-      "OLV",
-      "Digital"
-    ],
+    "channels": ["OOH", "OLV", "Digital"],
+    "materials": ["OOH", "OLV", "Digital"],
     "links": [
       {
         "label": "Бриф",
@@ -1291,20 +1073,8 @@
     "audience": "селлеры автомобилей, 70%/30% М/Ж, 20-55 лет",
     "objectives": [],
     "key_message": "Авито Аукцион — продайте авто за 1 день",
-    "channels": [
-      "OOH",
-      "DOOH",
-      "Media facades",
-      "Digital banners",
-      "Radio"
-    ],
-    "materials": [
-      "OOH",
-      "DOOH",
-      "Media facades",
-      "Digital banners",
-      "Radio"
-    ],
+    "channels": ["OOH", "DOOH", "Media facades", "Digital banners", "Radio"],
+    "materials": ["OOH", "DOOH", "Media facades", "Digital banners", "Radio"],
     "links": [
       {
         "label": "Бриф",
@@ -1325,18 +1095,8 @@
     "audience": "пары 30-35 лет, доход средний/высокий, непользователи Авито",
     "objectives": [],
     "key_message": "Прозрачный выбор недвижимости",
-    "channels": [
-      "TV",
-      "OOH",
-      "Digital Media (OLV, Banners)",
-      "Radio"
-    ],
-    "materials": [
-      "TV",
-      "OOH",
-      "Digital Media (OLV, Banners)",
-      "Radio"
-    ],
+    "channels": ["TV", "OOH", "Digital Media (OLV, Banners)", "Radio"],
+    "materials": ["TV", "OOH", "Digital Media (OLV, Banners)", "Radio"],
     "links": [
       {
         "label": "Бриф",
@@ -1362,14 +1122,8 @@
     "audience": "автовладельцы 25-54 лет, обращаются в автосервис 1-2 раза в год",
     "objectives": [],
     "key_message": "Сотни предложений автосервисов для планового ТО от 5 000 ₽",
-    "channels": [
-      "OLV",
-      "Digital"
-    ],
-    "materials": [
-      "OLV",
-      "Digital"
-    ],
+    "channels": ["OLV", "Digital"],
+    "materials": ["OLV", "Digital"],
     "links": [
       {
         "label": "Бриф",
@@ -1390,18 +1144,8 @@
     "audience": "автовладельцы, М, 25-54 лет",
     "objectives": [],
     "key_message": "Шины от 3200 ₽ на Авито",
-    "channels": [
-      "TV",
-      "OOH/DOOH",
-      "АнА",
-      "radio"
-    ],
-    "materials": [
-      "TV",
-      "OOH/DOOH",
-      "АнА",
-      "radio"
-    ],
+    "channels": ["TV", "OOH/DOOH", "АнА", "radio"],
+    "materials": ["TV", "OOH/DOOH", "АнА", "radio"],
     "links": [
       {
         "label": "Бриф",
@@ -1422,16 +1166,8 @@
     "audience": "мужчины 25-55, доход выше среднего, жители столиц, продают авто ≥ 2 млн₽",
     "objectives": [],
     "key_message": "Авито Авто — современный сервис для спокойного принятия решений о продаже машины",
-    "channels": [
-      "TV",
-      "OLV",
-      "OOH/DOOH/Media facades"
-    ],
-    "materials": [
-      "TV",
-      "OLV",
-      "OOH/DOOH/Media facades"
-    ],
+    "channels": ["TV", "OLV", "OOH/DOOH/Media facades"],
+    "materials": ["TV", "OLV", "OOH/DOOH/Media facades"],
     "links": [
       {
         "label": "Бриф",
@@ -1452,20 +1188,8 @@
     "audience": "25-65, М/Ж, все пользователи Авито (> 1 год не активности)",
     "objectives": [],
     "key_message": "Покупайте спокойно на Авито",
-    "channels": [
-      "OLV",
-      "Media facades",
-      "Digital",
-      "SMM",
-      "PR"
-    ],
-    "materials": [
-      "OLV",
-      "Media facades",
-      "Digital",
-      "SMM",
-      "PR"
-    ],
+    "channels": ["OLV", "Media facades", "Digital", "SMM", "PR"],
+    "materials": ["OLV", "Media facades", "Digital", "SMM", "PR"],
     "links": [
       {
         "label": "Бриф",
@@ -1523,7 +1247,17 @@
     "audience": "М, 25-55, доход выше среднего, планируют или в процессе покупки авто от 2 000 000 ₽",
     "objectives": ["Укрепить имидж технологичного сервиса Авито Авто"],
     "key_message": "Авито Авто — современный сервис для спокойной покупки автомобиля",
-    "channels": ["TV", "OOH", "DOOH", "MF", "Digital (OLV, banners)", "Avito on Avito", "Special project", "Radio", "SMM"],
+    "channels": [
+      "TV",
+      "OOH",
+      "DOOH",
+      "MF",
+      "Digital (OLV, banners)",
+      "Avito on Avito",
+      "Special project",
+      "Radio",
+      "SMM"
+    ],
     "links": [
       {
         "label": "TV+OLV",
@@ -1550,7 +1284,9 @@
     },
     "geo": "Россия (фокус на Мск и Спб)",
     "audience": "Major Repair: мужчины-«нетребовательные самоделкины»; Appliances: женщины-ценители проверенных мастеров; возраст 24-54, доход средний+",
-    "objectives": ["Объединить аудитории с различными запросами на Авито Услуги"],
+    "objectives": [
+      "Объединить аудитории с различными запросами на Авито Услуги"
+    ],
     "key_message": "Ну а-а-а с кем еще строить? / чинить?",
     "channels": ["TV", "Метро / Электрички", "ООН", "OLV", "Digital"],
     "links": [
@@ -1624,7 +1360,9 @@
     },
     "geo": "Россия (ООН фокус Москва, Санкт-Петербург)",
     "audience": "Ж, 25-44, города 1 млн+, доход средний+",
-    "objectives": ["Рассказать, что на Авито Премиум 100% оригиналы стали доступнее"],
+    "objectives": [
+      "Рассказать, что на Авито Премиум 100% оригиналы стали доступнее"
+    ],
     "key_message": "100% оригиналы теперь доступнее",
     "channels": ["TV", "ООН", "Digital", "PR", "Special project", "CRM", "AoA"],
     "links": [
@@ -1663,7 +1401,19 @@
     "audience": "25-65, М/Ж, все пользователи Авито (> 1 год неактивные)",
     "objectives": ["Запуск нового экстеншена и программы лояльности"],
     "key_message": "Все пройдет, как забронировано. И с кэшбеком бонусами",
-    "channels": ["TV", "ООН", "Media facades", "Radio Metro", "Аэропорты", "Вокзалы", "Поезда", "Digital", "Internal", "SMM", "Special project"],
+    "channels": [
+      "TV",
+      "ООН",
+      "Media facades",
+      "Radio Metro",
+      "Аэропорты",
+      "Вокзалы",
+      "Поезда",
+      "Digital",
+      "Internal",
+      "SMM",
+      "Special project"
+    ],
     "links": [
       {
         "label": "Презентация РК",
@@ -1719,7 +1469,9 @@
     },
     "geo": "региональный эфир: Вологда, Красноярск, Ростов-на-Дону, Томск",
     "audience": "«Требовательные перфекционисты»: М, 25-54, автовладельцы, планируют летний отпуск на авто",
-    "objectives": ["Привлечь баеров в запчасти и аксессуары через интерес к автопутешествиям"],
+    "objectives": [
+      "Привлечь баеров в запчасти и аксессуары через интерес к автопутешествиям"
+    ],
     "key_message": "Соберите авто в отпуск без лишних трат",
     "channels": ["TV", "Radio", "Digital (OLV, banners)"],
     "links": [
@@ -1740,8 +1492,11 @@
     },
     "geo": "Россия",
     "audience": "М, 25-54, по интересам: автозапчасти, техобслуживание, автосервисы…",
-    "objectives": ["Рассказать о подборках запчастей по марке авто с доставкой и возвратом"],
-    "key_message": "Подберите запчасти по марке авто с доставкой и возвратом",    "channels": ["Digital (OLV, Banners)", "AoA"],
+    "objectives": [
+      "Рассказать о подборках запчастей по марке авто с доставкой и возвратом"
+    ],
+    "key_message": "Подберите запчасти по марке авто с доставкой и возвратом",
+    "channels": ["Digital (OLV, Banners)", "AoA"],
     "links": [
       {
         "label": "Карточка проекта",
@@ -1770,7 +1525,15 @@
     "audience": "хозяйственные умельцы, 30-54, M",
     "objectives": ["Вернуть покупателей в категорию стройматериалов в сезон"],
     "key_message": "Берите [на распродаже] и стройте",
-    "channels": ["TV", "ООН/DOOH", "Digital (OLV, Banners)", "Radio", "Perf", "PR", "AoA"],
+    "channels": [
+      "TV",
+      "ООН/DOOH",
+      "Digital (OLV, Banners)",
+      "Radio",
+      "Perf",
+      "PR",
+      "AoA"
+    ],
     "links": [
       {
         "label": "Карточка проекта",
@@ -1858,7 +1621,9 @@
     },
     "geo": "Россия",
     "audience": "студенты 18-25 лет",
-    "objectives": ["Донести, что на Авито Работе можно найти подработку без опыта"],
+    "objectives": [
+      "Донести, что на Авито Работе можно найти подработку без опыта"
+    ],
     "key_message": "Твой опыт в жизни тоже считается!",
     "channels": ["OLV", "КВ", "Спецпроект онлайн", "Оффлайн в вузах"],
     "links": [
@@ -1969,7 +1734,7 @@
   },
   {
     "campaign_type": "T1",
-    "campaign_vertical": "Товары",  
+    "campaign_vertical": "Товары",
     "campaign_name": "gc-24-06-СС-SALE-Federal Хватамба",
     "flight_period": {
       "start_date": "2024-06-24",
@@ -2055,7 +1820,9 @@
     },
     "geo": "Россия",
     "audience": "М, 25-55; «Файнтюнеры» и «Гаражные умельцы» — ищут запчасти и аксессуары",
-    "objectives": ["Показать скорость и удобство поиска запчастей через «Гараж» Авито Авто"],
+    "objectives": [
+      "Показать скорость и удобство поиска запчастей через «Гараж» Авито Авто"
+    ],
     "key_message": "Гараж Авито Авто. Гараж нашего времени",
     "channels": ["TV", "ООН", "Digital banners", "Radio"],
     "links": [
@@ -2094,7 +1861,16 @@
     "audience": "хозяйственные умельцы, 30-54, M",
     "objectives": ["Показать выгоду стройматериалов на Авито Для дома"],
     "key_message": "Постройте задуманное быстрее!",
-    "channels": ["TV", "Indoor", "Radio", "Digital", "Bloggers", "Avito internal", "Performance", "PR"],
+    "channels": [
+      "TV",
+      "Indoor",
+      "Radio",
+      "Digital",
+      "Bloggers",
+      "Avito internal",
+      "Performance",
+      "PR"
+    ],
     "links": [
       {
         "label": "Карточка проекта",
@@ -2150,7 +1926,9 @@
     },
     "geo": "Россия (Мск, СПб, Краснодар, Казань)",
     "audience": "продавцы авто, 20-55, M/Ж",
-    "objectives": ["Расказать о сервисе Авито Аукцион для быстрой продажи авто"],
+    "objectives": [
+      "Расказать о сервисе Авито Аукцион для быстрой продажи авто"
+    ],
     "key_message": "Авито Аукцион — продайте авто за 1 день",
     "channels": ["TV/OLV", "ООН/DOOH", "Digital", "Radio"],
     "links": [
@@ -2169,4 +1947,4 @@
     ],
     "attachments": []
   }
-] 
+]

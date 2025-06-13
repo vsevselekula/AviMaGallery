@@ -34,7 +34,9 @@ describe('ResetPasswordForm', () => {
   });
 
   it('handles successful password reset', async () => {
-    (supabase.auth.resetPasswordForEmail as jest.Mock).mockResolvedValueOnce({ error: null });
+    (supabase.auth.resetPasswordForEmail as jest.Mock).mockResolvedValueOnce({
+      error: null,
+    });
 
     render(<ResetPasswordForm />);
     const emailInput = screen.getByPlaceholderText('Email');
@@ -44,12 +46,18 @@ describe('ResetPasswordForm', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText('Инструкции по восстановлению пароля отправлены на ваш email')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'Инструкции по восстановлению пароля отправлены на ваш email'
+        )
+      ).toBeInTheDocument();
     });
   });
 
   it('handles password reset error', async () => {
-    (supabase.auth.resetPasswordForEmail as jest.Mock).mockResolvedValueOnce({ error: { message: 'Любая ошибка' } });
+    (supabase.auth.resetPasswordForEmail as jest.Mock).mockResolvedValueOnce({
+      error: { message: 'Любая ошибка' },
+    });
 
     render(<ResetPasswordForm />);
     const emailInput = screen.getByPlaceholderText('Email');
@@ -59,7 +67,9 @@ describe('ResetPasswordForm', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText('Произошла ошибка при отправке письма')).toBeInTheDocument();
+      expect(
+        screen.getByText('Произошла ошибка при отправке письма')
+      ).toBeInTheDocument();
     });
   });
 
@@ -69,4 +79,4 @@ describe('ResetPasswordForm', () => {
     fireEvent.click(backButton);
     expect(mockRouter.push).toHaveBeenCalledWith('/auth/login');
   });
-}); 
+});

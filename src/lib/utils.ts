@@ -21,4 +21,4 @@ export const getVerticalColorClass = (vertical: string) => {
     default:
       return { backgroundColor: '#6B7280', color: '#FFFFFF' }; // bg-gray-500
   }
-}; 
+};

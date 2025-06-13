@@ -15,11 +15,12 @@ export default function ResetPasswordPage() {
             Восстановление пароля
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Введите ваш email, и мы отправим вам инструкции по восстановлению пароля
+            Введите ваш email, и мы отправим вам инструкции по восстановлению
+            пароля
           </p>
         </div>
         <ResetPasswordForm />
       </div>
     </div>
   );
-} 
+}

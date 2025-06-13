@@ -22,4 +22,4 @@ export default function UpdatePasswordPage() {
       </div>
     </div>
   );
-} 
+}

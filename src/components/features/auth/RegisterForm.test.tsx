@@ -31,7 +31,9 @@ describe('RegisterForm', () => {
     render(<RegisterForm />);
     expect(screen.getByPlaceholderText('Email')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Пароль')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Подтвердите пароль')).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText('Подтвердите пароль')
+    ).toBeInTheDocument();
     expect(screen.getByText('Зарегистрироваться')).toBeInTheDocument();
   });
 
@@ -39,12 +41,15 @@ describe('RegisterForm', () => {
     render(<RegisterForm />);
     const emailInput = screen.getByPlaceholderText('Email');
     const passwordInput = screen.getByPlaceholderText('Пароль');
-    const confirmPasswordInput = screen.getByPlaceholderText('Подтвердите пароль');
+    const confirmPasswordInput =
+      screen.getByPlaceholderText('Подтвердите пароль');
     const submitButton = screen.getByText('Зарегистрироваться');
 
     fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
     fireEvent.change(passwordInput, { target: { value: 'password123' } });
-    fireEvent.change(confirmPasswordInput, { target: { value: 'password123' } });
+    fireEvent.change(confirmPasswordInput, {
+      target: { value: 'password123' },
+    });
     fireEvent.click(submitButton);
 
     expect(screen.getByText('Регистрация...')).toBeInTheDocument();
@@ -57,12 +62,15 @@ describe('RegisterForm', () => {
     render(<RegisterForm />);
     const emailInput = screen.getByPlaceholderText('Email');
     const passwordInput = screen.getByPlaceholderText('Пароль');
-    const confirmPasswordInput = screen.getByPlaceholderText('Подтвердите пароль');
+    const confirmPasswordInput =
+      screen.getByPlaceholderText('Подтвердите пароль');
     const submitButton = screen.getByText('Зарегистрироваться');
 
     fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
     fireEvent.change(passwordInput, { target: { value: 'password123' } });
-    fireEvent.change(confirmPasswordInput, { target: { value: 'password123' } });
+    fireEvent.change(confirmPasswordInput, {
+      target: { value: 'password123' },
+    });
     fireEvent.click(submitButton);
 
     await waitFor(() => {
@@ -81,12 +89,15 @@ describe('RegisterForm', () => {
     render(<RegisterForm />);
     const emailInput = screen.getByPlaceholderText('Email');
     const passwordInput = screen.getByPlaceholderText('Пароль');
-    const confirmPasswordInput = screen.getByPlaceholderText('Подтвердите пароль');
+    const confirmPasswordInput =
+      screen.getByPlaceholderText('Подтвердите пароль');
     const submitButton = screen.getByText('Зарегистрироваться');
 
     fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
     fireEvent.change(passwordInput, { target: { value: 'password123' } });
-    fireEvent.change(confirmPasswordInput, { target: { value: 'different-password' } });
+    fireEvent.change(confirmPasswordInput, {
+      target: { value: 'different-password' },
+    });
     fireEvent.click(submitButton);
 
     expect(screen.getByText('Пароли не совпадают')).toBeInTheDocument();
@@ -99,12 +110,15 @@ describe('RegisterForm', () => {
     render(<RegisterForm />);
     const emailInput = screen.getByPlaceholderText('Email');
     const passwordInput = screen.getByPlaceholderText('Пароль');
-    const confirmPasswordInput = screen.getByPlaceholderText('Подтвердите пароль');
+    const confirmPasswordInput =
+      screen.getByPlaceholderText('Подтвердите пароль');
     const submitButton = screen.getByText('Зарегистрироваться');
 
     fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
     fireEvent.change(passwordInput, { target: { value: 'password123' } });
-    fireEvent.change(confirmPasswordInput, { target: { value: 'password123' } });
+    fireEvent.change(confirmPasswordInput, {
+      target: { value: 'password123' },
+    });
     fireEvent.click(submitButton);
 
     await waitFor(() => {
@@ -122,4 +136,4 @@ describe('RegisterForm', () => {
     expect(screen.getByPlaceholderText('Пароль')).toBeRequired();
     expect(screen.getByPlaceholderText('Подтвердите пароль')).toBeRequired();
   });
-}); 
+});

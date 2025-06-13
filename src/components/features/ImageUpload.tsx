@@ -17,60 +17,68 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const onDrop = useCallback(async (acceptedFiles: File[]) => {
-    const file = acceptedFiles[0];
-    if (!file) return;
+  const onDrop = useCallback(
+    async (acceptedFiles: File[]) => {
+      const file = acceptedFiles[0];
+      if (!file) return;
 
-    try {
-      setIsUploading(true);
-      setError(null);
+      try {
+        setIsUploading(true);
+        setError(null);
 
-      // Загружаем файл в Supabase Storage
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${campaignId}-${Math.random()}.${fileExt}`;
-      const filePath = `${fileName}`;
-      const { error: uploadError } = await supabase.storage
-        .from('campaign-images')
-        .upload(filePath, file);
+        // Загружаем файл в Supabase Storage
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${campaignId}-${Math.random()}.${fileExt}`;
+        const filePath = `${fileName}`;
+        const { error: uploadError } = await supabase.storage
+          .from('campaign-images')
+          .upload(filePath, file);
 
-      if (uploadError) {
-        throw uploadError;
+        if (uploadError) {
+          throw uploadError;
+        }
+
+        // Получаем публичный URL
+        const {
+          data: { publicUrl },
+        } = supabase.storage.from('campaign-images').getPublicUrl(filePath);
+
+        onImageUpload(publicUrl);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : 'Ошибка при загрузке изображения'
+        );
+      } finally {
+        setIsUploading(false);
       }
-
-      // Получаем публичный URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('campaign-images')
-        .getPublicUrl(filePath);
-
-      onImageUpload(publicUrl);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка при загрузке изображения');
-    } finally {
-      setIsUploading(false);
-    }
-  }, [campaignId, onImageUpload]);
+    },
+    [campaignId, onImageUpload]
+  );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      'image/*': ['.png', '.jpg', '.jpeg', '.gif']
+      'image/*': ['.png', '.jpg', '.jpeg', '.gif'],
     },
     maxSize: 5242880, // 5MB
   });
 
-  const handlePaste = useCallback(async (e: React.ClipboardEvent) => {
-    const items = Array.from(e.clipboardData.items);
-    for (const item of items) {
-      if (item.type.indexOf('image') === 0) {
-        const file = item.getAsFile();
-        if (file) {
-          const dataTransfer = new DataTransfer();
-          dataTransfer.items.add(file);
-          await onDrop(Array.from(dataTransfer.files));
+  const handlePaste = useCallback(
+    async (e: React.ClipboardEvent) => {
+      const items = Array.from(e.clipboardData.items);
+      for (const item of items) {
+        if (item.type.indexOf('image') === 0) {
+          const file = item.getAsFile();
+          if (file) {
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            await onDrop(Array.from(dataTransfer.files));
+          }
         }
       }
-    }
-  }, [onDrop]);
+    },
+    [onDrop]
+  );
 
   const handleUrlSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -94,7 +102,9 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
       onImageUpload(url);
       urlInput.value = '';
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка при загрузке изображения');
+      setError(
+        err instanceof Error ? err.message : 'Ошибка при загрузке изображения'
+      );
     } finally {
       setIsUploading(false);
     }
@@ -154,13 +164,11 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
         </button>
       </form>
 
-      {error && (
-        <p className="text-red-500 text-sm">{error}</p>
-      )}
+      {error && <p className="text-red-500 text-sm">{error}</p>}
 
       {isUploading && (
         <p className="text-blue-500 text-sm">Загрузка изображения...</p>
       )}
     </div>
   );
-}; 
+};

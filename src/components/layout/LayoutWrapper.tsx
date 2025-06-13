@@ -27,20 +27,21 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Не показываем сайдбар на страницах аутентификации
-  if (pathname.startsWith('/auth')) {
-    return <>{children}</>;
-  }
+  const showSidebar = !pathname.startsWith('/auth');
 
   return (
     <div className="flex h-screen bg-gray-900">
-      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-      <main className={cn(
-        'flex-1 overflow-auto transition-all duration-300',
-        isSidebarOpen ? 'lg:ml-64' : 'ml-0'
-      )}>
+      {showSidebar && (
+        <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      )}
+      <main
+        className={cn(
+          'flex-1 overflow-auto transition-all duration-300',
+          showSidebar && isSidebarOpen ? 'lg:ml-64' : 'ml-0'
+        )}
+      >
         {children}
       </main>
     </div>
   );
-} 
+}

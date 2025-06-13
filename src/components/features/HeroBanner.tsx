@@ -14,10 +14,14 @@ interface HeroBannerProps {
   onCampaignUpdated: (updatedCampaign: Campaign) => void;
 }
 
-export function HeroBanner({ campaigns, className, onCampaignUpdated }: HeroBannerProps) {
+export function HeroBanner({
+  campaigns,
+  className,
+  onCampaignUpdated,
+}: HeroBannerProps) {
   const [currentCampaign, setCurrentCampaign] = useState<Campaign | null>(null);
 
-  const activeCampaigns = campaigns.filter(campaign => {
+  const activeCampaigns = campaigns.filter((campaign) => {
     const now = new Date();
     const startDate = new Date(campaign.flight_period.start_date);
     const endDate = new Date(campaign.flight_period.end_date);
@@ -41,17 +45,23 @@ export function HeroBanner({ campaigns, className, onCampaignUpdated }: HeroBann
 
   if (!heroCampaign) {
     return (
-      <div className={`relative bg-gray-900 p-8 text-white flex items-center justify-center min-h-[300px] ${className || ''}`}>
+      <div
+        className={`relative bg-gray-900 p-8 text-white flex items-center justify-center min-h-[300px] ${className || ''}`}
+      >
         <p className="text-xl">Нет активных кампаний для отображения.</p>
       </div>
     );
   }
 
-  const hasImage = heroCampaign.image_url && heroCampaign.image_url.startsWith('http');
+  const hasImage =
+    heroCampaign.image_url && heroCampaign.image_url.startsWith('http');
   const isActive = new Date(heroCampaign.flight_period.end_date) > new Date();
 
   return (
-    <div className={`relative w-full overflow-hidden ${className || ''}`} style={{ minHeight: '400px' }}>
+    <div
+      className={`relative w-full overflow-hidden ${className || ''}`}
+      style={{ minHeight: '400px' }}
+    >
       {hasImage && heroCampaign.image_url ? (
         <Image
           src={heroCampaign.image_url}
@@ -76,7 +86,7 @@ export function HeroBanner({ campaigns, className, onCampaignUpdated }: HeroBann
               </div>
             )}
             <div className="flex items-center gap-2 mb-4">
-              <span 
+              <span
                 className="px-3 py-1 rounded-full text-sm font-medium"
                 style={getVerticalColorClass(heroCampaign.campaign_vertical)}
               >
@@ -86,10 +96,24 @@ export function HeroBanner({ campaigns, className, onCampaignUpdated }: HeroBann
                 {heroCampaign.campaign_type}
               </span>
             </div>
-            <h3 className="text-4xl font-extrabold mb-4">{heroCampaign.campaign_name}</h3>
-            <p className="text-lg text-gray-200 mb-6">{heroCampaign.key_message}</p>
+            <h3 className="text-4xl font-extrabold mb-4">
+              {heroCampaign.campaign_name}
+            </h3>
+            <p className="text-lg text-gray-200 mb-6">
+              {heroCampaign.key_message}
+            </p>
             <div className="text-base text-gray-300">
-              {format(new Date(heroCampaign.flight_period.start_date), 'dd.MM.yyyy', { locale: ru })} - {format(new Date(heroCampaign.flight_period.end_date), 'dd.MM.yyyy', { locale: ru })}
+              {format(
+                new Date(heroCampaign.flight_period.start_date),
+                'dd.MM.yyyy',
+                { locale: ru }
+              )}{' '}
+              -{' '}
+              {format(
+                new Date(heroCampaign.flight_period.end_date),
+                'dd.MM.yyyy',
+                { locale: ru }
+              )}
             </div>
             <button
               onClick={() => handleCampaignClick(heroCampaign)}
@@ -110,4 +134,4 @@ export function HeroBanner({ campaigns, className, onCampaignUpdated }: HeroBann
       )}
     </div>
   );
-} 
+}

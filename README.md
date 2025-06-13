@@ -13,23 +13,27 @@
 ## Установка
 
 1. Клонируйте репозиторий:
+
 ```bash
 git clone https://github.com/your-username/avito-gallery.git
 cd avito-gallery
 ```
 
 2. Установите зависимости:
+
 ```bash
 npm install
 ```
 
 3. Создайте файл `.env.local` и добавьте переменные окружения:
+
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your-project-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 ```
 
 4. Запустите проект:
+
 ```bash
 npm run dev
 ```
@@ -68,4 +72,4 @@ src/
 
 ## Лицензия
 
-MIT 
+MIT

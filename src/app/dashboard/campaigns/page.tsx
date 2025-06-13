@@ -17,4 +17,4 @@ export default async function CampaignsPage() {
   const campaigns = await getCampaigns();
 
   return <CampaignsClient initialCampaigns={campaigns} />;
-} 
+}

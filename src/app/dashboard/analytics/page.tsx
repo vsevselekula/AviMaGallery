@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { Campaign } from '@/lib/types';
-import { 
+import {
   Chart as ChartJS,
   ArcElement,
   Tooltip,
@@ -11,7 +11,7 @@ import {
   CategoryScale,
   LinearScale,
   BarElement,
-  Title
+  Title,
 } from 'chart.js';
 import { Doughnut, Bar } from 'react-chartjs-2';
 import { format, isPast, isWithinInterval } from 'date-fns';
@@ -19,7 +19,15 @@ import { ru } from 'date-fns/locale';
 import { getVerticalColorClass } from '@/lib/utils';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 
-ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
+ChartJS.register(
+  ArcElement,
+  Tooltip,
+  Legend,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title
+);
 
 export default function Analytics() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
@@ -47,39 +55,45 @@ export default function Analytics() {
     fetchCampaigns();
   }, [supabase]);
 
-  const { 
-    totalCampaigns, 
-    activeCampaignsCount, 
+  const {
+    totalCampaigns,
+    activeCampaignsCount,
     completedCampaignsCount,
     campaignsByVertical,
     campaignsByType,
-    campaignsByMonth
+    campaignsByMonth,
   } = useMemo(() => {
     const now = new Date();
 
-    const active = campaigns.filter(campaign => 
+    const active = campaigns.filter((campaign) =>
       isWithinInterval(now, {
         start: new Date(campaign.flight_period.start_date),
-        end: new Date(campaign.flight_period.end_date)
+        end: new Date(campaign.flight_period.end_date),
       })
     ).length;
 
-    const completed = campaigns.filter(campaign => 
-      isPast(new Date(campaign.flight_period.end_date)) && 
-      !isWithinInterval(now, {
-        start: new Date(campaign.flight_period.start_date),
-        end: new Date(campaign.flight_period.end_date)
-      })
+    const completed = campaigns.filter(
+      (campaign) =>
+        isPast(new Date(campaign.flight_period.end_date)) &&
+        !isWithinInterval(now, {
+          start: new Date(campaign.flight_period.start_date),
+          end: new Date(campaign.flight_period.end_date),
+        })
     ).length;
 
     // Распределение по вертикалям
     const verticalCounts: { [key: string]: number } = {};
-    campaigns.forEach(c => {
-      verticalCounts[c.campaign_vertical] = (verticalCounts[c.campaign_vertical] || 0) + 1;
+    campaigns.forEach((c) => {
+      verticalCounts[c.campaign_vertical] =
+        (verticalCounts[c.campaign_vertical] || 0) + 1;
     });
     const verticalLabels = Object.keys(verticalCounts);
-    const verticalBackgroundColors = verticalLabels.map(label => getVerticalColorClass(label).backgroundColor);
-    const verticalBorderColors = verticalLabels.map(label => getVerticalColorClass(label).backgroundColor);
+    const verticalBackgroundColors = verticalLabels.map(
+      (label) => getVerticalColorClass(label).backgroundColor
+    );
+    const verticalBorderColors = verticalLabels.map(
+      (label) => getVerticalColorClass(label).backgroundColor
+    );
 
     const campaignsByVerticalData = {
       labels: verticalLabels,
@@ -96,7 +110,7 @@ export default function Analytics() {
 
     // Распределение по типам
     const typeCounts: { [key: string]: number } = {};
-    campaigns.forEach(c => {
+    campaigns.forEach((c) => {
       typeCounts[c.campaign_type] = (typeCounts[c.campaign_type] || 0) + 1;
     });
     const campaignsByTypeData = {
@@ -112,13 +126,7 @@ export default function Analytics() {
             '#EC4899', // pink-500
             '#3B82F6', // blue-600
           ],
-          borderColor: [
-            '#F59E0B', 
-            '#10B981', 
-            '#6366F1', 
-            '#EC4899', 
-            '#3B82F6',
-          ],
+          borderColor: ['#F59E0B', '#10B981', '#6366F1', '#EC4899', '#3B82F6'],
           borderWidth: 1,
         },
       ],
@@ -126,8 +134,12 @@ export default function Analytics() {
 
     // Кампании по месяцам запуска
     const monthCounts: { [key: string]: number } = {};
-    campaigns.forEach(c => {
-      const monthYear = format(new Date(c.flight_period.start_date), 'MMMM yyyy', { locale: ru });
+    campaigns.forEach((c) => {
+      const monthYear = format(
+        new Date(c.flight_period.start_date),
+        'MMMM yyyy',
+        { locale: ru }
+      );
       monthCounts[monthYear] = (monthCounts[monthYear] || 0) + 1;
     });
     // Сортируем месяцы
@@ -141,7 +153,7 @@ export default function Analytics() {
       datasets: [
         {
           label: 'Количество кампаний',
-          data: sortedMonths.map(month => monthCounts[month]),
+          data: sortedMonths.map((month) => monthCounts[month]),
           backgroundColor: '#60A5FA', // blue-400
           borderColor: '#3B82F6',
           borderWidth: 1,
@@ -166,11 +178,11 @@ export default function Analytics() {
         position: 'right' as const,
         labels: {
           color: '#ffffff', // Белый цвет текста легенды
-        }
+        },
       },
       tooltip: {
         callbacks: {
-          label: function(context: { label?: string; parsed?: number }) {
+          label: function (context: { label?: string; parsed?: number }) {
             let label = context.label || '';
             if (label) {
               label += ': ';
@@ -179,9 +191,9 @@ export default function Analytics() {
               label += context.parsed;
             }
             return label;
-          }
-        }
-      }
+          },
+        },
+      },
     },
   };
 
@@ -193,7 +205,7 @@ export default function Analytics() {
         position: 'top' as const,
         labels: {
           color: '#ffffff', // Белый цвет текста легенды
-        }
+        },
       },
       title: {
         display: false,
@@ -207,8 +219,8 @@ export default function Analytics() {
           color: '#ffffff', // Белый цвет текста на оси X
         },
         grid: {
-          color: 'rgba(255, 255, 255, 0.1)' // Цвет сетки X
-        }
+          color: 'rgba(255, 255, 255, 0.1)', // Цвет сетки X
+        },
       },
       y: {
         ticks: {
@@ -216,8 +228,8 @@ export default function Analytics() {
           stepSize: 1, // Шаг в 1 для количества кампаний
         },
         grid: {
-          color: 'rgba(255, 255, 255, 0.1)' // Цвет сетки Y
-        }
+          color: 'rgba(255, 255, 255, 0.1)', // Цвет сетки Y
+        },
       },
     },
   };
@@ -241,30 +253,40 @@ export default function Analytics() {
           <p className="text-gray-300 mt-2">Всего кампаний</p>
         </div>
         <div className="bg-gray-800 rounded-lg p-6 flex flex-col items-center justify-center text-center">
-          <p className="text-5xl font-bold text-green-400">{activeCampaignsCount}</p>
+          <p className="text-5xl font-bold text-green-400">
+            {activeCampaignsCount}
+          </p>
           <p className="text-gray-300 mt-2">Активных кампаний</p>
         </div>
         <div className="bg-gray-800 rounded-lg p-6 flex flex-col items-center justify-center text-center">
-          <p className="text-5xl font-bold text-red-400">{completedCampaignsCount}</p>
+          <p className="text-5xl font-bold text-red-400">
+            {completedCampaignsCount}
+          </p>
           <p className="text-gray-300 mt-2">Завершенных кампаний</p>
         </div>
 
         <div className="bg-gray-800 rounded-lg p-6 md:col-span-2 shadow-md">
-          <h2 className="text-xl font-semibold text-white mb-4">Кампании по вертикалям</h2>
+          <h2 className="text-xl font-semibold text-white mb-4">
+            Кампании по вертикалям
+          </h2>
           <div className="h-80">
             <Doughnut data={campaignsByVertical} options={donutOptions} />
           </div>
         </div>
 
         <div className="bg-gray-800 rounded-lg p-6 shadow-md">
-          <h2 className="text-xl font-semibold text-white mb-4">Кампании по типу</h2>
+          <h2 className="text-xl font-semibold text-white mb-4">
+            Кампании по типу
+          </h2>
           <div className="h-80">
             <Doughnut data={campaignsByType} options={donutOptions} />
           </div>
         </div>
 
         <div className="bg-gray-800 rounded-lg p-6 md:col-span-3 shadow-md">
-          <h2 className="text-xl font-semibold text-white mb-4">Кампании по месяцам запуска</h2>
+          <h2 className="text-xl font-semibold text-white mb-4">
+            Кампании по месяцам запуска
+          </h2>
           <div className="h-96">
             <Bar data={campaignsByMonth} options={barOptions} />
           </div>
@@ -272,4 +294,4 @@ export default function Analytics() {
       </div>
     </main>
   );
-} 
+}

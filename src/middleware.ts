@@ -32,7 +32,9 @@ export async function middleware(req: NextRequest) {
 
   // Если пользователь аутентифицирован и пытается получить доступ к корневой странице
   if (session && req.nextUrl.pathname === '/') {
-    console.log('Middleware - Session exists, redirecting from root to dashboard');
+    console.log(
+      'Middleware - Session exists, redirecting from root to dashboard'
+    );
     const redirectUrl = req.nextUrl.clone();
     redirectUrl.pathname = '/dashboard';
     return NextResponse.redirect(redirectUrl);
@@ -52,4 +54,4 @@ export const config = {
      */
     '/((?!_next/static|_next/image|favicon.ico|public/).*)',
   ],
-}; 
+};

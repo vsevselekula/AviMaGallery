@@ -18,4 +18,4 @@ describe('LoginPage', () => {
     expect(screen.getByPlaceholderText('Пароль')).toBeInTheDocument();
     expect(screen.getByText('Войти')).toBeInTheDocument();
   });
-}); 
+});

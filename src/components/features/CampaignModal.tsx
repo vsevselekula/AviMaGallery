@@ -23,7 +23,11 @@ interface CampaignModalProps {
   onCampaignUpdated?: (updatedCampaign: Campaign) => void;
 }
 
-export function CampaignModal({ campaign, onClose, onCampaignUpdated }: CampaignModalProps) {
+export function CampaignModal({
+  campaign,
+  onClose,
+  onCampaignUpdated,
+}: CampaignModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editedCampaign, setEditedCampaign] = useState<Campaign>({
@@ -42,12 +46,18 @@ export function CampaignModal({ campaign, onClose, onCampaignUpdated }: Campaign
       video_url: campaign.video_url || null,
     });
     if (Array.isArray(campaign.links)) {
-      setLinksText(campaign.links.map(link => `${link.label} - ${link.url}`).join('\n'));
+      setLinksText(
+        campaign.links.map((link) => `${link.label} - ${link.url}`).join('\n')
+      );
     } else {
       setLinksText('');
     }
     if (Array.isArray(campaign.attachments)) {
-      setAttachmentsText(campaign.attachments.map(attachment => `${attachment.label} - ${attachment.url}`).join('\n'));
+      setAttachmentsText(
+        campaign.attachments
+          .map((attachment) => `${attachment.label} - ${attachment.url}`)
+          .join('\n')
+      );
     } else {
       setAttachmentsText('');
     }
@@ -55,7 +65,10 @@ export function CampaignModal({ campaign, onClose, onCampaignUpdated }: Campaign
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+      if (
+        modalRef.current &&
+        !modalRef.current.contains(event.target as Node)
+      ) {
         onClose();
       }
     };
@@ -68,7 +81,9 @@ export function CampaignModal({ campaign, onClose, onCampaignUpdated }: Campaign
 
   useEffect(() => {
     const fetchUserRole = async () => {
-      const { data: { user: supabaseUser } } = await supabase.auth.getUser();
+      const {
+        data: { user: supabaseUser },
+      } = await supabase.auth.getUser();
       if (supabaseUser) {
         const { data: roleData } = await supabase
           .from('user_roles')
@@ -83,13 +98,17 @@ export function CampaignModal({ campaign, onClose, onCampaignUpdated }: Campaign
     fetchUserRole();
   }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value } = e.target;
-    setEditedCampaign(prev => ({ ...prev, [name]: value }));
+    setEditedCampaign((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleDateChange = (type: 'start_date' | 'end_date', value: string) => {
-    setEditedCampaign(prev => ({
+    setEditedCampaign((prev) => ({
       ...prev,
       flight_period: {
         ...prev.flight_period,
@@ -99,14 +118,20 @@ export function CampaignModal({ campaign, onClose, onCampaignUpdated }: Campaign
   };
 
   const handleArrayChange = (name: keyof Campaign, value: string) => {
-    const newArray = value.split('\n').map(item => item.trim()).filter(item => item !== '');
-    setEditedCampaign(prev => ({ 
-      ...prev, 
-      [name]: newArray.length === 0 ? [] : newArray
+    const newArray = value
+      .split('\n')
+      .map((item) => item.trim())
+      .filter((item) => item !== '');
+    setEditedCampaign((prev) => ({
+      ...prev,
+      [name]: newArray.length === 0 ? [] : newArray,
     }));
   };
 
-  const handleTextareaChange = (type: 'links' | 'attachments', value: string) => {
+  const handleTextareaChange = (
+    type: 'links' | 'attachments',
+    value: string
+  ) => {
     if (type === 'links') {
       setLinksText(value);
     } else {
@@ -115,23 +140,36 @@ export function CampaignModal({ campaign, onClose, onCampaignUpdated }: Campaign
   };
 
   const handleSave = async () => {
-    console.log('CampaignModal: Attempting to save, current editedCampaign:', editedCampaign);
+    console.log(
+      'CampaignModal: Attempting to save, current editedCampaign:',
+      editedCampaign
+    );
     try {
       setIsSaving(true);
 
-      const parsedLinks = linksText.split('\n').map(line => {
-        const trimmedLine = line.trim();
-        if (trimmedLine === '') return null;
-        const [label, url] = trimmedLine.split(' - ').map(item => item.trim());
-        return { label: label || '', url: url || '' };
-      }).filter(item => item !== null && item.label && item.url);
+      const parsedLinks = linksText
+        .split('\n')
+        .map((line) => {
+          const trimmedLine = line.trim();
+          if (trimmedLine === '') return null;
+          const [label, url] = trimmedLine
+            .split(' - ')
+            .map((item) => item.trim());
+          return { label: label || '', url: url || '' };
+        })
+        .filter((item) => item !== null && item.label && item.url);
 
-      const parsedAttachments = attachmentsText.split('\n').map(line => {
-        const trimmedLine = line.trim();
-        if (trimmedLine === '') return null;
-        const [label, url] = trimmedLine.split(' - ').map(item => item.trim());
-        return { label: label || '', url: url || '' };
-      }).filter(item => item !== null && item.label && item.url);
+      const parsedAttachments = attachmentsText
+        .split('\n')
+        .map((line) => {
+          const trimmedLine = line.trim();
+          if (trimmedLine === '') return null;
+          const [label, url] = trimmedLine
+            .split(' - ')
+            .map((item) => item.trim());
+          return { label: label || '', url: url || '' };
+        })
+        .filter((item) => item !== null && item.label && item.url);
 
       const { data, error } = await supabase
         .from('campaigns')
@@ -157,13 +195,31 @@ export function CampaignModal({ campaign, onClose, onCampaignUpdated }: Campaign
         .single();
 
       if (error) throw error;
-      
+
       setEditedCampaign(data);
-      setLinksText(data.links ? data.links.map((link: { label: string; url: string; }) => `${link.label} - ${link.url}`).join('\n') : '');
-      setAttachmentsText(data.attachments ? data.attachments.map((attachment: { label: string; url: string; }) => `${attachment.label} - ${attachment.url}`).join('\n') : '');
+      setLinksText(
+        data.links
+          ? data.links
+              .map(
+                (link: { label: string; url: string }) =>
+                  `${link.label} - ${link.url}`
+              )
+              .join('\n')
+          : ''
+      );
+      setAttachmentsText(
+        data.attachments
+          ? data.attachments
+              .map(
+                (attachment: { label: string; url: string }) =>
+                  `${attachment.label} - ${attachment.url}`
+              )
+              .join('\n')
+          : ''
+      );
 
       console.log('CampaignModal: Local editedCampaign updated to:', data);
-      
+
       if (onCampaignUpdated) {
         console.log('CampaignModal: Calling onCampaignUpdated with:', data);
         onCampaignUpdated(data);
@@ -171,35 +227,53 @@ export function CampaignModal({ campaign, onClose, onCampaignUpdated }: Campaign
       setIsEditing(false);
     } catch (error) {
       console.error('CampaignModal: Error saving campaign:', error);
-      alert(`Ошибка при сохранении кампании: ${error instanceof Error ? error.message : String(error)}`);
+      alert(
+        `Ошибка при сохранении кампании: ${error instanceof Error ? error.message : String(error)}`
+      );
     } finally {
       setIsSaving(false);
     }
   };
 
   const handleImageUpload = (imageUrl: string) => {
-    setEditedCampaign(prev => ({
+    setEditedCampaign((prev) => ({
       ...prev,
       image_url: imageUrl,
     }));
   };
 
-  const handleVideoTypeChange = useCallback((type: 'google_drive' | 'yandex_disk' | undefined) => {
-    setEditedCampaign(prev => ({
-      ...prev,
-      video_type: type,
-    }));
-  }, []);
+  const handleVideoTypeChange = useCallback(
+    (type: 'google_drive' | 'yandex_disk' | undefined) => {
+      setEditedCampaign((prev) => ({
+        ...prev,
+        video_type: type,
+      }));
+    },
+    []
+  );
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 backdrop-blur-sm h-screen w-screen !mt-0">
-      <div ref={modalRef} className="bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[51]">
+      <div
+        ref={modalRef}
+        className="bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[51]"
+      >
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors z-10"
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </button>
 
@@ -228,7 +302,10 @@ export function CampaignModal({ campaign, onClose, onCampaignUpdated }: Campaign
             {isEditing ? (
               <>
                 <div className="flex items-center gap-4">
-                  <label className="block text-gray-400 text-sm font-bold mb-2" htmlFor="campaign_type">
+                  <label
+                    className="block text-gray-400 text-sm font-bold mb-2"
+                    htmlFor="campaign_type"
+                  >
                     Тип кампании:
                   </label>
                   <select
@@ -244,7 +321,10 @@ export function CampaignModal({ campaign, onClose, onCampaignUpdated }: Campaign
                     <option value="Special">Special</option>
                   </select>
 
-                  <label className="block text-gray-400 text-sm font-bold mb-2 ml-4" htmlFor="campaign_vertical">
+                  <label
+                    className="block text-gray-400 text-sm font-bold mb-2 ml-4"
+                    htmlFor="campaign_vertical"
+                  >
                     Вертикаль:
                   </label>
                   <select
@@ -254,7 +334,7 @@ export function CampaignModal({ campaign, onClose, onCampaignUpdated }: Campaign
                     onChange={handleInputChange}
                     className="bg-gray-700 text-white p-2 rounded-lg"
                   >
-                    {(verticalsData as Vertical[]).map(vertical => (
+                    {(verticalsData as Vertical[]).map((vertical) => (
                       <option key={vertical.id} value={vertical.name}>
                         {vertical.name}
                       </option>
@@ -262,7 +342,10 @@ export function CampaignModal({ campaign, onClose, onCampaignUpdated }: Campaign
                   </select>
                 </div>
 
-                <label className="block text-gray-400 text-sm font-bold mb-2" htmlFor="campaign_name">
+                <label
+                  className="block text-gray-400 text-sm font-bold mb-2"
+                  htmlFor="campaign_name"
+                >
                   Название кампании:
                 </label>
                 <input
@@ -274,7 +357,10 @@ export function CampaignModal({ campaign, onClose, onCampaignUpdated }: Campaign
                   className="w-full bg-gray-700 text-white p-2 rounded-lg mb-4"
                 />
 
-                <label className="block text-gray-400 text-sm font-bold mb-2" htmlFor="key_message">
+                <label
+                  className="block text-gray-400 text-sm font-bold mb-2"
+                  htmlFor="key_message"
+                >
                   Ключевое сообщение:
                 </label>
                 <textarea
@@ -288,33 +374,56 @@ export function CampaignModal({ campaign, onClose, onCampaignUpdated }: Campaign
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <h3 className="text-lg font-semibold text-white mb-2">Период</h3>
-                    <label className="block text-gray-400 text-sm font-bold mb-2" htmlFor="start_date">
+                    <h3 className="text-lg font-semibold text-white mb-2">
+                      Период
+                    </h3>
+                    <label
+                      className="block text-gray-400 text-sm font-bold mb-2"
+                      htmlFor="start_date"
+                    >
                       Дата начала:
                     </label>
                     <input
                       type="date"
                       name="start_date"
                       id="start_date"
-                      value={format(new Date(editedCampaign.flight_period.start_date), 'yyyy-MM-dd')}
-                      onChange={(e) => handleDateChange('start_date', e.target.value)}
+                      value={format(
+                        new Date(editedCampaign.flight_period.start_date),
+                        'yyyy-MM-dd'
+                      )}
+                      onChange={(e) =>
+                        handleDateChange('start_date', e.target.value)
+                      }
                       className="w-full bg-gray-700 text-white p-2 rounded-lg mb-4"
                     />
-                    <label className="block text-gray-400 text-sm font-bold mb-2" htmlFor="end_date">
+                    <label
+                      className="block text-gray-400 text-sm font-bold mb-2"
+                      htmlFor="end_date"
+                    >
                       Дата окончания:
                     </label>
                     <input
                       type="date"
                       name="end_date"
                       id="end_date"
-                      value={format(new Date(editedCampaign.flight_period.end_date), 'yyyy-MM-dd')}
-                      onChange={(e) => handleDateChange('end_date', e.target.value)}
+                      value={format(
+                        new Date(editedCampaign.flight_period.end_date),
+                        'yyyy-MM-dd'
+                      )}
+                      onChange={(e) =>
+                        handleDateChange('end_date', e.target.value)
+                      }
                       className="w-full bg-gray-700 text-white p-2 rounded-lg mb-4"
                     />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-white mb-2">География</h3>
-                    <label className="block text-gray-400 text-sm font-bold mb-2" htmlFor="geo">
+                    <h3 className="text-lg font-semibold text-white mb-2">
+                      География
+                    </h3>
+                    <label
+                      className="block text-gray-400 text-sm font-bold mb-2"
+                      htmlFor="geo"
+                    >
                       География:
                     </label>
                     <input
@@ -327,8 +436,13 @@ export function CampaignModal({ campaign, onClose, onCampaignUpdated }: Campaign
                     />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-white mb-2">Целевая аудитория</h3>
-                    <label className="block text-gray-400 text-sm font-bold mb-2" htmlFor="audience">
+                    <h3 className="text-lg font-semibold text-white mb-2">
+                      Целевая аудитория
+                    </h3>
+                    <label
+                      className="block text-gray-400 text-sm font-bold mb-2"
+                      htmlFor="audience"
+                    >
                       Целевая аудитория:
                     </label>
                     <input
@@ -341,12 +455,16 @@ export function CampaignModal({ campaign, onClose, onCampaignUpdated }: Campaign
                     />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-white mb-2">Цели (каждая с новой строки)</h3>
+                    <h3 className="text-lg font-semibold text-white mb-2">
+                      Цели (каждая с новой строки)
+                    </h3>
                     <textarea
                       name="objectives"
                       id="objectives"
                       value={editedCampaign.objectives.join('\n')}
-                      onChange={(e) => handleArrayChange('objectives', e.target.value)}
+                      onChange={(e) =>
+                        handleArrayChange('objectives', e.target.value)
+                      }
                       className="w-full bg-gray-700 text-white p-2 rounded-lg mb-4"
                       rows={4}
                     ></textarea>
@@ -354,40 +472,54 @@ export function CampaignModal({ campaign, onClose, onCampaignUpdated }: Campaign
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-semibold text-white mb-2">Каналы (каждый с новой строки)</h3>
+                  <h3 className="text-lg font-semibold text-white mb-2">
+                    Каналы (каждый с новой строки)
+                  </h3>
                   <textarea
                     name="channels"
                     id="channels"
                     value={editedCampaign.channels.join('\n')}
-                    onChange={(e) => handleArrayChange('channels', e.target.value)}
+                    onChange={(e) =>
+                      handleArrayChange('channels', e.target.value)
+                    }
                     className="w-full bg-gray-700 text-white p-2 rounded-lg mb-4"
                     rows={4}
                   ></textarea>
                 </div>
 
                 <div>
-                  <label className="block text-gray-400 text-sm font-bold mb-2" htmlFor="links">
+                  <label
+                    className="block text-gray-400 text-sm font-bold mb-2"
+                    htmlFor="links"
+                  >
                     Ссылки (каждая на новой строке, формат: Метка - URL):
                   </label>
                   <textarea
                     name="links"
                     id="links"
                     value={linksText}
-                    onChange={(e) => handleTextareaChange('links', e.target.value)}
+                    onChange={(e) =>
+                      handleTextareaChange('links', e.target.value)
+                    }
                     className="w-full bg-gray-700 text-white p-2 rounded-lg mb-4"
                     rows={5}
                   ></textarea>
                 </div>
 
                 <div>
-                  <label className="block text-gray-400 text-sm font-bold mb-2" htmlFor="attachments">
+                  <label
+                    className="block text-gray-400 text-sm font-bold mb-2"
+                    htmlFor="attachments"
+                  >
                     Вложения (каждое на новой строке, формат: Метка - URL):
                   </label>
                   <textarea
                     name="attachments"
                     id="attachments"
                     value={attachmentsText}
-                    onChange={(e) => handleTextareaChange('attachments', e.target.value)}
+                    onChange={(e) =>
+                      handleTextareaChange('attachments', e.target.value)
+                    }
                     className="w-full bg-gray-700 text-white p-2 rounded-lg mb-4"
                     rows={5}
                   ></textarea>
@@ -428,8 +560,11 @@ export function CampaignModal({ campaign, onClose, onCampaignUpdated }: Campaign
                 </h2>
 
                 <div className="flex flex-wrap items-center gap-4 text-sm text-gray-400 mb-6">
-                  <span className="px-3 py-1 rounded-full text-sm font-medium"
-                    style={getVerticalColorClass(editedCampaign.campaign_vertical)}
+                  <span
+                    className="px-3 py-1 rounded-full text-sm font-medium"
+                    style={getVerticalColorClass(
+                      editedCampaign.campaign_vertical
+                    )}
                   >
                     {editedCampaign.campaign_vertical}
                   </span>
@@ -437,80 +572,147 @@ export function CampaignModal({ campaign, onClose, onCampaignUpdated }: Campaign
                     {editedCampaign.campaign_type}
                   </span>
                   <span className="flex items-center gap-1">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd"></path></svg>
-                    {format(new Date(editedCampaign.flight_period.start_date), 'dd.MM.yyyy', { locale: ru })} - {format(new Date(editedCampaign.flight_period.end_date), 'dd.MM.yyyy', { locale: ru })}
+                    <svg
+                      className="w-4 h-4"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                        clipRule="evenodd"
+                      ></path>
+                    </svg>
+                    {format(
+                      new Date(editedCampaign.flight_period.start_date),
+                      'dd.MM.yyyy',
+                      { locale: ru }
+                    )}{' '}
+                    -{' '}
+                    {format(
+                      new Date(editedCampaign.flight_period.end_date),
+                      'dd.MM.yyyy',
+                      { locale: ru }
+                    )}
                   </span>
                 </div>
 
                 {editedCampaign.key_message && (
                   <div>
-                    <h3 className="text-xl font-bold text-gray-300 mb-2">Ключевое сообщение</h3>
-                    <p className="text-gray-200 text-lg">{editedCampaign.key_message}</p>
+                    <h3 className="text-xl font-bold text-gray-300 mb-2">
+                      Ключевое сообщение
+                    </h3>
+                    <p className="text-gray-200 text-lg">
+                      {editedCampaign.key_message}
+                    </p>
                   </div>
                 )}
 
-                {editedCampaign.objectives && editedCampaign.objectives.length > 0 && (
-                  <div>
-                    <h3 className="text-xl font-bold text-gray-300 mb-2">Цели</h3>
-                    <ul className="list-disc list-inside text-gray-200 text-lg">
-                      {editedCampaign.objectives.map((obj, i) => (
-                        <li key={i}>{obj}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                {editedCampaign.objectives &&
+                  editedCampaign.objectives.length > 0 && (
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-300 mb-2">
+                        Цели
+                      </h3>
+                      <ul className="list-disc list-inside text-gray-200 text-lg">
+                        {editedCampaign.objectives.map((obj, i) => (
+                          <li key={i}>{obj}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
 
-                {editedCampaign.channels && editedCampaign.channels.length > 0 && (
-                  <div>
-                    <h3 className="text-xl font-bold text-gray-300 mb-2">Каналы</h3>
-                    <ul className="list-disc list-inside text-gray-200 text-lg">
-                      {editedCampaign.channels.map((channel, i) => (
-                        <li key={i}>{channel}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                {editedCampaign.channels &&
+                  editedCampaign.channels.length > 0 && (
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-300 mb-2">
+                        Каналы
+                      </h3>
+                      <ul className="list-disc list-inside text-gray-200 text-lg">
+                        {editedCampaign.channels.map((channel, i) => (
+                          <li key={i}>{channel}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
 
                 {editedCampaign.geo && (
                   <div>
-                    <h3 className="text-xl font-bold text-gray-300 mb-2">Гео</h3>
-                    <p className="text-gray-200 text-lg">{editedCampaign.geo}</p>
+                    <h3 className="text-xl font-bold text-gray-300 mb-2">
+                      Гео
+                    </h3>
+                    <p className="text-gray-200 text-lg">
+                      {editedCampaign.geo}
+                    </p>
                   </div>
                 )}
 
                 {editedCampaign.audience && (
                   <div>
-                    <h3 className="text-xl font-bold text-gray-300 mb-2">Аудитория</h3>
-                    <p className="text-gray-200 text-lg">{editedCampaign.audience}</p>
+                    <h3 className="text-xl font-bold text-gray-300 mb-2">
+                      Аудитория
+                    </h3>
+                    <p className="text-gray-200 text-lg">
+                      {editedCampaign.audience}
+                    </p>
                   </div>
                 )}
 
                 {editedCampaign.links && editedCampaign.links.length > 0 && (
                   <div>
-                    <h3 className="text-xl font-bold text-gray-300 mb-2">Ссылки</h3>
+                    <h3 className="text-xl font-bold text-gray-300 mb-2">
+                      Ссылки
+                    </h3>
                     <ul className="list-disc list-inside text-gray-200 text-lg">
                       {editedCampaign.links.map((link, i) => (
-                        <li key={i}><a href={link.url} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">{link.label || link.url}</a></li>
+                        <li key={i}>
+                          <a
+                            href={link.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-400 hover:underline"
+                          >
+                            {link.label || link.url}
+                          </a>
+                        </li>
                       ))}
                     </ul>
                   </div>
                 )}
 
-                {editedCampaign.attachments && editedCampaign.attachments.length > 0 && (
-                  <div>
-                    <h3 className="text-xl font-bold text-gray-300 mb-2">Вложения</h3>
-                    <ul className="list-disc list-inside text-gray-200 text-lg">
-                      {editedCampaign.attachments.map((attachment, i) => (
-                        <li key={i}><a href={attachment.url} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">{attachment.label || attachment.url}</a></li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                {editedCampaign.attachments &&
+                  editedCampaign.attachments.length > 0 && (
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-300 mb-2">
+                        Вложения
+                      </h3>
+                      <ul className="list-disc list-inside text-gray-200 text-lg">
+                        {editedCampaign.attachments.map((attachment, i) => (
+                          <li key={i}>
+                            <a
+                              href={attachment.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-400 hover:underline"
+                            >
+                              {attachment.label || attachment.url}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
 
                 {editedCampaign.video_url && (
                   <div>
-                    <h3 className="text-xl font-bold text-gray-300 mb-2">Видео</h3>
-                    <VideoPlayer videoUrl={editedCampaign.video_url || null} currentVideoType={editedCampaign.video_type} onVideoTypeChange={handleVideoTypeChange} />
+                    <h3 className="text-xl font-bold text-gray-300 mb-2">
+                      Видео
+                    </h3>
+                    <VideoPlayer
+                      videoUrl={editedCampaign.video_url || null}
+                      currentVideoType={editedCampaign.video_type}
+                      onVideoTypeChange={handleVideoTypeChange}
+                    />
                   </div>
                 )}
 
@@ -538,4 +740,4 @@ export function CampaignModal({ campaign, onClose, onCampaignUpdated }: Campaign
       </div>
     </div>
   );
-} 
+}

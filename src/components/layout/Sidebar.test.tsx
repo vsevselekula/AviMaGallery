@@ -28,4 +28,4 @@ describe('Sidebar', () => {
     expect(screen.getByText('📅')).toBeInTheDocument();
     expect(screen.getByText('📈')).toBeInTheDocument();
   });
-}); 
+});

@@ -17,9 +17,14 @@ interface VerticalClientProps {
   initialCampaigns: Campaign[];
 }
 
-export function VerticalClient({ verticalName, initialVertical, initialCampaigns }: VerticalClientProps) {
+export function VerticalClient({
+  verticalName,
+  initialVertical,
+  initialCampaigns,
+}: VerticalClientProps) {
   const [vertical, setVertical] = useState<Vertical | null>(initialVertical);
-  const [verticalCampaigns, setVerticalCampaigns] = useState<Campaign[]>(initialCampaigns);
+  const [verticalCampaigns, setVerticalCampaigns] =
+    useState<Campaign[]>(initialCampaigns);
   const supabase = createClientComponentClient();
 
   useEffect(() => {
@@ -62,8 +67,12 @@ export function VerticalClient({ verticalName, initialVertical, initialCampaigns
     return (
       <main className="flex-1 p-8">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-white mb-4">Направление не найдено</h1>
-          <p className="text-gray-400">Пожалуйста, проверьте URL и попробуйте снова.</p>
+          <h1 className="text-2xl font-bold text-white mb-4">
+            Направление не найдено
+          </h1>
+          <p className="text-gray-400">
+            Пожалуйста, проверьте URL и попробуйте снова.
+          </p>
         </div>
       </main>
     );
@@ -76,7 +85,9 @@ export function VerticalClient({ verticalName, initialVertical, initialCampaigns
         <p className="text-gray-400">{vertical.description}</p>
       </div>
 
-      <h2 className="text-2xl font-bold text-white mb-6">Кампании направления "{vertical.name}"</h2>
+      <h2 className="text-2xl font-bold text-white mb-6">
+        Кампании направления "{vertical.name}"
+      </h2>
       {verticalCampaigns.length > 0 ? (
         <CampaignList campaigns={verticalCampaigns} hideVerticalFilter={true} />
       ) : (
@@ -84,4 +95,4 @@ export function VerticalClient({ verticalName, initialVertical, initialCampaigns
       )}
     </main>
   );
-} 
+}

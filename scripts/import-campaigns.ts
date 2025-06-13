@@ -14,7 +14,8 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 if (!supabaseUrl || !supabaseServiceKey) {
   console.error('\nMissing environment variables:');
   if (!supabaseUrl) console.error('- NEXT_PUBLIC_SUPABASE_URL is missing');
-  if (!supabaseServiceKey) console.error('- SUPABASE_SERVICE_ROLE_KEY is missing');
+  if (!supabaseServiceKey)
+    console.error('- SUPABASE_SERVICE_ROLE_KEY is missing');
   process.exit(1);
 }
 
@@ -22,8 +23,8 @@ if (!supabaseUrl || !supabaseServiceKey) {
 const supabase = createClient(supabaseUrl, supabaseServiceKey, {
   auth: {
     autoRefreshToken: false,
-    persistSession: false
-  }
+    persistSession: false,
+  },
 });
 
 interface NewCampaign {
@@ -65,7 +66,9 @@ async function importCampaigns() {
     process.exit(1);
   }
 
-  const existingCampaignTitles = new Set(existingCampaigns?.map(c => c.campaign_name));
+  const existingCampaignTitles = new Set(
+    existingCampaigns?.map((c) => c.campaign_name)
+  );
 
   const campaignsToInsert = [];
   const duplicateCampaigns = [];
@@ -108,10 +111,10 @@ async function importCampaigns() {
 
   if (duplicateCampaigns.length > 0) {
     console.warn('\nDuplicate campaigns (not inserted):');
-    duplicateCampaigns.forEach(title => console.warn(`- ${title}`));
+    duplicateCampaigns.forEach((title) => console.warn(`- ${title}`));
   }
 
   process.exit(0);
 }
 
-importCampaigns(); 
+importCampaigns();

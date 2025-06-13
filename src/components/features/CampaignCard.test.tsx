@@ -4,7 +4,11 @@ import { CampaignCard } from './CampaignCard';
 // Мокаем next/image
 jest.mock('next/image', () => ({
   __esModule: true,
-  default: function MockImage(props: { src: string; alt: string; className?: string }) {
+  default: function MockImage(props: {
+    src: string;
+    alt: string;
+    className?: string;
+  }) {
     return <div data-testid="mock-image" {...props} />;
   },
 }));
@@ -35,8 +39,8 @@ interface MockCampaign {
   objectives: string[];
   channels: string[];
   materials: string[];
-  links: { label: string; url: string; }[];
-  attachments: { label: string; url: string; }[];
+  links: { label: string; url: string }[];
+  attachments: { label: string; url: string }[];
 }
 
 const mockCampaign: MockCampaign = {
@@ -48,7 +52,7 @@ const mockCampaign: MockCampaign = {
   campaign_vertical: 'Test Vertical',
   flight_period: {
     start_date: '2024-03-01',
-    end_date: '2099-12-31'
+    end_date: '2099-12-31',
   },
   status: 'active' as CampaignStatus,
   budget: 1000000,
@@ -56,7 +60,7 @@ const mockCampaign: MockCampaign = {
     impressions: 0,
     clicks: 0,
     ctr: 0,
-    conversions: 0
+    conversions: 0,
   },
   geo: 'Test Geo',
   audience: 'Test Audience',
@@ -64,7 +68,9 @@ const mockCampaign: MockCampaign = {
   channels: ['Test Channel'],
   materials: ['Test Material'],
   links: [{ label: 'Test Link', url: 'https://test.com' }],
-  attachments: [{ label: 'Test Attachment', url: 'https://test.com/attachment' }]
+  attachments: [
+    { label: 'Test Attachment', url: 'https://test.com/attachment' },
+  ],
 };
 
 describe('CampaignCard', () => {
@@ -94,14 +100,14 @@ describe('CampaignCard', () => {
   });
 
   it('does not show ON AIR badge for inactive campaigns', () => {
-    const inactiveCampaign = { 
-      ...mockCampaign, 
+    const inactiveCampaign = {
+      ...mockCampaign,
       flight_period: {
         ...mockCampaign.flight_period,
-        end_date: '2000-01-01'
-      }
+        end_date: '2000-01-01',
+      },
     };
     render(<CampaignCard campaign={inactiveCampaign} />);
     expect(screen.queryByText('ON AIR')).not.toBeInTheDocument();
   });
-}); 
+});

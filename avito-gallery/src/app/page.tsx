@@ -8,7 +8,7 @@ import { Campaign } from '@/lib/types';
 
 export default async function Home() {
   const supabase = createServerComponentClient({ cookies });
-  
+
   const { data: campaigns } = await supabase
     .from('campaigns')
     .select('*')
@@ -24,12 +24,12 @@ export default async function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <HeroBanner 
-        campaigns={campaigns as Campaign[]} 
+      <HeroBanner
+        campaigns={campaigns as Campaign[]}
         onCampaignUpdated={handleCampaignUpdated}
       />
-      <CampaignList 
-        campaigns={campaigns as Campaign[]} 
+      <CampaignList
+        campaigns={campaigns as Campaign[]}
         onCampaignUpdated={handleCampaignUpdated}
       />
     </main>

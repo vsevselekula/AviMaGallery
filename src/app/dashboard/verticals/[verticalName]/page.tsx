@@ -8,13 +8,13 @@ const supabase = createClient(
 
 export async function generateStaticParams() {
   try {
-    const { data: verticals } = await supabase
-      .from('verticals')
-      .select('name');
+    const { data: verticals } = await supabase.from('verticals').select('name');
 
-    return verticals?.map((vertical) => ({
-      verticalName: vertical.name,
-    })) || [];
+    return (
+      verticals?.map((vertical) => ({
+        verticalName: vertical.name,
+      })) || []
+    );
   } catch (error) {
     console.error('Error generating static params:', error);
     return [];
@@ -32,7 +32,7 @@ interface PageProps {
 
 export default async function VerticalPage(props: PageProps) {
   const params = await props.params;
-  
+
   const { data: vertical } = await supabase
     .from('verticals')
     .select('*')
@@ -52,4 +52,4 @@ export default async function VerticalPage(props: PageProps) {
       initialCampaigns={campaigns || []}
     />
   );
-} 
+}

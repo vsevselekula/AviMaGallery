@@ -13,11 +13,15 @@ interface HeroBannerProps {
   onCampaignUpdated: (updatedCampaign: Campaign) => void;
 }
 
-export function HeroBanner({ campaigns, className, onCampaignUpdated }: HeroBannerProps) {
+export function HeroBanner({
+  campaigns,
+  className,
+  onCampaignUpdated,
+}: HeroBannerProps) {
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [currentCampaign, setCurrentCampaign] = useState<Campaign | null>(null);
 
-  const activeCampaigns = campaigns.filter(campaign => {
+  const activeCampaigns = campaigns.filter((campaign) => {
     const now = new Date();
     const startDate = new Date(campaign.flight_period.start_date);
     const endDate = new Date(campaign.flight_period.end_date);
@@ -41,17 +45,19 @@ export function HeroBanner({ campaigns, className, onCampaignUpdated }: HeroBann
   };
 
   return (
-    <div className={`relative bg-gradient-to-r from-blue-600 to-blue-800 p-8 ${className || ''}`}>
+    <div
+      className={`relative bg-gradient-to-r from-blue-600 to-blue-800 p-8 ${className || ''}`}
+    >
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {activeCampaigns.slice(0, 3).map(campaign => (
+          {activeCampaigns.slice(0, 3).map((campaign) => (
             <div
               key={campaign.id}
               onClick={() => handleCampaignClick(campaign)}
               className="bg-white/10 backdrop-blur-sm rounded-lg p-6 cursor-pointer hover:bg-white/20 transition-colors"
             >
               <div className="flex items-center gap-2 mb-4">
-                <span 
+                <span
                   className="px-3 py-1 rounded-full text-sm font-medium"
                   style={getVerticalColorClass(campaign.campaign_vertical)}
                 >
@@ -61,10 +67,22 @@ export function HeroBanner({ campaigns, className, onCampaignUpdated }: HeroBann
                   {campaign.campaign_type}
                 </span>
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">{campaign.campaign_name}</h3>
+              <h3 className="text-xl font-bold text-white mb-2">
+                {campaign.campaign_name}
+              </h3>
               <p className="text-gray-200 mb-4">{campaign.key_message}</p>
               <div className="text-sm text-gray-300">
-                {format(new Date(campaign.flight_period.start_date), 'dd.MM.yyyy', { locale: ru })} - {format(new Date(campaign.flight_period.end_date), 'dd.MM.yyyy', { locale: ru })}
+                {format(
+                  new Date(campaign.flight_period.start_date),
+                  'dd.MM.yyyy',
+                  { locale: ru }
+                )}{' '}
+                -{' '}
+                {format(
+                  new Date(campaign.flight_period.end_date),
+                  'dd.MM.yyyy',
+                  { locale: ru }
+                )}
               </div>
             </div>
           ))}
@@ -80,4 +98,4 @@ export function HeroBanner({ campaigns, className, onCampaignUpdated }: HeroBann
       )}
     </div>
   );
-} 
+}

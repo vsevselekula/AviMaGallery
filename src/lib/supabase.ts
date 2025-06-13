@@ -37,4 +37,4 @@ export interface CampaignMaterial {
   type: 'image' | 'video' | 'document';
   url: string;
   created_at: string;
-} 
+}

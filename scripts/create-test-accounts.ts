@@ -13,7 +13,8 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 if (!supabaseUrl || !supabaseServiceKey) {
   console.error('\nMissing environment variables:');
   if (!supabaseUrl) console.error('- NEXT_PUBLIC_SUPABASE_URL is missing');
-  if (!supabaseServiceKey) console.error('- SUPABASE_SERVICE_ROLE_KEY is missing');
+  if (!supabaseServiceKey)
+    console.error('- SUPABASE_SERVICE_ROLE_KEY is missing');
   process.exit(1);
 }
 
@@ -21,8 +22,8 @@ if (!supabaseUrl || !supabaseServiceKey) {
 const supabase = createClient(supabaseUrl, supabaseServiceKey, {
   auth: {
     autoRefreshToken: false,
-    persistSession: false
-  }
+    persistSession: false,
+  },
 });
 
 const testAccounts = [
@@ -47,12 +48,15 @@ async function createTestAccounts() {
   for (const account of testAccounts) {
     try {
       // Проверяем существование пользователя в auth.users
-      const { data: allUsers, error: listError } = await supabase.auth.admin.listUsers();
+      const { data: allUsers, error: listError } =
+        await supabase.auth.admin.listUsers();
       if (listError) {
         console.error(`Error listing users:`, listError);
         continue;
       }
-      const existingAuthUser = allUsers?.users.find(u => u.email === account.email);
+      const existingAuthUser = allUsers?.users.find(
+        (u) => u.email === account.email
+      );
       let userId: string;
 
       if (existingAuthUser) {
@@ -60,12 +64,13 @@ async function createTestAccounts() {
         console.log(`User ${account.email} already exists in auth.users.`);
       } else {
         // Создаем нового пользователя в auth.users
-        const { data: newUser, error: signUpError } = await supabase.auth.admin.createUser({
-          email: account.email,
-          password: account.password,
-          email_confirm: true,
-          user_metadata: { role: account.role }
-        });
+        const { data: newUser, error: signUpError } =
+          await supabase.auth.admin.createUser({
+            email: account.email,
+            password: account.password,
+            email_confirm: true,
+            user_metadata: { role: account.role },
+          });
         if (signUpError) {
           console.error(`Error creating user ${account.email}:`, signUpError);
           continue;
@@ -81,8 +86,12 @@ async function createTestAccounts() {
         .eq('user_id', userId)
         .single();
 
-      if (fetchRoleError && fetchRoleError.code !== 'PGRST116') { // PGRST116 is 'No rows found'
-        console.error(`Error fetching role for ${account.email}:`, fetchRoleError);
+      if (fetchRoleError && fetchRoleError.code !== 'PGRST116') {
+        // PGRST116 is 'No rows found'
+        console.error(
+          `Error fetching role for ${account.email}:`,
+          fetchRoleError
+        );
         continue;
       }
 
@@ -96,7 +105,10 @@ async function createTestAccounts() {
           .eq('user_id', userId);
 
         if (updateRoleError) {
-          console.error(`Error updating role for ${account.email}:`, updateRoleError);
+          console.error(
+            `Error updating role for ${account.email}:`,
+            updateRoleError
+          );
         } else {
           console.log(`Updated role for ${account.email} in user_roles table.`);
         }
@@ -110,9 +122,14 @@ async function createTestAccounts() {
           });
 
         if (insertRoleError) {
-          console.error(`Error inserting role for ${account.email}:`, insertRoleError);
+          console.error(
+            `Error inserting role for ${account.email}:`,
+            insertRoleError
+          );
         } else {
-          console.log(`Inserted role for ${account.email} in user_roles table.`);
+          console.log(
+            `Inserted role for ${account.email} in user_roles table.`
+          );
         }
       }
     } catch (error) {

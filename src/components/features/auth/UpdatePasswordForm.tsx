@@ -34,7 +34,11 @@ export function UpdatePasswordForm() {
 
       router.push('/auth/login?message=password-updated');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Произошла ошибка при обновлении пароля');
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Произошла ошибка при обновлении пароля'
+      );
     } finally {
       setLoading(false);
     }
@@ -77,19 +81,13 @@ export function UpdatePasswordForm() {
         </div>
       </div>
 
-      {error && (
-        <div className="text-red-500 text-sm text-center">{error}</div>
-      )}
+      {error && <div className="text-red-500 text-sm text-center">{error}</div>}
 
       <div>
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={loading}
-        >
+        <Button type="submit" className="w-full" disabled={loading}>
           {loading ? 'Обновление...' : 'Обновить пароль'}
         </Button>
       </div>
     </form>
   );
-} 
+}

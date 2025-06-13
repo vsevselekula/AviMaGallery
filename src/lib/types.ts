@@ -54,4 +54,4 @@ export interface Vertical {
   description: string;
   main_image: string;
   team_members: TeamMember[];
-} 
+}

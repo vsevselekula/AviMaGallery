@@ -13,31 +13,46 @@ interface CampaignListProps {
   onCampaignUpdated?: (updatedCampaign: Campaign) => void;
 }
 
-export function CampaignList({ campaigns, title, description, hideVerticalFilter, onCampaignUpdated }: CampaignListProps) {
-  const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
+export function CampaignList({
+  campaigns,
+  title,
+  description,
+  hideVerticalFilter,
+  onCampaignUpdated,
+}: CampaignListProps) {
+  const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(
+    null
+  );
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState<string>('');
   const [selectedVertical, setSelectedVertical] = useState<string>('');
 
-  const uniqueTypes = useMemo(() => 
-    Array.from(new Set(campaigns.map(c => c.campaign_type))).sort(),
+  const uniqueTypes = useMemo(
+    () => Array.from(new Set(campaigns.map((c) => c.campaign_type))).sort(),
     [campaigns]
   );
 
-  const uniqueVerticals = useMemo(() => 
-    Array.from(new Set(campaigns.map(c => c.campaign_vertical))).sort(),
+  const uniqueVerticals = useMemo(
+    () => Array.from(new Set(campaigns.map((c) => c.campaign_vertical))).sort(),
     [campaigns]
   );
 
   const filteredCampaigns = useMemo(() => {
-    return campaigns.filter(campaign => {
-      const matchesSearch = searchQuery === '' || 
-        campaign.campaign_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    return campaigns.filter((campaign) => {
+      const matchesSearch =
+        searchQuery === '' ||
+        campaign.campaign_name
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
         campaign.key_message.toLowerCase().includes(searchQuery.toLowerCase());
-      
-      const matchesType = selectedType === '' || campaign.campaign_type.toLowerCase() === selectedType.toLowerCase();
-      const matchesVertical = selectedVertical === '' || campaign.campaign_vertical === selectedVertical;
-      
+
+      const matchesType =
+        selectedType === '' ||
+        campaign.campaign_type.toLowerCase() === selectedType.toLowerCase();
+      const matchesVertical =
+        selectedVertical === '' ||
+        campaign.campaign_vertical === selectedVertical;
+
       return matchesSearch && matchesType && matchesVertical;
     });
   }, [campaigns, searchQuery, selectedType, selectedVertical]);
@@ -53,7 +68,9 @@ export function CampaignList({ campaigns, title, description, hideVerticalFilter
     <div className="space-y-6">
       {(title || description) && (
         <div className="mb-8">
-          {title && <h2 className="text-2xl font-bold text-white mb-2">{title}</h2>}
+          {title && (
+            <h2 className="text-2xl font-bold text-white mb-2">{title}</h2>
+          )}
           {description && <p className="text-gray-400">{description}</p>}
         </div>
       )}
@@ -75,8 +92,10 @@ export function CampaignList({ campaigns, title, description, hideVerticalFilter
             onChange={(e) => setSelectedType(e.target.value)}
           >
             <option value="">Все типы кампаний</option>
-            {uniqueTypes.map(type => (
-              <option key={type} value={type}>{type}</option>
+            {uniqueTypes.map((type) => (
+              <option key={type} value={type}>
+                {type}
+              </option>
             ))}
           </select>
         </div>
@@ -88,8 +107,10 @@ export function CampaignList({ campaigns, title, description, hideVerticalFilter
               onChange={(e) => setSelectedVertical(e.target.value)}
             >
               <option value="">Все вертикали</option>
-              {uniqueVerticals.map(vertical => (
-                <option key={vertical} value={vertical}>{vertical}</option>
+              {uniqueVerticals.map((vertical) => (
+                <option key={vertical} value={vertical}>
+                  {vertical}
+                </option>
               ))}
             </select>
           </div>
@@ -116,4 +137,4 @@ export function CampaignList({ campaigns, title, description, hideVerticalFilter
       )}
     </div>
   );
-} 
+}

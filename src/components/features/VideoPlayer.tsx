@@ -4,7 +4,9 @@ import { cn } from '@/lib/utils';
 interface VideoPlayerProps {
   videoUrl: string | null;
   currentVideoType?: 'google_drive' | 'yandex_disk';
-  onVideoTypeChange?: (type: 'google_drive' | 'yandex_disk' | undefined) => void;
+  onVideoTypeChange?: (
+    type: 'google_drive' | 'yandex_disk' | undefined
+  ) => void;
 }
 
 export const VideoPlayer: React.FC<VideoPlayerProps> = ({
@@ -18,7 +20,11 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   useEffect(() => {
     // Явная проверка на случай, если videoUrl не является строкой или null
     if (typeof videoUrl !== 'string' && videoUrl !== null) {
-      console.error('VideoPlayer: Received unexpected videoUrl type:', typeof videoUrl, videoUrl);
+      console.error(
+        'VideoPlayer: Received unexpected videoUrl type:',
+        typeof videoUrl,
+        videoUrl
+      );
       setEmbedUrl(null);
       setError('Неверный формат видео ссылки');
       onVideoTypeChange?.(undefined);
@@ -59,7 +65,9 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       }
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка при обработке ссылки');
+      setError(
+        err instanceof Error ? err.message : 'Ошибка при обработке ссылки'
+      );
       setEmbedUrl(null);
       if (currentVideoType !== undefined) {
         onVideoTypeChange?.(undefined); // Сбрасываем тип при ошибке
@@ -85,8 +93,8 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         <iframe
           src={embedUrl}
           className={cn(
-            "absolute inset-0 w-full h-full rounded-lg",
-            "border-0"
+            'absolute inset-0 w-full h-full rounded-lg',
+            'border-0'
           )}
           allow="autoplay"
           allowFullScreen
@@ -95,4 +103,4 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       )}
     </div>
   );
-}; 
+};

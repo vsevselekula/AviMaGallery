@@ -29,7 +29,11 @@ export function ResetPasswordForm() {
 
       setSuccess(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Произошла ошибка при отправке письма');
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Произошла ошибка при отправке письма'
+      );
     } finally {
       setLoading(false);
     }
@@ -56,9 +60,7 @@ export function ResetPasswordForm() {
         </div>
       </div>
 
-      {error && (
-        <div className="text-red-500 text-sm text-center">{error}</div>
-      )}
+      {error && <div className="text-red-500 text-sm text-center">{error}</div>}
 
       {success && (
         <div className="text-green-500 text-sm text-center">
@@ -67,11 +69,7 @@ export function ResetPasswordForm() {
       )}
 
       <div>
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={loading}
-        >
+        <Button type="submit" className="w-full" disabled={loading}>
           {loading ? 'Отправка...' : 'Восстановить пароль'}
         </Button>
       </div>
@@ -87,4 +85,4 @@ export function ResetPasswordForm() {
       </div>
     </form>
   );
-} 
+}

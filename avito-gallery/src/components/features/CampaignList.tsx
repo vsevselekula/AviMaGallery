@@ -13,28 +13,43 @@ interface CampaignListProps {
   onCampaignUpdated?: (updatedCampaign: Campaign) => void;
 }
 
-export function CampaignList({ campaigns, title, description, hideVerticalFilter, onCampaignUpdated }: CampaignListProps) {
+export function CampaignList({
+  campaigns,
+  title,
+  description,
+  hideVerticalFilter,
+  onCampaignUpdated,
+}: CampaignListProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState('');
   const [selectedVertical, setSelectedVertical] = useState('');
-  const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
+  const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(
+    null
+  );
 
   const uniqueTypes = useMemo(() => {
-    const types = new Set(campaigns.map(campaign => campaign.campaign_type));
+    const types = new Set(campaigns.map((campaign) => campaign.campaign_type));
     return Array.from(types);
   }, [campaigns]);
 
   const uniqueVerticals = useMemo(() => {
-    const verticals = new Set(campaigns.map(campaign => campaign.campaign_vertical));
+    const verticals = new Set(
+      campaigns.map((campaign) => campaign.campaign_vertical)
+    );
     return Array.from(verticals);
   }, [campaigns]);
 
   const filteredCampaigns = useMemo(() => {
-    return campaigns.filter(campaign => {
-      const matchesSearch = campaign.campaign_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    return campaigns.filter((campaign) => {
+      const matchesSearch =
+        campaign.campaign_name
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
         campaign.key_message.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesType = !selectedType || campaign.campaign_type === selectedType;
-      const matchesVertical = !selectedVertical || campaign.campaign_vertical === selectedVertical;
+      const matchesType =
+        !selectedType || campaign.campaign_type === selectedType;
+      const matchesVertical =
+        !selectedVertical || campaign.campaign_vertical === selectedVertical;
       return matchesSearch && matchesType && matchesVertical;
     });
   }, [campaigns, searchQuery, selectedType, selectedVertical]);
@@ -50,7 +65,9 @@ export function CampaignList({ campaigns, title, description, hideVerticalFilter
     <div className="space-y-6">
       {(title || description) && (
         <div className="mb-8">
-          {title && <h2 className="text-2xl font-bold text-white mb-2">{title}</h2>}
+          {title && (
+            <h2 className="text-2xl font-bold text-white mb-2">{title}</h2>
+          )}
           {description && <p className="text-gray-400">{description}</p>}
         </div>
       )}
@@ -72,8 +89,10 @@ export function CampaignList({ campaigns, title, description, hideVerticalFilter
             onChange={(e) => setSelectedType(e.target.value)}
           >
             <option value="">Все типы кампаний</option>
-            {uniqueTypes.map(type => (
-              <option key={type} value={type}>{type}</option>
+            {uniqueTypes.map((type) => (
+              <option key={type} value={type}>
+                {type}
+              </option>
             ))}
           </select>
         </div>
@@ -85,8 +104,10 @@ export function CampaignList({ campaigns, title, description, hideVerticalFilter
               onChange={(e) => setSelectedVertical(e.target.value)}
             >
               <option value="">Все вертикали</option>
-              {uniqueVerticals.map(vertical => (
-                <option key={vertical} value={vertical}>{vertical}</option>
+              {uniqueVerticals.map((vertical) => (
+                <option key={vertical} value={vertical}>
+                  {vertical}
+                </option>
               ))}
             </select>
           </div>
@@ -113,4 +134,4 @@ export function CampaignList({ campaigns, title, description, hideVerticalFilter
       )}
     </div>
   );
-} 
+}

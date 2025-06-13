@@ -15,7 +15,8 @@ export default function VerifyEmailPage() {
             Подтверждение email
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Мы отправили вам письмо с подтверждением. Пожалуйста, проверьте вашу почту и перейдите по ссылке для завершения регистрации.
+            Мы отправили вам письмо с подтверждением. Пожалуйста, проверьте вашу
+            почту и перейдите по ссылке для завершения регистрации.
           </p>
         </div>
         <div className="text-center">
@@ -29,4 +30,4 @@ export default function VerifyEmailPage() {
       </div>
     </div>
   );
-} 
+}
