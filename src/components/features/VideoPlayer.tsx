@@ -12,12 +12,12 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   currentVideoType,
   onVideoTypeChange,
 }) => {
-  const [embedUrl, setEmbedUrl] = useState<string>('');
+  const [embedUrl, setEmbedUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!videoUrl) {
-      setEmbedUrl('');
+      setEmbedUrl(null);
       setError(null);
       if (currentVideoType !== undefined) {
         onVideoTypeChange?.(undefined); // Сбрасываем тип, если нет видео
@@ -51,7 +51,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ошибка при обработке ссылки');
-      setEmbedUrl('');
+      setEmbedUrl(null);
       if (currentVideoType !== undefined) {
         onVideoTypeChange?.(undefined); // Сбрасываем тип при ошибке
       }
@@ -72,16 +72,18 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
   return (
     <div className="relative w-full aspect-video">
-      <iframe
-        src={embedUrl}
-        className={cn(
-          "absolute inset-0 w-full h-full rounded-lg",
-          "border-0"
-        )}
-        allow="autoplay"
-        allowFullScreen
-        title="Video player"
-      />
+      {embedUrl && (
+        <iframe
+          src={embedUrl}
+          className={cn(
+            "absolute inset-0 w-full h-full rounded-lg",
+            "border-0"
+          )}
+          allow="autoplay"
+          allowFullScreen
+          title="Video player"
+        />
+      )}
     </div>
   );
 }; 
