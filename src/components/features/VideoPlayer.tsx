@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 interface VideoPlayerProps {
-  videoUrl: string;
+  videoUrl: string | null;
   currentVideoType?: 'google_drive' | 'yandex_disk';
   onVideoTypeChange?: (type: 'google_drive' | 'yandex_disk' | undefined) => void;
 }
@@ -16,6 +16,15 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Явная проверка на случай, если videoUrl не является строкой или null
+    if (typeof videoUrl !== 'string' && videoUrl !== null) {
+      console.error('VideoPlayer: Received unexpected videoUrl type:', typeof videoUrl, videoUrl);
+      setEmbedUrl(null);
+      setError('Неверный формат видео ссылки');
+      onVideoTypeChange?.(undefined);
+      return;
+    }
+
     if (!videoUrl) {
       setEmbedUrl(null);
       setError(null);
@@ -58,7 +67,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     }
   }, [videoUrl, currentVideoType, onVideoTypeChange]);
 
-  if (!videoUrl) {
+  if (!videoUrl && !embedUrl) {
     return null;
   }
 

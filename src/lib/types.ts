@@ -32,7 +32,7 @@ export interface Campaign {
     url: string;
   }[];
   image_url?: string;
-  video_url?: string;
+  video_url?: string | null;
   video_type?: 'google_drive' | 'yandex_disk';
 }
 

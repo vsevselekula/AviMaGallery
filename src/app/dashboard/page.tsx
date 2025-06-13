@@ -38,11 +38,10 @@ export default function DashboardPage() {
   return (
     <div className="flex-1">
       <HeroBanner campaigns={campaigns} onCampaignUpdated={handleCampaignUpdated} />
-      <div className="px-8">
+      <div className="px-8 mt-8">
         <CampaignList 
           campaigns={campaigns}
           title="Все кампании"
-          description="Полный список всех кампаний"
           onCampaignUpdated={handleCampaignUpdated}
         />
       </div>

@@ -51,16 +51,19 @@ export function CampaignCalendar() {
 
   const months = useMemo(() => {
     if (selectedYear === 'all') {
-      return eachMonthOfInterval({
-        start: startOfYear(new Date()),
-        end: endOfYear(new Date())
+      const allMonths = eachMonthOfInterval({
+        start: new Date(Math.min(...campaigns.map(c => new Date(c.flight_period.start_date).getFullYear())) || new Date().getFullYear(), 0, 1),
+        end: new Date(Math.max(...campaigns.map(c => new Date(c.flight_period.end_date).getFullYear())) || new Date().getFullYear(), 11, 31)
       });
+      return allMonths.filter((month, index, self) =>
+        index === self.findIndex((m) => format(m, 'yyyy-MM') === format(month, 'yyyy-MM'))
+      ).sort((a, b) => a.getTime() - b.getTime());
     }
     return eachMonthOfInterval({
       start: startOfYear(new Date(selectedYear, 0)),
       end: endOfYear(new Date(selectedYear, 0))
     });
-  }, [selectedYear]);
+  }, [selectedYear, campaigns]);
 
   const filteredCampaigns = useMemo(() => {
     return campaigns.filter(campaign => {
@@ -82,7 +85,7 @@ export function CampaignCalendar() {
         <select
           value={selectedYear}
           onChange={(e) => setSelectedYear(e.target.value === 'all' ? 'all' : parseInt(e.target.value))}
-          className="p-2 border rounded"
+          className="p-2 border rounded bg-gray-700 text-white"
         >
           <option value="all">Все годы</option>
           {availableYears.map(year => (
@@ -91,7 +94,7 @@ export function CampaignCalendar() {
         </select>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div className="flex flex-col gap-4">
         {months.map(month => {
           const monthCampaigns = filteredCampaigns.filter(campaign => {
             const campaignStartDate = new Date(campaign.flight_period.start_date);
@@ -100,18 +103,26 @@ export function CampaignCalendar() {
           });
 
           return (
-            <div key={month.toISOString()} className="border rounded p-4">
-              <h3 className="font-bold mb-2">
+            <div key={month.toISOString()} className="p-4 bg-gray-800 rounded-lg shadow-lg">
+              <h3 className="font-bold mb-4 text-white">
                 {format(month, 'LLLL', { locale: ru })}
               </h3>
               {monthCampaigns.map(campaign => (
                 <div
                   key={campaign.id}
                   onClick={() => setSelectedCampaign(campaign)}
-                  className={`p-2 mb-2 rounded cursor-pointer ${getVerticalColorClass(campaign.campaign_vertical)}`}
+                  className="p-3 mb-1 rounded cursor-pointer bg-gray-800 hover:bg-gray-700 shadow-md transition-all duration-200 ease-in-out"
                 >
-                  <div className="font-medium">{campaign.campaign_name}</div>
-                  <div className="text-sm">
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="font-medium text-white">{campaign.campaign_name}</div>
+                    <span
+                      className="px-2 py-1 rounded-full text-xs font-semibold"
+                      style={getVerticalColorClass(campaign.campaign_vertical)}
+                    >
+                      {campaign.campaign_vertical}
+                    </span>
+                  </div>
+                  <div className="text-sm text-gray-400">
                     {format(new Date(campaign.flight_period.start_date), 'd MMM', { locale: ru })} - {format(new Date(campaign.flight_period.end_date), 'd MMM', { locale: ru })}
                   </div>
                 </div>

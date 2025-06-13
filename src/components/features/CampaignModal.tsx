@@ -26,7 +26,10 @@ interface CampaignModalProps {
 export function CampaignModal({ campaign, onClose, onCampaignUpdated }: CampaignModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [editedCampaign, setEditedCampaign] = useState<Campaign>(campaign);
+  const [editedCampaign, setEditedCampaign] = useState<Campaign>({
+    ...campaign,
+    video_url: campaign.video_url || null,
+  });
   const [userRole, setUserRole] = useState<UserProfile['role'] | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [linksText, setLinksText] = useState('');
@@ -34,7 +37,10 @@ export function CampaignModal({ campaign, onClose, onCampaignUpdated }: Campaign
 
   useEffect(() => {
     console.log('CampaignModal: Campaign prop received/changed:', campaign);
-    setEditedCampaign(campaign);
+    setEditedCampaign({
+      ...campaign,
+      video_url: campaign.video_url || null,
+    });
     if (Array.isArray(campaign.links)) {
       setLinksText(campaign.links.map(link => `${link.label} - ${link.url}`).join('\n'));
     } else {
@@ -96,7 +102,7 @@ export function CampaignModal({ campaign, onClose, onCampaignUpdated }: Campaign
     const newArray = value.split('\n').map(item => item.trim()).filter(item => item !== '');
     setEditedCampaign(prev => ({ 
       ...prev, 
-      [name]: newArray.length === 0 ? [] : newArray // Если массив пустой, устанавливаем пустой массив
+      [name]: newArray.length === 0 ? [] : newArray
     }));
   };
 
@@ -504,7 +510,7 @@ export function CampaignModal({ campaign, onClose, onCampaignUpdated }: Campaign
                 {editedCampaign.video_url && (
                   <div>
                     <h3 className="text-xl font-bold text-gray-300 mb-2">Видео</h3>
-                    <VideoPlayer videoUrl={editedCampaign.video_url} currentVideoType={editedCampaign.video_type} onVideoTypeChange={handleVideoTypeChange} />
+                    <VideoPlayer videoUrl={editedCampaign.video_url || null} currentVideoType={editedCampaign.video_type} onVideoTypeChange={handleVideoTypeChange} />
                   </div>
                 )}
 

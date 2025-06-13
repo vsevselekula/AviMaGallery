@@ -48,6 +48,7 @@ export function HeroBanner({ campaigns, className, onCampaignUpdated }: HeroBann
   }
 
   const hasImage = heroCampaign.image_url && heroCampaign.image_url.startsWith('http');
+  const isActive = new Date(heroCampaign.flight_period.end_date) > new Date();
 
   return (
     <div className={`relative w-full overflow-hidden ${className || ''}`} style={{ minHeight: '400px' }}>
@@ -65,10 +66,15 @@ export function HeroBanner({ campaigns, className, onCampaignUpdated }: HeroBann
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-800 z-0"></div>
       )}
 
-      {/* Overlay for glass blur effect */}
-      <div className="absolute inset-0 z-10 flex items-center justify-center p-8 backdrop-blur-md bg-black/40">
+      {/* Overlay for glass blur effect - now just for centering content */}
+      <div className="absolute inset-0 z-10 flex items-center justify-center p-8">
         <div className="max-w-7xl mx-auto w-full text-white">
-          <div className="bg-white/10 p-8 rounded-xl backdrop-blur-md shadow-2xl max-w-2xl">
+          <div className="bg-white/20 p-8 rounded-xl backdrop-blur-md max-w-2xl relative">
+            {isActive && (
+              <div className="absolute top-4 right-4 bg-green-500 text-white px-2 py-1 rounded text-sm font-semibold">
+                ON AIR
+              </div>
+            )}
             <div className="flex items-center gap-2 mb-4">
               <span 
                 className="px-3 py-1 rounded-full text-sm font-medium"
