@@ -12,7 +12,6 @@ const nextConfig = {
     ],
     domains: ['wutftnrkjkbgqhxqgpqs.supabase.co'],
   },
-  output: 'export',
   trailingSlash: true,
 };
 

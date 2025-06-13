@@ -55,3 +55,16 @@ export interface Vertical {
   main_image: string;
   team_members: TeamMember[];
 }
+
+export type UserRole = 'super_admin' | 'editor' | 'viewer';
+
+export interface UserRoleData {
+  user_id: string;
+  role: UserRole;
+}
+
+export interface UserData {
+  id: string;
+  email: string;
+  role: string;
+}

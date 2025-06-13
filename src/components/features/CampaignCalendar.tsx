@@ -144,9 +144,7 @@ export function CampaignCalendar() {
             const campaignStartDate = new Date(
               campaign.flight_period.start_date
             );
-            return (
-              isSameMonth(campaignStartDate, month)
-            );
+            return isSameMonth(campaignStartDate, month);
           });
 
           return (

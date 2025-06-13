@@ -32,7 +32,10 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
   return (
     <div className="flex h-screen bg-gray-900">
       {showSidebar && (
-        <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+        <Sidebar
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+        />
       )}
       <main
         className={cn(

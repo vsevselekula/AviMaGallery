@@ -22,7 +22,9 @@ export function LoginForm() {
     const fullEmail = `${localEmailPart}@avito.ru`;
 
     try {
-      console.log('LoginForm - Attempting to sign in with:', { email: fullEmail });
+      console.log('LoginForm - Attempting to sign in with:', {
+        email: fullEmail,
+      });
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: fullEmail,
         password,
