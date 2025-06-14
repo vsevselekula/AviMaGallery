@@ -32,13 +32,13 @@ export default function DashboardPage() {
     fetchCampaigns();
   }, [supabase]);
 
-  // const handleCampaignUpdated = (updatedCampaign: Campaign) => {
-  //   setCampaigns((prevCampaigns) =>
-  //     prevCampaigns.map((campaign) =>
-  //       campaign.id === updatedCampaign.id ? updatedCampaign : campaign
-  //     )
-  //   );
-  // };
+  const handleCampaignUpdated = (updatedCampaign: Campaign) => {
+    setCampaigns((prevCampaigns) =>
+      prevCampaigns.map((campaign) =>
+        campaign.id === updatedCampaign.id ? updatedCampaign : campaign
+      )
+    );
+  };
 
   if (loading) {
     return (
@@ -50,13 +50,12 @@ export default function DashboardPage() {
 
   return (
     <div className="flex-1">
-      <HeroBanner
-        campaigns={campaigns}
-      />
+      <HeroBanner campaigns={campaigns} />
       <div className="px-8 mt-8">
-        <CampaignList
-          campaigns={campaigns}
-          title="Все кампании"
+        <CampaignList 
+          campaigns={campaigns} 
+          title="Все кампании" 
+          onCampaignUpdated={handleCampaignUpdated}
         />
       </div>
     </div>

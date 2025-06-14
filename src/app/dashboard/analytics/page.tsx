@@ -169,7 +169,9 @@ export default function Analytics() {
         channelCounts[ch] = (channelCounts[ch] || 0) + 1;
       });
     });
-    const sortedChannels = Object.keys(channelCounts).sort((a, b) => channelCounts[b] - channelCounts[a]);
+    const sortedChannels = Object.keys(channelCounts).sort(
+      (a, b) => channelCounts[b] - channelCounts[a]
+    );
     const channelsPopularity = {
       labels: sortedChannels,
       datasets: [

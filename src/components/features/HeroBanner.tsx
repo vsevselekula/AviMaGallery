@@ -14,10 +14,7 @@ interface HeroBannerProps {
   // const { onCampaignUpdated } = props;
 }
 
-export function HeroBanner({
-  campaigns,
-  className,
-}: HeroBannerProps) {
+export function HeroBanner({ campaigns, className }: HeroBannerProps) {
   const [currentCampaign, setCurrentCampaign] = useState<Campaign | null>(null);
   const [slideIndex, setSlideIndex] = useState(0);
 
@@ -42,7 +39,10 @@ export function HeroBanner({
     setSlideIndex(0);
   }, [activeCampaigns.length]);
 
-  const heroCampaign = activeCampaigns.length > 0 ? activeCampaigns[slideIndex % activeCampaigns.length] : null;
+  const heroCampaign =
+    activeCampaigns.length > 0
+      ? activeCampaigns[slideIndex % activeCampaigns.length]
+      : null;
 
   const handleCampaignClick = (campaign: Campaign) => {
     setCurrentCampaign(campaign);
@@ -154,10 +154,7 @@ export function HeroBanner({
       )}
 
       {currentCampaign && (
-        <CampaignModal
-          campaign={currentCampaign}
-          onClose={handleCloseModal}
-        />
+        <CampaignModal campaign={currentCampaign} onClose={handleCloseModal} />
       )}
     </div>
   );

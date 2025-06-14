@@ -26,9 +26,7 @@ export function CampaignsClient({ initialCampaigns }: CampaignsClientProps) {
         <p className="text-gray-400">Управление рекламными кампаниями</p>
       </div>
 
-      <CampaignList
-        campaigns={campaigns}
-      />
+      <CampaignList campaigns={campaigns} />
     </main>
   );
 }

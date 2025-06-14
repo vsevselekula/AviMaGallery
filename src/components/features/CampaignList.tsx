@@ -10,7 +10,7 @@ interface CampaignListProps {
   title?: string;
   description?: string;
   hideVerticalFilter?: boolean;
-  // const { onCampaignUpdated } = props;
+  onCampaignUpdated?: (updatedCampaign: Campaign) => void;
 }
 
 export function CampaignList({
@@ -18,6 +18,7 @@ export function CampaignList({
   title,
   description,
   hideVerticalFilter,
+  onCampaignUpdated,
 }: CampaignListProps) {
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(
     null
@@ -25,6 +26,13 @@ export function CampaignList({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState<string>('');
   const [selectedVertical, setSelectedVertical] = useState<string>('');
+
+  const handleCampaignUpdated = (updatedCampaign: Campaign) => {
+    if (onCampaignUpdated) {
+      onCampaignUpdated(updatedCampaign);
+    }
+    setSelectedCampaign(null);
+  };
 
   const uniqueTypes = useMemo(
     () => Array.from(new Set(campaigns.map((c) => c.campaign_type))).sort(),
@@ -43,7 +51,10 @@ export function CampaignList({
         campaign.campaign_name
           .toLowerCase()
           .includes(searchQuery.toLowerCase()) ||
-        (campaign.key_message ? campaign.key_message.toLowerCase() : '').includes(searchQuery.toLowerCase());
+        (campaign.key_message
+          ? campaign.key_message.toLowerCase()
+          : ''
+        ).includes(searchQuery.toLowerCase());
 
       const matchesType =
         selectedType === '' ||
@@ -111,10 +122,7 @@ export function CampaignList({
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredCampaigns.map((campaign) => (
-          <div
-            key={campaign.id}
-            onClick={() => setSelectedCampaign(campaign)}
-          >
+          <div key={campaign.id} onClick={() => setSelectedCampaign(campaign)}>
             <CampaignCard campaign={campaign} />
           </div>
         ))}
@@ -124,6 +132,7 @@ export function CampaignList({
         <CampaignModal
           campaign={selectedCampaign}
           onClose={() => setSelectedCampaign(null)}
+          onCampaignUpdated={handleCampaignUpdated}
         />
       )}
     </div>
