@@ -7,6 +7,7 @@ import { ru } from 'date-fns/locale';
 import { getVerticalColorClass } from '@/lib/utils';
 import { CampaignModal } from './CampaignModal';
 import Image from 'next/image';
+import { isValidImageUrl } from '@/lib/imageUtils';
 
 interface HeroBannerProps {
   campaigns: Campaign[];
@@ -67,8 +68,7 @@ export function HeroBanner({ campaigns, className }: HeroBannerProps) {
     );
   }
 
-  const hasImage =
-    heroCampaign.image_url && heroCampaign.image_url.startsWith('http');
+  const hasImage = isValidImageUrl(heroCampaign.image_url);
   const isActive = new Date(heroCampaign.flight_period.end_date) > new Date();
 
   return (
@@ -91,9 +91,9 @@ export function HeroBanner({ campaigns, className }: HeroBannerProps) {
       )}
 
       {/* Overlay for glass blur effect - now just for centering content */}
-      <div className="absolute inset-0 z-10 flex items-center justify-center p-8">
-        <div className="max-w-7xl mx-auto w-full text-white">
-          <div className="bg-white/20 p-8 rounded-xl backdrop-blur-md max-w-2xl relative">
+      <div className="absolute inset-0 z-10 flex items-center justify-start p-8">
+        <div className="w-full max-w-none">
+          <div className="bg-white/20 backdrop-blur-lg p-6 rounded-xl w-full max-w-[33.333%] max-h-[70%] overflow-hidden relative border border-white/30 shadow-2xl">
             {isActive && (
               <div className="absolute top-4 right-4 bg-green-500 text-white px-2 py-1 rounded text-sm font-semibold">
                 ON AIR
@@ -101,22 +101,22 @@ export function HeroBanner({ campaigns, className }: HeroBannerProps) {
             )}
             <div className="flex items-center gap-2 mb-4">
               <span
-                className="px-3 py-1 rounded-full text-sm font-medium"
+                className="px-3 rounded-full text-sm font-medium text-white h-8 flex items-center justify-center max-w-32 overflow-hidden min-w-0 flex-shrink-0"
                 style={getVerticalColorClass(heroCampaign.campaign_vertical)}
               >
-                {heroCampaign.campaign_vertical}
+                <span className="truncate whitespace-nowrap">{heroCampaign.campaign_vertical}</span>
               </span>
-              <span className="px-3 py-1 rounded-full text-sm font-medium border border-white text-white bg-transparent">
-                {heroCampaign.campaign_type}
+              <span className="px-3 rounded-full text-sm font-medium border border-white text-white bg-transparent h-8 flex items-center justify-center max-w-32 overflow-hidden min-w-0 flex-shrink-0">
+                <span className="truncate whitespace-nowrap">{heroCampaign.campaign_type}</span>
               </span>
             </div>
-            <h3 className="text-4xl font-extrabold mb-4">
+            <h3 className="text-3xl font-extrabold mb-3 text-black line-clamp-2">
               {heroCampaign.campaign_name}
             </h3>
-            <p className="text-lg text-gray-200 mb-6">
+            <p className="text-base text-gray-800 mb-4 line-clamp-3">
               {heroCampaign.key_message}
             </p>
-            <div className="text-base text-gray-300">
+            <div className="text-sm text-gray-600 mb-4">
               {format(
                 new Date(heroCampaign.flight_period.start_date),
                 'dd.MM.yyyy',
@@ -131,7 +131,7 @@ export function HeroBanner({ campaigns, className }: HeroBannerProps) {
             </div>
             <button
               onClick={() => handleCampaignClick(heroCampaign)}
-              className="mt-6 inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
             >
               Подробнее
             </button>

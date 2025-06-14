@@ -16,7 +16,10 @@ export function useNotification() {
   });
 
   const showNotification = useCallback(
-    (message: string, type: 'success' | 'error' | 'info' | 'warning' = 'info') => {
+    (
+      message: string,
+      type: 'success' | 'error' | 'info' | 'warning' = 'info'
+    ) => {
       setNotification({
         message,
         type,
@@ -27,27 +30,39 @@ export function useNotification() {
   );
 
   const hideNotification = useCallback(() => {
-    setNotification(prev => ({
+    setNotification((prev) => ({
       ...prev,
       isVisible: false,
     }));
   }, []);
 
-  const showSuccess = useCallback((message: string) => {
-    showNotification(message, 'success');
-  }, [showNotification]);
+  const showSuccess = useCallback(
+    (message: string) => {
+      showNotification(message, 'success');
+    },
+    [showNotification]
+  );
 
-  const showError = useCallback((message: string) => {
-    showNotification(message, 'error');
-  }, [showNotification]);
+  const showError = useCallback(
+    (message: string) => {
+      showNotification(message, 'error');
+    },
+    [showNotification]
+  );
 
-  const showWarning = useCallback((message: string) => {
-    showNotification(message, 'warning');
-  }, [showNotification]);
+  const showWarning = useCallback(
+    (message: string) => {
+      showNotification(message, 'warning');
+    },
+    [showNotification]
+  );
 
-  const showInfo = useCallback((message: string) => {
-    showNotification(message, 'info');
-  }, [showNotification]);
+  const showInfo = useCallback(
+    (message: string) => {
+      showNotification(message, 'info');
+    },
+    [showNotification]
+  );
 
   return {
     notification,
@@ -58,4 +73,4 @@ export function useNotification() {
     showWarning,
     showInfo,
   };
-} 
+}

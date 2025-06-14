@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 // import { Vertical } from '@/lib/types';
 // import verticalsData from '@/data/verticals.json';
 // import { ImageUpload } from './ImageUpload';
-// import Image from 'next/image';
+import Image from 'next/image';
 // import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -13,8 +13,9 @@ import { getVerticalColorClass } from '@/lib/utils';
 import { useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 // import { ImageUpload } from './ImageUpload';
-import { VideoPlayer } from './VideoPlayer';
+import { VideoPlayer } from '@/components/ui/VideoPlayer';
 import { Notification } from '@/components/ui/Notification';
+import { ImageUpload } from '@/components/ui/ImageUpload';
 import { useNotification } from '@/hooks/useNotification';
 // import React from 'react';
 // import { cn } from '@/lib/utils';
@@ -24,6 +25,122 @@ interface CampaignModalProps {
   onClose: () => void;
   onCampaignUpdated?: (updatedCampaign: Campaign) => void;
 }
+
+// Helper для тегов - вынесен за пределы компонента
+const Tag = ({
+  children,
+  color = 'gray',
+}: {
+  children: React.ReactNode;
+  color?: string;
+}) => (
+  <span
+    className={`inline-block px-3 py-1 rounded-full text-xs font-semibold bg-${color}-700 text-white mr-2 mb-1`}
+  >
+    {children}
+  </span>
+);
+
+// Helper для секций - вынесен за пределы компонента
+const Section = ({
+  title,
+  icon,
+  children,
+  className = '',
+}: {
+  title: string;
+  icon?: React.ReactNode;
+  children: React.ReactNode;
+  className?: string;
+}) => (
+  <section
+    className={`bg-gray-800 rounded-xl p-6 flex flex-col gap-2 shadow ${className}`}
+  >
+    <h3 className="font-semibold text-lg flex items-center gap-2 mb-2">
+      {icon}
+      {title}
+    </h3>
+    {children}
+  </section>
+);
+
+// Helper для ссылок - вынесен за пределы компонента
+const renderLinks = (
+  links:
+    | { label?: string; url?: string }[]
+    | Record<string, string>
+    | string
+    | null
+    | undefined
+) => {
+  if (!links) return <span className="text-gray-400">Нет данных</span>;
+  if (Array.isArray(links)) {
+    return (
+      <ul className="list-disc ml-6">
+        {links.map((l, i) => (
+          <li key={i}>
+            {typeof l === 'object' &&
+            l !== null &&
+            'label' in l &&
+            'url' in l &&
+            l.label &&
+            l.url ? (
+              <a
+                href={l.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 underline"
+              >
+                {l.label}
+              </a>
+            ) : typeof l === 'object' && l !== null && 'url' in l && l.url ? (
+              <a
+                href={l.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 underline"
+              >
+                {l.url}
+              </a>
+            ) : typeof l === 'object' &&
+              l !== null &&
+              'label' in l &&
+              l.label ? (
+              l.label
+            ) : (
+              String(l)
+            )}
+          </li>
+        ))}
+      </ul>
+    );
+  }
+  if (typeof links === 'object' && links !== null) {
+    return (
+      <ul className="list-disc ml-6">
+        {Object.entries(links).map(([k, v]) => (
+          <li key={k}>
+            {typeof v === 'string' && v.startsWith('http') ? (
+              <a
+                href={v}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 underline"
+              >
+                {k}
+              </a>
+            ) : typeof v === 'string' ? (
+              `${k}: ${v}`
+            ) : (
+              `${k}: ${JSON.stringify(v)}`
+            )}
+          </li>
+        ))}
+      </ul>
+    );
+  }
+  return <span>{String(links)}</span>;
+};
 
 export function CampaignModal({
   campaign,
@@ -39,52 +156,11 @@ export function CampaignModal({
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [linksText, setLinksText] = useState('');
-  const [attachmentsText, setAttachmentsText] = useState('');
-  const [materialsText, setMaterialsText] = useState('');
-  const [objectivesText, setObjectivesText] = useState('');
   const [channelsText, setChannelsText] = useState('');
   const [targetsText, setTargetsText] = useState('');
 
   // Добавляем хук для нотификаций
   const { notification, showSuccess, showError, hideNotification } = useNotification();
-
-  // Helper для тегов
-  const Tag = ({
-    children,
-    color = 'gray',
-  }: {
-    children: React.ReactNode;
-    color?: string;
-  }) => (
-    <span
-      className={`inline-block px-3 py-1 rounded-full text-xs font-semibold bg-${color}-700 text-white mr-2 mb-1`}
-    >
-      {children}
-    </span>
-  );
-
-  // Helper для секций
-  const Section = ({
-    title,
-    icon,
-    children,
-    className = '',
-  }: {
-    title: string;
-    icon?: React.ReactNode;
-    children: React.ReactNode;
-    className?: string;
-  }) => (
-    <section
-      className={`bg-gray-800 rounded-xl p-6 flex flex-col gap-2 shadow ${className}`}
-    >
-      <h3 className="font-semibold text-lg flex items-center gap-2 mb-2">
-        {icon}
-        {title}
-      </h3>
-      {children}
-    </section>
-  );
 
   useEffect(() => {
     console.log('CampaignModal: Campaign prop received/changed:', campaign);
@@ -102,25 +178,7 @@ export function CampaignModal({
       setLinksText('');
     }
     
-    if (Array.isArray(campaign.attachments)) {
-      setAttachmentsText(
-        campaign.attachments.map((attachment) => `${attachment.label} - ${attachment.url}`).join('\n')
-      );
-    } else {
-      setAttachmentsText('');
-    }
 
-    if (Array.isArray(campaign.materials)) {
-      setMaterialsText(campaign.materials.join('\n'));
-    } else {
-      setMaterialsText('');
-    }
-
-    if (Array.isArray(campaign.objectives)) {
-      setObjectivesText(campaign.objectives.join('\n'));
-    } else {
-      setObjectivesText('');
-    }
 
     if (Array.isArray(campaign.channels)) {
       setChannelsText(campaign.channels.join('\n'));
@@ -267,19 +325,7 @@ export function CampaignModal({
           );
         }
         
-        if (Array.isArray(updatedCampaign.attachments)) {
-          setAttachmentsText(
-            updatedCampaign.attachments.map((attachment) => `${attachment.label} - ${attachment.url}`).join('\n')
-          );
-        }
 
-        if (Array.isArray(updatedCampaign.materials)) {
-          setMaterialsText(updatedCampaign.materials.join('\n'));
-        }
-
-        if (Array.isArray(updatedCampaign.objectives)) {
-          setObjectivesText(updatedCampaign.objectives.join('\n'));
-        }
 
         if (Array.isArray(updatedCampaign.channels)) {
           setChannelsText(updatedCampaign.channels.join('\n'));
@@ -301,84 +347,6 @@ export function CampaignModal({
   };
 
   const isAdmin = userRole === 'super_admin' || userRole === 'editor';
-
-  // Helper для ссылок
-  const renderLinks = (
-    links:
-      | { label?: string; url?: string }[]
-      | Record<string, string>
-      | string
-      | null
-      | undefined
-  ) => {
-    if (!links) return <span className="text-gray-400">Нет данных</span>;
-    if (Array.isArray(links)) {
-      return (
-        <ul className="list-disc ml-6">
-          {links.map((l, i) => (
-            <li key={i}>
-              {typeof l === 'object' &&
-              l !== null &&
-              'label' in l &&
-              'url' in l &&
-              l.label &&
-              l.url ? (
-                <a
-                  href={l.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-400 underline"
-                >
-                  {l.label}
-                </a>
-              ) : typeof l === 'object' && l !== null && 'url' in l && l.url ? (
-                <a
-                  href={l.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-400 underline"
-                >
-                  {l.url}
-                </a>
-              ) : typeof l === 'object' &&
-                l !== null &&
-                'label' in l &&
-                l.label ? (
-                l.label
-              ) : (
-                String(l)
-              )}
-            </li>
-          ))}
-        </ul>
-      );
-    }
-    if (typeof links === 'object' && links !== null) {
-      return (
-        <ul className="list-disc ml-6">
-          {Object.entries(links).map(([k, v]) => (
-            <li key={k}>
-              {typeof v === 'string' && v.startsWith('http') ? (
-                <a
-                  href={v}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-400 underline"
-                >
-                  {k}
-                </a>
-              ) : typeof v === 'string' ? (
-                `${k}: ${v}`
-              ) : (
-                `${k}: ${JSON.stringify(v)}`
-              )}
-            </li>
-          ))}
-        </ul>
-      );
-    }
-    return <span>{String(links)}</span>;
-  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm !mt-0">
@@ -426,51 +394,89 @@ export function CampaignModal({
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
-          {/* Основная информация — на всю ширину */}
-          <Section
-            title="Основное"
-            icon={<span>📢</span>}
-            className="md:col-span-2"
-          >
-            {isEditing ? (
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Название кампании
-                  </label>
-                  <input
-                    type="text"
-                    value={editedCampaign.campaign_name}
-                    onChange={(e) => handleInputChange('campaign_name', e.target.value)}
-                    className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        {/* Hero изображение кампании */}
+        {isEditing ? (
+          <div className="mt-12 mb-6">
+            <div className="bg-gray-800 rounded-xl p-6">
+              <h3 className="font-semibold text-lg flex items-center gap-2 mb-4">
+                <span>🖼️</span>
+                Изображение кампании
+              </h3>
+              <ImageUpload
+                value={editedCampaign.image_url || ''}
+                onChange={(imageUrl) => handleInputChange('image_url', imageUrl)}
+                onError={(error) => showError(error)}
+                campaignId={campaign.id}
+                maxSizeMB={10}
+                placeholder="Перетащите изображение кампании или нажмите Ctrl+V"
+              />
+              
+              <div className="mt-6">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <span>🎬</span> URL видео (опционально)
+                </label>
+                <input
+                  type="url"
+                  value={editedCampaign.video_url || ''}
+                  onChange={(e) => handleInputChange('video_url', e.target.value)}
+                  placeholder="https://example.com/video.mp4"
+                  className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <p className="text-xs text-gray-400 mt-1">
+                  Видео будет отображаться поверх изображения в hero-секции
+                </p>
+              </div>
+            </div>
+          </div>
+        ) : editedCampaign.image_url ? (
+          <div className="mt-12 mb-6 -mx-8">
+            <div className="relative h-64 md:h-80 overflow-hidden rounded-t-2xl">
+              <Image
+                src={editedCampaign.image_url}
+                alt={editedCampaign.campaign_name}
+                fill
+                style={{ objectFit: 'cover' }}
+                sizes="(max-width: 768px) 100vw, 1200px"
+                priority
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+              
+              {/* Видеоплеер поверх изображения */}
+              {editedCampaign.video_url && (
+                <div className="absolute top-6 left-6">
+                  <VideoPlayer
+                    videoUrl={editedCampaign.video_url}
+                    posterUrl={editedCampaign.image_url}
+                    className="w-64 h-36"
                   />
                 </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Тип кампании
-                    </label>
-                    <input
-                      type="text"
-                      value={editedCampaign.campaign_type}
-                      onChange={(e) => handleInputChange('campaign_type', e.target.value)}
-                      className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Вертикаль
-                    </label>
-                    <input
-                      type="text"
-                      value={editedCampaign.campaign_vertical}
-                      onChange={(e) => handleInputChange('campaign_vertical', e.target.value)}
-                      className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
+              )}
+              
+              <div className="absolute bottom-4 left-8 right-8">
+                <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">
+                  {editedCampaign.campaign_name}
+                </h1>
+                <div className="flex gap-2 flex-wrap">
+                  <span
+                    className="px-3 py-1 rounded-full text-sm font-medium backdrop-blur-sm"
+                    style={getVerticalColorClass(editedCampaign.campaign_vertical)}
+                  >
+                    {editedCampaign.campaign_vertical}
+                  </span>
+                  <span className="px-3 py-1 rounded-full text-sm font-medium border border-white text-white bg-black/30 backdrop-blur-sm">
+                    {editedCampaign.campaign_type}
+                  </span>
                 </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Основная информация — на всю ширину */}
+          <div className="bg-gray-800 rounded-xl p-6 md:col-span-2">
+            {isEditing ? (
+              <div className="space-y-4">
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -562,22 +568,6 @@ export function CampaignModal({
               </div>
             ) : (
               <>
-                <div className="text-2xl font-bold mb-2 text-white">
-                  {editedCampaign.campaign_name}
-                </div>
-                <div className="flex gap-2 flex-wrap mb-2">
-                  <span
-                    className="px-3 py-1 rounded-full text-sm font-medium"
-                    style={getVerticalColorClass(editedCampaign.campaign_vertical)}
-                  >
-                    {editedCampaign.campaign_vertical}
-                  </span>
-                  <span className="px-3 py-1 rounded-full text-sm font-medium border border-white text-white bg-transparent">
-                    {editedCampaign.campaign_type}
-                  </span>
-                  {editedCampaign.type && <Tag color="indigo">{editedCampaign.type}</Tag>}
-                  {editedCampaign.slogan && <Tag color="purple">{editedCampaign.slogan}</Tag>}
-                </div>
                 {editedCampaign.flight_period?.start_date &&
                   editedCampaign.flight_period?.end_date && (
                     <div className="text-sm text-gray-300 mb-2">
@@ -603,9 +593,21 @@ export function CampaignModal({
                     {editedCampaign.key_message}
                   </p>
                 )}
+                {editedCampaign.type && (
+                  <div className="mt-2">
+                    <span className="text-sm text-gray-300">Тип: </span>
+                    <Tag color="indigo">{editedCampaign.type}</Tag>
+                  </div>
+                )}
+                {editedCampaign.slogan && (
+                  <div className="mt-2">
+                    <span className="text-sm text-gray-300">Слоган: </span>
+                    <Tag color="purple">{editedCampaign.slogan}</Tag>
+                  </div>
+                )}
               </>
             )}
-          </Section>
+          </div>
 
           {/* Новый ряд: периоды, цели, каналы */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:col-span-2">
@@ -667,18 +669,7 @@ export function CampaignModal({
                       className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Задачи (каждая с новой строки)
-                    </label>
-                    <textarea
-                      value={objectivesText}
-                      onChange={(e) => handleArrayTextChange('objectives', e.target.value, setObjectivesText)}
-                      rows={4}
-                      placeholder="Задача 1&#10;Задача 2&#10;Задача 3"
-                      className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
+
                 </div>
               ) : (
                 <div className="mb-2 text-base font-normal text-white">
@@ -714,54 +705,10 @@ export function CampaignModal({
                       className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Материалы (каждый с новой строки)
-                    </label>
-                    <textarea
-                      value={materialsText}
-                      onChange={(e) => handleArrayTextChange('materials', e.target.value, setMaterialsText)}
-                      rows={3}
-                      placeholder="Баннер 1&#10;Видео 1&#10;Аудио 1"
-                      className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      URL изображения
-                    </label>
-                    <input
-                      type="url"
-                      value={editedCampaign.image_url || ''}
-                      onChange={(e) => handleInputChange('image_url', e.target.value)}
-                      className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      URL видео
-                    </label>
-                    <input
-                      type="url"
-                      value={editedCampaign.video_url || ''}
-                      onChange={(e) => handleInputChange('video_url', e.target.value)}
-                      className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Тип видео
-                    </label>
-                    <select
-                      value={editedCampaign.video_type || ''}
-                      onChange={(e) => handleInputChange('video_type', e.target.value as 'google_drive' | 'yandex_disk')}
-                      className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="">Не указан</option>
-                      <option value="google_drive">Google Drive</option>
-                      <option value="yandex_disk">Яндекс.Диск</option>
-                    </select>
-                  </div>
+
+
+
+
                 </div>
               ) : (
                 <>
@@ -776,16 +723,8 @@ export function CampaignModal({
                       <span className="text-gray-500">Нет данных</span>
                     )}
                   </div>
-                  {editedCampaign.image_url && (
-                    <img
-                      src={editedCampaign.image_url}
-                      alt="Картинка кампании"
-                      className="rounded-lg max-h-40 object-contain mx-auto mb-2"
-                    />
-                  )}
-                  {editedCampaign.video_url && (
-                    <VideoPlayer videoUrl={editedCampaign.video_url} />
-                  )}
+
+
                 </>
               )}
             </Section>
@@ -812,18 +751,7 @@ export function CampaignModal({
                       className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Вложения (формат: Название - URL)
-                    </label>
-                    <textarea
-                      value={attachmentsText}
-                      onChange={(e) => handleArrayTextChange('attachments', e.target.value, setAttachmentsText)}
-                      rows={4}
-                      placeholder="Презентация - https://docs.google.com/...&#10;Отчет - https://drive.google.com/..."
-                      className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
+
                 </div>
               ) : (
                 renderLinks(editedCampaign.links)

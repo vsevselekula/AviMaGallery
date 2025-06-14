@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { Campaign } from '@/lib/types';
 import { cn, getVerticalColorClass } from '@/lib/utils';
+import { isValidImageUrl } from '@/lib/imageUtils';
 
 interface CampaignCardProps {
   campaign: Campaign;
@@ -9,7 +10,7 @@ interface CampaignCardProps {
 
 export function CampaignCard({ campaign, className }: CampaignCardProps) {
   const isActive = new Date(campaign.flight_period.end_date) > new Date();
-  const hasImage = campaign.image_url && campaign.image_url.startsWith('http');
+  const hasImage = isValidImageUrl(campaign.image_url);
 
   return (
     <div
