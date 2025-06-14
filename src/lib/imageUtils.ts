@@ -20,7 +20,7 @@ export async function compressImage(
     maxWidth = 1920,
     maxHeight = 1080,
     quality = 0.8,
-    format = 'jpeg'
+    format = 'jpeg',
   } = options;
 
   return new Promise((resolve, reject) => {
@@ -31,12 +31,12 @@ export async function compressImage(
     img.onload = () => {
       // Вычисляем новые размеры с сохранением пропорций
       let { width, height } = img;
-      
+
       if (width > maxWidth) {
         height = (height * maxWidth) / width;
         width = maxWidth;
       }
-      
+
       if (height > maxHeight) {
         width = (width * maxHeight) / height;
         height = maxHeight;
@@ -97,7 +97,9 @@ export function fileToBase64(file: File): Promise<string> {
 /**
  * Получает размеры изображения из файла
  */
-export function getImageDimensions(file: File): Promise<{ width: number; height: number }> {
+export function getImageDimensions(
+  file: File
+): Promise<{ width: number; height: number }> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => {
@@ -120,11 +122,11 @@ export function isImageFile(file: File): boolean {
  */
 export function formatFileSize(bytes: number): string {
   if (bytes === 0) return '0 Б';
-  
+
   const k = 1024;
   const sizes = ['Б', 'КБ', 'МБ', 'ГБ'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  
+
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
@@ -133,11 +135,11 @@ export function formatFileSize(bytes: number): string {
  */
 export function isValidImageUrl(url: string | null | undefined): boolean {
   if (!url) return false;
-  
+
   return (
     url.startsWith('http') ||
     url.startsWith('https') ||
     url.startsWith('data:image/') ||
     url.includes('/storage/v1/object/public/') // Supabase Storage URL
   );
-} 
+}

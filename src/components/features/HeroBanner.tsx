@@ -93,7 +93,7 @@ export function HeroBanner({ campaigns, className }: HeroBannerProps) {
       {/* Overlay for glass blur effect - now just for centering content */}
       <div className="absolute inset-0 z-10 flex items-center justify-start p-8">
         <div className="w-full max-w-none">
-          <div className="bg-white/20 backdrop-blur-lg p-6 rounded-xl w-full max-w-[33.333%] max-h-[70%] overflow-hidden relative border border-white/30 shadow-2xl">
+          <div className="bg-white/20 backdrop-blur-lg p-6 rounded-xl w-full max-w-[90%] sm:max-w-[70%] md:max-w-[60%] lg:max-w-[50%] xl:max-w-[33.333%] max-h-[70%] overflow-hidden relative border border-white/30 shadow-2xl">
             {isActive && (
               <div className="absolute top-4 right-4 bg-green-500 text-white px-2 py-1 rounded text-sm font-semibold">
                 ON AIR
@@ -101,13 +101,19 @@ export function HeroBanner({ campaigns, className }: HeroBannerProps) {
             )}
             <div className="flex items-center gap-2 mb-4">
               <span
-                className="px-3 rounded-full text-sm font-medium text-white h-8 flex items-center justify-center max-w-32 overflow-hidden min-w-0 flex-shrink-0"
+                className={`px-3 rounded-full text-sm font-medium h-8 flex items-center justify-center max-w-32 overflow-hidden min-w-0 flex-shrink-0 ${
+                  heroCampaign.campaign_vertical === 'Авито' ? 'text-black' : 'text-white'
+                }`}
                 style={getVerticalColorClass(heroCampaign.campaign_vertical)}
               >
-                <span className="truncate whitespace-nowrap">{heroCampaign.campaign_vertical}</span>
+                <span className="truncate whitespace-nowrap">
+                  {heroCampaign.campaign_vertical}
+                </span>
               </span>
               <span className="px-3 rounded-full text-sm font-medium border border-white text-white bg-transparent h-8 flex items-center justify-center max-w-32 overflow-hidden min-w-0 flex-shrink-0">
-                <span className="truncate whitespace-nowrap">{heroCampaign.campaign_type}</span>
+                <span className="truncate whitespace-nowrap">
+                  {heroCampaign.campaign_type}
+                </span>
               </span>
             </div>
             <h3 className="text-3xl font-extrabold mb-3 text-black line-clamp-2">

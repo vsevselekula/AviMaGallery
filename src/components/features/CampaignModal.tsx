@@ -160,7 +160,8 @@ export function CampaignModal({
   const [targetsText, setTargetsText] = useState('');
 
   // Добавляем хук для нотификаций
-  const { notification, showSuccess, showError, hideNotification } = useNotification();
+  const { notification, showSuccess, showError, hideNotification } =
+    useNotification();
 
   useEffect(() => {
     console.log('CampaignModal: Campaign prop received/changed:', campaign);
@@ -168,7 +169,7 @@ export function CampaignModal({
       ...campaign,
       video_url: campaign.video_url || null,
     });
-    
+
     // Инициализация текстовых полей для массивов
     if (Array.isArray(campaign.links)) {
       setLinksText(
@@ -177,8 +178,6 @@ export function CampaignModal({
     } else {
       setLinksText('');
     }
-    
-
 
     if (Array.isArray(campaign.channels)) {
       setChannelsText(campaign.channels.join('\n'));
@@ -228,33 +227,52 @@ export function CampaignModal({
     fetchUserRole();
   }, []);
 
-  const handleInputChange = (field: keyof Campaign, value: string | string[] | { label: string; url: string }[] | 'active' | 'completed' | 'planned' | 'google_drive' | 'yandex_disk' | null) => {
-    setEditedCampaign(prev => ({
+  const handleInputChange = (
+    field: keyof Campaign,
+    value:
+      | string
+      | string[]
+      | { label: string; url: string }[]
+      | 'active'
+      | 'completed'
+      | 'planned'
+      | 'google_drive'
+      | 'yandex_disk'
+      | null
+  ) => {
+    setEditedCampaign((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
-  const handleDateChange = (field: 'start_date' | 'end_date', value: string) => {
-    setEditedCampaign(prev => ({
+  const handleDateChange = (
+    field: 'start_date' | 'end_date',
+    value: string
+  ) => {
+    setEditedCampaign((prev) => ({
       ...prev,
       flight_period: {
         ...prev.flight_period,
-        [field]: value
-      }
+        [field]: value,
+      },
     }));
   };
 
-  const handleArrayTextChange = (field: string, text: string, setter: (text: string) => void) => {
+  const handleArrayTextChange = (
+    field: string,
+    text: string,
+    setter: (text: string) => void
+  ) => {
     setter(text);
-    const lines = text.split('\n').filter(line => line.trim() !== '');
-    
+    const lines = text.split('\n').filter((line) => line.trim() !== '');
+
     if (field === 'links' || field === 'attachments') {
-      const items = lines.map(line => {
+      const items = lines.map((line) => {
         const parts = line.split(' - ');
         return {
           label: parts[0] || '',
-          url: parts[1] || parts[0] || ''
+          url: parts[1] || parts[0] || '',
         };
       });
       handleInputChange(field as keyof Campaign, items);
@@ -294,7 +312,7 @@ export function CampaignModal({
           slogan: editedCampaign.slogan,
           description: editedCampaign.description,
           targets: editedCampaign.targets,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .eq('id', campaign.id)
         .select()
@@ -309,7 +327,7 @@ export function CampaignModal({
       if (data) {
         // Обновляем локальное состояние кампании
         const updatedCampaign = data as Campaign;
-        
+
         // Вызываем callback для обновления родительского компонента
         if (onCampaignUpdated) {
           onCampaignUpdated(updatedCampaign);
@@ -317,15 +335,15 @@ export function CampaignModal({
 
         // Обновляем локальное состояние модального окна
         setEditedCampaign(updatedCampaign);
-        
+
         // Обновляем текстовые поля для массивов
         if (Array.isArray(updatedCampaign.links)) {
           setLinksText(
-            updatedCampaign.links.map((link) => `${link.label} - ${link.url}`).join('\n')
+            updatedCampaign.links
+              .map((link) => `${link.label} - ${link.url}`)
+              .join('\n')
           );
         }
-        
-
 
         if (Array.isArray(updatedCampaign.channels)) {
           setChannelsText(updatedCampaign.channels.join('\n'));
@@ -360,7 +378,7 @@ export function CampaignModal({
         >
           ×
         </button>
-        
+
         {/* Кнопки управления для админов */}
         {isAdmin && (
           <div className="absolute top-4 left-4 flex gap-2">
@@ -383,7 +401,10 @@ export function CampaignModal({
                 <button
                   onClick={() => {
                     setIsEditing(false);
-                    setEditedCampaign({ ...campaign, video_url: campaign.video_url || null });
+                    setEditedCampaign({
+                      ...campaign,
+                      video_url: campaign.video_url || null,
+                    });
                   }}
                   className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg text-sm font-medium transition-colors"
                 >
@@ -404,13 +425,15 @@ export function CampaignModal({
               </h3>
               <ImageUpload
                 value={editedCampaign.image_url || ''}
-                onChange={(imageUrl) => handleInputChange('image_url', imageUrl)}
+                onChange={(imageUrl) =>
+                  handleInputChange('image_url', imageUrl)
+                }
                 onError={(error) => showError(error)}
                 campaignId={campaign.id}
                 maxSizeMB={10}
                 placeholder="Перетащите изображение кампании или нажмите Ctrl+V"
               />
-              
+
               <div className="mt-6">
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   <span>🎬</span> URL видео (опционально)
@@ -418,7 +441,9 @@ export function CampaignModal({
                 <input
                   type="url"
                   value={editedCampaign.video_url || ''}
-                  onChange={(e) => handleInputChange('video_url', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange('video_url', e.target.value)
+                  }
                   placeholder="https://example.com/video.mp4"
                   className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -440,7 +465,7 @@ export function CampaignModal({
                 priority
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-              
+
               {/* Видеоплеер поверх изображения */}
               {editedCampaign.video_url && (
                 <div className="absolute top-6 left-6">
@@ -451,15 +476,19 @@ export function CampaignModal({
                   />
                 </div>
               )}
-              
+
               <div className="absolute bottom-4 left-8 right-8">
                 <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">
                   {editedCampaign.campaign_name}
                 </h1>
                 <div className="flex gap-2 flex-wrap">
                   <span
-                    className="px-3 py-1 rounded-full text-sm font-medium backdrop-blur-sm"
-                    style={getVerticalColorClass(editedCampaign.campaign_vertical)}
+                    className={`px-3 py-1 rounded-full text-sm font-medium backdrop-blur-sm ${
+                      editedCampaign.campaign_vertical === 'Авито' ? 'text-black' : 'text-white'
+                    }`}
+                    style={getVerticalColorClass(
+                      editedCampaign.campaign_vertical
+                    )}
                   >
                     {editedCampaign.campaign_vertical}
                   </span>
@@ -477,7 +506,6 @@ export function CampaignModal({
           <div className="bg-gray-800 rounded-xl p-6 md:col-span-2">
             {isEditing ? (
               <div className="space-y-4">
-
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -485,8 +513,14 @@ export function CampaignModal({
                     </label>
                     <input
                       type="date"
-                      value={editedCampaign.flight_period?.start_date?.split('T')[0] || ''}
-                      onChange={(e) => handleDateChange('start_date', e.target.value)}
+                      value={
+                        editedCampaign.flight_period?.start_date?.split(
+                          'T'
+                        )[0] || ''
+                      }
+                      onChange={(e) =>
+                        handleDateChange('start_date', e.target.value)
+                      }
                       className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -496,8 +530,13 @@ export function CampaignModal({
                     </label>
                     <input
                       type="date"
-                      value={editedCampaign.flight_period?.end_date?.split('T')[0] || ''}
-                      onChange={(e) => handleDateChange('end_date', e.target.value)}
+                      value={
+                        editedCampaign.flight_period?.end_date?.split('T')[0] ||
+                        ''
+                      }
+                      onChange={(e) =>
+                        handleDateChange('end_date', e.target.value)
+                      }
                       className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -509,7 +548,9 @@ export function CampaignModal({
                   </label>
                   <textarea
                     value={editedCampaign.key_message}
-                    onChange={(e) => handleInputChange('key_message', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange('key_message', e.target.value)
+                    }
                     rows={3}
                     className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
@@ -521,7 +562,9 @@ export function CampaignModal({
                   </label>
                   <textarea
                     value={editedCampaign.description || ''}
-                    onChange={(e) => handleInputChange('description', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange('description', e.target.value)
+                    }
                     rows={2}
                     className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
@@ -535,7 +578,9 @@ export function CampaignModal({
                     <input
                       type="text"
                       value={editedCampaign.type || ''}
-                      onChange={(e) => handleInputChange('type', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange('type', e.target.value)
+                      }
                       className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -546,7 +591,9 @@ export function CampaignModal({
                     <input
                       type="text"
                       value={editedCampaign.slogan || ''}
-                      onChange={(e) => handleInputChange('slogan', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange('slogan', e.target.value)
+                      }
                       className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -556,7 +603,12 @@ export function CampaignModal({
                     </label>
                     <select
                       value={editedCampaign.status}
-                      onChange={(e) => handleInputChange('status', e.target.value as 'active' | 'completed' | 'planned')}
+                      onChange={(e) =>
+                        handleInputChange(
+                          'status',
+                          e.target.value as 'active' | 'completed' | 'planned'
+                        )
+                      }
                       className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="planned">Запланирована</option>
@@ -586,7 +638,9 @@ export function CampaignModal({
                     </div>
                   )}
                 {editedCampaign.description && (
-                  <p className="text-gray-200 mb-1">{editedCampaign.description}</p>
+                  <p className="text-gray-200 mb-1">
+                    {editedCampaign.description}
+                  </p>
                 )}
                 {editedCampaign.key_message && (
                   <p className="text-gray-400 italic mb-1">
@@ -631,7 +685,9 @@ export function CampaignModal({
                     </label>
                     <textarea
                       value={editedCampaign.audience}
-                      onChange={(e) => handleInputChange('audience', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange('audience', e.target.value)
+                      }
                       rows={3}
                       className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
@@ -663,13 +719,18 @@ export function CampaignModal({
                     </label>
                     <textarea
                       value={targetsText}
-                      onChange={(e) => handleArrayTextChange('targets', e.target.value, setTargetsText)}
+                      onChange={(e) =>
+                        handleArrayTextChange(
+                          'targets',
+                          e.target.value,
+                          setTargetsText
+                        )
+                      }
                       rows={4}
                       placeholder="Цель 1&#10;Цель 2&#10;Цель 3"
                       className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
-
                 </div>
               ) : (
                 <div className="mb-2 text-base font-normal text-white">
@@ -699,16 +760,18 @@ export function CampaignModal({
                     </label>
                     <textarea
                       value={channelsText}
-                      onChange={(e) => handleArrayTextChange('channels', e.target.value, setChannelsText)}
+                      onChange={(e) =>
+                        handleArrayTextChange(
+                          'channels',
+                          e.target.value,
+                          setChannelsText
+                        )
+                      }
                       rows={4}
                       placeholder="ТВ&#10;Радио&#10;Интернет&#10;OOH"
                       className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
-
-
-
-
                 </div>
               ) : (
                 <>
@@ -723,8 +786,6 @@ export function CampaignModal({
                       <span className="text-gray-500">Нет данных</span>
                     )}
                   </div>
-
-
                 </>
               )}
             </Section>
@@ -745,13 +806,18 @@ export function CampaignModal({
                     </label>
                     <textarea
                       value={linksText}
-                      onChange={(e) => handleArrayTextChange('links', e.target.value, setLinksText)}
+                      onChange={(e) =>
+                        handleArrayTextChange(
+                          'links',
+                          e.target.value,
+                          setLinksText
+                        )
+                      }
                       rows={4}
                       placeholder="Сайт - https://example.com&#10;Лендинг - https://landing.com"
                       className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
-
                 </div>
               ) : (
                 renderLinks(editedCampaign.links)
@@ -791,7 +857,7 @@ export function CampaignModal({
                     return null;
                   })}
                 </ul>
-                              ) : editedCampaign.pre_tests &&
+              ) : editedCampaign.pre_tests &&
                 typeof editedCampaign.pre_tests === 'object' &&
                 !Array.isArray(editedCampaign.pre_tests) ? (
                 <ul className="list-disc ml-6">

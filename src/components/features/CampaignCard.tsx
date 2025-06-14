@@ -66,7 +66,9 @@ export function CampaignCard({ campaign, className }: CampaignCardProps) {
         </h3>
         <div className="flex items-center gap-2 mt-2">
           <span
-            className="px-3 py-1 rounded-full text-sm font-medium"
+            className={`px-3 py-1 rounded-full text-sm font-medium ${
+              campaign.campaign_vertical === 'Авито' ? 'text-black' : 'text-white'
+            }`}
             style={getVerticalColorClass(campaign.campaign_vertical)}
           >
             {campaign.campaign_vertical}

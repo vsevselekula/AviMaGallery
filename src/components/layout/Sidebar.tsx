@@ -197,16 +197,16 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   return (
     <aside
       className={cn(
-        'fixed left-0 top-0 h-screen bg-gray-800 text-white p-4 transition-transform duration-300 z-50',
-        'md:w-64 md:translate-x-0',
-        isOpen ? 'translate-x-0' : '-translate-x-full'
+        'fixed left-0 top-0 h-screen bg-gray-800 text-white p-4 transition-transform duration-300 z-50 w-64',
+        isOpen ? 'translate-x-0' : '-translate-x-full',
+        'lg:translate-x-0' // На больших экранах всегда видимый
       )}
     >
       <div className="mb-8 flex items-center justify-between">
         <h1 className="text-2xl font-bold">Avito Gallery</h1>
         <button
           onClick={onClose}
-          className="lg:hidden text-gray-400 hover:text-white"
+          className="md:hidden text-gray-400 hover:text-white"
         >
           <svg
             className="w-6 h-6"

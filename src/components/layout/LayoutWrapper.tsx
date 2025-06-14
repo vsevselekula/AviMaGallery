@@ -22,6 +22,7 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
       }
     };
 
+    // Устанавливаем начальное состояние
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -37,6 +38,29 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
           onClose={() => setIsSidebarOpen(false)}
         />
       )}
+      
+      {/* Кнопка бургер меню */}
+      {showSidebar && !isSidebarOpen && (
+        <button
+          onClick={() => setIsSidebarOpen(true)}
+          className="fixed top-4 left-4 z-50 p-2 bg-gray-800 text-white rounded-lg shadow-lg hover:bg-gray-700 transition-colors lg:hidden"
+        >
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          </svg>
+        </button>
+      )}
+      
       <main
         className={cn(
           'flex-1 overflow-auto transition-all duration-300',

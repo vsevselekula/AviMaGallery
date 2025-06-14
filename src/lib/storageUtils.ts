@@ -14,7 +14,7 @@ export async function uploadCampaignImage(
       maxWidth: 1920,
       maxHeight: 1080,
       quality: 0.8,
-      format: 'jpeg'
+      format: 'jpeg',
     });
 
     // Генерируем уникальное имя файла
@@ -26,7 +26,7 @@ export async function uploadCampaignImage(
       .from('campaign-images')
       .upload(fileName, compressedFile, {
         cacheControl: '3600',
-        upsert: false
+        upsert: false,
       });
 
     if (error) {
@@ -35,9 +35,9 @@ export async function uploadCampaignImage(
     }
 
     // Получаем публичный URL
-    const { data: { publicUrl } } = supabase.storage
-      .from('campaign-images')
-      .getPublicUrl(fileName);
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from('campaign-images').getPublicUrl(fileName);
 
     return { url: publicUrl };
   } catch (error) {
@@ -97,12 +97,12 @@ function extractFileNameFromUrl(url: string): string | null {
     // URL формат: https://[project].supabase.co/storage/v1/object/public/campaign-images/filename.jpg
     const urlParts = url.split('/');
     const fileName = urlParts[urlParts.length - 1];
-    
+
     // Проверяем, что это файл из нашего bucket
     if (url.includes('/campaign-images/') && fileName) {
       return fileName;
     }
-    
+
     return null;
   } catch (error) {
     console.error('Error extracting filename from URL:', error);
@@ -125,4 +125,4 @@ export async function uploadImageFromClipboard(
   campaignId: string
 ): Promise<{ url: string; error?: string }> {
   return await uploadCampaignImage(clipboardFile, campaignId);
-} 
+}
