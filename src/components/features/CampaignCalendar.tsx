@@ -16,9 +16,11 @@ import { getVerticalColorClass } from '@/lib/utils';
 import { useMemo } from 'react';
 import { CampaignModal } from './CampaignModal';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 
 export function CampaignCalendar() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedYear, setSelectedYear] = useState<number | 'all'>(() => {
     const currentYear = new Date().getFullYear();
     return currentYear;
@@ -30,29 +32,32 @@ export function CampaignCalendar() {
 
   useEffect(() => {
     const fetchCampaigns = async () => {
+      setLoading(true);
       const { data, error } = await supabase
-        .from('campaigns')
+        .from('campaigns_v2')
         .select('*')
         .order('flight_period->>start_date', { ascending: true });
 
       if (error) {
         console.error('Error fetching campaigns:', error);
+        setLoading(false);
       } else {
         setCampaigns(data as Campaign[]);
+        setLoading(false);
       }
     };
 
     fetchCampaigns();
   }, [supabase]);
 
-  const handleCampaignUpdated = (updatedCampaign: Campaign) => {
-    setCampaigns((prevCampaigns) =>
-      prevCampaigns.map((campaign) =>
-        campaign.id === updatedCampaign.id ? updatedCampaign : campaign
-      )
-    );
-    setSelectedCampaign(null);
-  };
+  // const handleCampaignUpdated = (updatedCampaign: Campaign) => {
+  //   setCampaigns((prevCampaigns) =>
+  //     prevCampaigns.map((campaign) =>
+  //       campaign.id === updatedCampaign.id ? updatedCampaign : campaign
+  //     )
+  //   );
+  //   setSelectedCampaign(null);
+  // };
 
   const availableYears = useMemo(() => {
     const years = Array.from(
@@ -116,6 +121,14 @@ export function CampaignCalendar() {
       );
     });
   }, [campaigns, selectedYear]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen w-full">
+        <LoadingSpinner />
+      </div>
+    );
+  }
 
   return (
     <div className="p-4">
@@ -196,7 +209,6 @@ export function CampaignCalendar() {
         <CampaignModal
           campaign={selectedCampaign}
           onClose={() => setSelectedCampaign(null)}
-          onCampaignUpdated={handleCampaignUpdated}
         />
       )}
     </div>

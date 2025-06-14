@@ -34,6 +34,14 @@ export interface Campaign {
   image_url?: string;
   video_url?: string | null;
   video_type?: 'google_drive' | 'yandex_disk';
+  type?: string;
+  slogan?: string;
+  description?: string;
+  created_at?: string;
+  updated_at?: string;
+  targets?: string[];
+  pre_tests?: unknown;
+  post_tests?: unknown;
 }
 
 export interface UserProfile {

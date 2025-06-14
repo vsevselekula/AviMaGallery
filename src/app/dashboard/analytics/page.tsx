@@ -39,7 +39,7 @@ export default function Analytics() {
       setLoading(true);
       console.log('Fetching campaigns for Analytics page from Supabase...');
       const { data, error } = await supabase
-        .from('campaigns')
+        .from('campaigns_v2')
         .select('*')
         .order('flight_period->>start_date', { ascending: false });
 
@@ -62,6 +62,7 @@ export default function Analytics() {
     campaignsByVertical,
     campaignsByType,
     campaignsByMonth,
+    channelsPopularity,
   } = useMemo(() => {
     const now = new Date();
 
@@ -161,6 +162,27 @@ export default function Analytics() {
       ],
     };
 
+    // Популярность каналов
+    const channelCounts: { [key: string]: number } = {};
+    campaigns.forEach((c) => {
+      (c.channels ?? []).forEach((ch) => {
+        channelCounts[ch] = (channelCounts[ch] || 0) + 1;
+      });
+    });
+    const sortedChannels = Object.keys(channelCounts).sort((a, b) => channelCounts[b] - channelCounts[a]);
+    const channelsPopularity = {
+      labels: sortedChannels,
+      datasets: [
+        {
+          label: 'Частота использования',
+          data: sortedChannels.map((ch) => channelCounts[ch]),
+          backgroundColor: '#F59E0B',
+          borderColor: '#F59E0B',
+          borderWidth: 1,
+        },
+      ],
+    };
+
     return {
       totalCampaigns: campaigns.length,
       activeCampaignsCount: active,
@@ -168,6 +190,7 @@ export default function Analytics() {
       campaignsByVertical: campaignsByVerticalData,
       campaignsByType: campaignsByTypeData,
       campaignsByMonth: campaignsByMonthData,
+      channelsPopularity,
     };
   }, [campaigns]);
 
@@ -175,7 +198,7 @@ export default function Analytics() {
     responsive: true,
     plugins: {
       legend: {
-        position: 'right' as const,
+        position: 'bottom' as const,
         labels: {
           color: '#ffffff', // Белый цвет текста легенды
         },
@@ -264,8 +287,10 @@ export default function Analytics() {
           </p>
           <p className="text-gray-300 mt-2">Завершенных кампаний</p>
         </div>
+      </div>
 
-        <div className="bg-gray-800 rounded-lg p-6 md:col-span-2 shadow-md">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="bg-gray-800 rounded-lg p-6 shadow-md flex flex-col items-center justify-center">
           <h2 className="text-xl font-semibold text-white mb-4">
             Кампании по вертикалям
           </h2>
@@ -274,7 +299,7 @@ export default function Analytics() {
           </div>
         </div>
 
-        <div className="bg-gray-800 rounded-lg p-6 shadow-md">
+        <div className="bg-gray-800 rounded-lg p-6 shadow-md flex flex-col items-center justify-center">
           <h2 className="text-xl font-semibold text-white mb-4">
             Кампании по типу
           </h2>
@@ -282,14 +307,23 @@ export default function Analytics() {
             <Doughnut data={campaignsByType} options={donutOptions} />
           </div>
         </div>
+      </div>
 
-        <div className="bg-gray-800 rounded-lg p-6 md:col-span-3 shadow-md">
-          <h2 className="text-xl font-semibold text-white mb-4">
-            Кампании по месяцам запуска
-          </h2>
-          <div className="h-96">
-            <Bar data={campaignsByMonth} options={barOptions} />
-          </div>
+      <div className="bg-gray-800 rounded-lg p-6 shadow-md">
+        <h2 className="text-xl font-semibold text-white mb-4">
+          Кампании по месяцам запуска
+        </h2>
+        <div className="h-96">
+          <Bar data={campaignsByMonth} options={barOptions} />
+        </div>
+      </div>
+
+      <div className="bg-gray-800 rounded-lg p-6 shadow-md mt-8">
+        <h2 className="text-xl font-semibold text-white mb-4">
+          Популярность каналов
+        </h2>
+        <div className="h-96">
+          <Bar data={channelsPopularity} options={barOptions} />
         </div>
       </div>
     </main>

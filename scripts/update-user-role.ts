@@ -64,7 +64,9 @@ async function updateUserRole(email: string) {
       if (updateError) {
         console.error('Error updating role:', updateError);
       } else {
-        console.log(`Successfully updated role to super_admin for user ${email}`);
+        console.log(
+          `Successfully updated role to super_admin for user ${email}`
+        );
       }
     } else {
       // Создаем новую запись с ролью
@@ -98,4 +100,4 @@ updateUserRole(email)
   .catch((error) => {
     console.error('Error:', error);
     process.exit(1);
-  }); 
+  });

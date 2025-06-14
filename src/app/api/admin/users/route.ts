@@ -52,7 +52,8 @@ export async function GET() {
       );
     }
 
-    const allUserRoles: UserRoleData[] = (allUserRolesRaw || []) as UserRoleData[];
+    const allUserRoles: UserRoleData[] = (allUserRolesRaw ||
+      []) as UserRoleData[];
 
     const rolesMap = new Map<string, UserRole>();
     allUserRoles.forEach((ur: UserRoleData) => {
@@ -69,8 +70,10 @@ export async function GET() {
   } catch (error: unknown) {
     console.error('Unexpected error in API route:', error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal Server Error' },
+      {
+        error: error instanceof Error ? error.message : 'Internal Server Error',
+      },
       { status: 500 }
     );
   }
-} 
+}

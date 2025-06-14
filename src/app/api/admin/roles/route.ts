@@ -34,7 +34,10 @@ export async function PUT(request: Request) {
 
     if (!userId || !role) {
       console.error('Missing userId or role in PUT request', { userId, role });
-      return NextResponse.json({ error: 'User ID and role are required' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'User ID and role are required' },
+        { status: 400 }
+      );
     }
 
     const { error: updateError } = await supabase
@@ -46,12 +49,17 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: updateError.message }, { status: 500 });
     }
 
-    return NextResponse.json({ message: 'Role updated successfully' }, { status: 200 });
+    return NextResponse.json(
+      { message: 'Role updated successfully' },
+      { status: 200 }
+    );
   } catch (error: unknown) {
     console.error('Unexpected error in API route:', error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal Server Error' },
+      {
+        error: error instanceof Error ? error.message : 'Internal Server Error',
+      },
       { status: 500 }
     );
   }
-} 
+}

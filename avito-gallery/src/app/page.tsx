@@ -26,11 +26,11 @@ export default async function Home() {
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <HeroBanner
         campaigns={campaigns as Campaign[]}
-        onCampaignUpdated={handleCampaignUpdated}
+        // onCampaignUpdated={handleCampaignUpdated}
       />
       <CampaignList
         campaigns={campaigns as Campaign[]}
-        onCampaignUpdated={handleCampaignUpdated}
+        // onCampaignUpdated={handleCampaignUpdated}
       />
     </main>
   );

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { Button } from '@/components/ui/Button';
 import { UserData } from '@/lib/types';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 
 export function AdminPanel() {
   const supabase = createClientComponentClient();
@@ -19,7 +20,10 @@ export function AdminPanel() {
       setLoading(true);
       setError(null);
 
-      const { data: { user: supabaseUser }, error: userError } = await supabase.auth.getUser();
+      const {
+        data: { user: supabaseUser },
+        error: userError,
+      } = await supabase.auth.getUser();
 
       if (userError || !supabaseUser) {
         setError('Ошибка получения текущего пользователя.');
@@ -27,14 +31,21 @@ export function AdminPanel() {
         return;
       }
 
-      const { data: currentUserRoleData, error: currentUserRoleError } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', supabaseUser.id)
-        .single();
+      const { data: currentUserRoleData, error: currentUserRoleError } =
+        await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', supabaseUser.id)
+          .single();
 
-      if (currentUserRoleError || !currentUserRoleData || currentUserRoleData.role !== 'super_admin') {
-        setError('Доступ запрещен. Только супер администраторы могут просматривать эту страницу.');
+      if (
+        currentUserRoleError ||
+        !currentUserRoleData ||
+        currentUserRoleData.role !== 'super_admin'
+      ) {
+        setError(
+          'Доступ запрещен. Только супер администраторы могут просматривать эту страницу.'
+        );
         setIsSuperAdmin(false);
         setLoading(false);
         return;
@@ -46,7 +57,9 @@ export function AdminPanel() {
       const response = await fetch('/api/admin/users');
       if (!response.ok) {
         const errorData = await response.json();
-        setError(`Ошибка получения пользователей: ${errorData.error || response.statusText}`);
+        setError(
+          `Ошибка получения пользователей: ${errorData.error || response.statusText}`
+        );
         setLoading(false);
         return;
       }
@@ -77,11 +90,13 @@ export function AdminPanel() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Ошибка обновления роли на сервере.');
+        throw new Error(
+          errorData.error || 'Ошибка обновления роли на сервере.'
+        );
       }
 
-      setUsers(prevUsers =>
-        prevUsers.map(user =>
+      setUsers((prevUsers) =>
+        prevUsers.map((user) =>
           user.id === userId ? { ...user, role: editedRole } : user
         )
       );
@@ -94,7 +109,11 @@ export function AdminPanel() {
   };
 
   if (loading) {
-    return <div className="text-white">Загрузка пользователей...</div>;
+    return (
+      <div className="text-white flex items-center justify-center h-full w-full">
+        <LoadingSpinner />
+      </div>
+    );
   }
 
   if (error) {
@@ -102,7 +121,11 @@ export function AdminPanel() {
   }
 
   if (!isSuperAdmin) {
-    return <div className="text-red-500">У вас нет прав для доступа к этой панели.</div>;
+    return (
+      <div className="text-red-500">
+        У вас нет прав для доступа к этой панели.
+      </div>
+    );
   }
 
   return (
@@ -117,7 +140,7 @@ export function AdminPanel() {
           </tr>
         </thead>
         <tbody>
-          {users.map(user => (
+          {users.map((user) => (
             <tr key={user.id} className="border-t border-gray-600">
               <td className="py-2 px-4">{user.email}</td>
               <td className="py-2 px-4">
@@ -137,11 +160,17 @@ export function AdminPanel() {
               </td>
               <td className="py-2 px-4">
                 {editingUserId === user.id ? (
-                  <Button onClick={() => handleSaveRole(user.id)} className="bg-green-600 hover:bg-green-700 text-white text-sm px-3 py-1 rounded">
+                  <Button
+                    onClick={() => handleSaveRole(user.id)}
+                    className="bg-green-600 hover:bg-green-700 text-white text-sm px-3 py-1 rounded"
+                  >
                     Сохранить
                   </Button>
                 ) : (
-                  <Button onClick={() => handleEditRole(user.id, user.role)} className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-3 py-1 rounded">
+                  <Button
+                    onClick={() => handleEditRole(user.id, user.role)}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-3 py-1 rounded"
+                  >
                     Редактировать
                   </Button>
                 )}
@@ -152,4 +181,4 @@ export function AdminPanel() {
       </table>
     </div>
   );
-} 
+}

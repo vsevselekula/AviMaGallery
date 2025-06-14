@@ -10,7 +10,7 @@ import { CampaignModal } from './CampaignModal';
 interface HeroBannerProps {
   campaigns: Campaign[];
   className?: string;
-  onCampaignUpdated: (updatedCampaign: Campaign) => void;
+  onCampaignUpdated?: (updatedCampaign: Campaign) => void;
 }
 
 export function HeroBanner({
@@ -40,7 +40,7 @@ export function HeroBanner({
   };
 
   const handleCampaignUpdated = (updatedCampaign: Campaign) => {
-    onCampaignUpdated(updatedCampaign);
+    onCampaignUpdated?.(updatedCampaign);
     setCurrentCampaign(null);
   };
 

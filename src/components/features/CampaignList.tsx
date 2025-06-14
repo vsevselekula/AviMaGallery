@@ -10,7 +10,7 @@ interface CampaignListProps {
   title?: string;
   description?: string;
   hideVerticalFilter?: boolean;
-  onCampaignUpdated?: (updatedCampaign: Campaign) => void;
+  // const { onCampaignUpdated } = props;
 }
 
 export function CampaignList({
@@ -18,7 +18,6 @@ export function CampaignList({
   title,
   description,
   hideVerticalFilter,
-  onCampaignUpdated,
 }: CampaignListProps) {
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(
     null
@@ -44,7 +43,7 @@ export function CampaignList({
         campaign.campaign_name
           .toLowerCase()
           .includes(searchQuery.toLowerCase()) ||
-        campaign.key_message.toLowerCase().includes(searchQuery.toLowerCase());
+        (campaign.key_message ? campaign.key_message.toLowerCase() : '').includes(searchQuery.toLowerCase());
 
       const matchesType =
         selectedType === '' ||
@@ -56,13 +55,6 @@ export function CampaignList({
       return matchesSearch && matchesType && matchesVertical;
     });
   }, [campaigns, searchQuery, selectedType, selectedVertical]);
-
-  const handleCampaignUpdated = (updatedCampaign: Campaign) => {
-    if (onCampaignUpdated) {
-      onCampaignUpdated(updatedCampaign);
-    }
-    setSelectedCampaign(updatedCampaign);
-  };
 
   return (
     <div className="space-y-6">
@@ -120,7 +112,7 @@ export function CampaignList({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredCampaigns.map((campaign) => (
           <div
-            key={`${campaign.campaign_name}-${campaign.flight_period.start_date}-${campaign.campaign_type}`}
+            key={campaign.id}
             onClick={() => setSelectedCampaign(campaign)}
           >
             <CampaignCard campaign={campaign} />
@@ -132,7 +124,6 @@ export function CampaignList({
         <CampaignModal
           campaign={selectedCampaign}
           onClose={() => setSelectedCampaign(null)}
-          onCampaignUpdated={handleCampaignUpdated}
         />
       )}
     </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Campaign } from '@/lib/types';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -11,15 +11,15 @@ import Image from 'next/image';
 interface HeroBannerProps {
   campaigns: Campaign[];
   className?: string;
-  onCampaignUpdated: (updatedCampaign: Campaign) => void;
+  // const { onCampaignUpdated } = props;
 }
 
 export function HeroBanner({
   campaigns,
   className,
-  onCampaignUpdated,
 }: HeroBannerProps) {
   const [currentCampaign, setCurrentCampaign] = useState<Campaign | null>(null);
+  const [slideIndex, setSlideIndex] = useState(0);
 
   const activeCampaigns = campaigns.filter((campaign) => {
     const now = new Date();
@@ -28,7 +28,21 @@ export function HeroBanner({
     return now >= startDate && now <= endDate;
   });
 
-  const heroCampaign = activeCampaigns.length > 0 ? activeCampaigns[0] : null;
+  // Слайдер: автосмена каждые 7 секунд
+  useEffect(() => {
+    if (activeCampaigns.length <= 1) return;
+    const timer = setInterval(() => {
+      setSlideIndex((prev) => (prev + 1) % activeCampaigns.length);
+    }, 7000);
+    return () => clearInterval(timer);
+  }, [activeCampaigns.length]);
+
+  // Сброс индекса если число кампаний изменилось
+  useEffect(() => {
+    setSlideIndex(0);
+  }, [activeCampaigns.length]);
+
+  const heroCampaign = activeCampaigns.length > 0 ? activeCampaigns[slideIndex % activeCampaigns.length] : null;
 
   const handleCampaignClick = (campaign: Campaign) => {
     setCurrentCampaign(campaign);
@@ -38,10 +52,10 @@ export function HeroBanner({
     setCurrentCampaign(null);
   };
 
-  const handleCampaignUpdated = (updatedCampaign: Campaign) => {
-    onCampaignUpdated(updatedCampaign);
-    setCurrentCampaign(null);
-  };
+  // const handleCampaignUpdated = (updatedCampaign: Campaign) => {
+  //   onCampaignUpdated?.(updatedCampaign);
+  //   setCurrentCampaign(null);
+  // };
 
   if (!heroCampaign) {
     return (
@@ -125,11 +139,24 @@ export function HeroBanner({
         </div>
       </div>
 
+      {/* Индикаторы слайдера */}
+      {activeCampaigns.length > 1 && (
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+          {activeCampaigns.map((_, idx) => (
+            <button
+              key={idx}
+              className={`w-3 h-3 rounded-full border-2 ${idx === slideIndex ? 'bg-white border-white' : 'bg-gray-400 border-gray-400'} transition-all`}
+              onClick={() => setSlideIndex(idx)}
+              aria-label={`Показать кампанию ${idx + 1}`}
+            />
+          ))}
+        </div>
+      )}
+
       {currentCampaign && (
         <CampaignModal
           campaign={currentCampaign}
           onClose={handleCloseModal}
-          onCampaignUpdated={handleCampaignUpdated}
         />
       )}
     </div>

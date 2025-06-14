@@ -9,15 +9,15 @@ interface CampaignsClientProps {
 }
 
 export function CampaignsClient({ initialCampaigns }: CampaignsClientProps) {
-  const [campaigns, setCampaigns] = useState<Campaign[]>(initialCampaigns);
+  const [campaigns] = useState<Campaign[]>(initialCampaigns);
 
-  const handleCampaignUpdated = (updatedCampaign: Campaign) => {
-    setCampaigns((prevCampaigns) =>
-      prevCampaigns.map((campaign) =>
-        campaign.id === updatedCampaign.id ? updatedCampaign : campaign
-      )
-    );
-  };
+  // const handleCampaignUpdated = (updatedCampaign: Campaign) => {
+  //   setCampaigns((prevCampaigns) =>
+  //     prevCampaigns.map((campaign) =>
+  //       campaign.id === updatedCampaign.id ? updatedCampaign : campaign
+  //     )
+  //   );
+  // };
 
   return (
     <main className="flex-1 p-8">
@@ -28,7 +28,6 @@ export function CampaignsClient({ initialCampaigns }: CampaignsClientProps) {
 
       <CampaignList
         campaigns={campaigns}
-        onCampaignUpdated={handleCampaignUpdated}
       />
     </main>
   );
