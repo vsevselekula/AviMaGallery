@@ -20,7 +20,6 @@ import { getVerticalColorClass } from '@/lib/utils';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { CampaignModal } from '@/components/features/CampaignModal';
 
-
 ChartJS.register(
   ArcElement,
   Tooltip,
@@ -82,9 +81,7 @@ export default function Analytics() {
     if (selectedChannel) {
       handleCloseChannelDetails();
     }
-  }, [selectedVerticalForChannels]);
-
-
+  }, [selectedVerticalForChannels, selectedChannel]);
 
   useEffect(() => {
     const fetchCampaigns = async () => {
@@ -394,9 +391,9 @@ export default function Analytics() {
   // Настройки для графика каналов с обработчиком клика
   const channelsBarOptions = {
     ...barOptions,
-                                                    onClick: (event: unknown, elements: { index: number }[]) => {
-                        if (elements && elements.length > 0) {
-                          const elementIndex = elements[0].index;
+    onClick: (event: unknown, elements: { index: number }[]) => {
+      if (elements && elements.length > 0) {
+        const elementIndex = elements[0].index;
         const channelName = channelsPopularity.labels[elementIndex];
         handleChannelClick(channelName);
       }
@@ -650,8 +647,6 @@ export default function Analytics() {
         </div>
       )}
 
-
-
       {/* Модальное окно детального просмотра кампании */}
       {selectedCampaignForModal && (
         <CampaignModal
@@ -659,8 +654,10 @@ export default function Analytics() {
           onClose={handleCloseCampaignModal}
           onCampaignUpdated={(updatedCampaign) => {
             // Обновляем кампанию в списке, если она была изменена
-            setCampaigns(prev => 
-              prev.map(c => c.id === updatedCampaign.id ? updatedCampaign : c)
+            setCampaigns((prev) =>
+              prev.map((c) =>
+                c.id === updatedCampaign.id ? updatedCampaign : c
+              )
             );
           }}
         />

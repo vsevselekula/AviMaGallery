@@ -17,6 +17,8 @@ import { VideoPlayer } from '@/components/ui/VideoPlayer';
 import { Notification } from '@/components/ui/Notification';
 import { ImageUpload } from '@/components/ui/ImageUpload';
 import { useNotification } from '@/hooks/useNotification';
+import { CampaignReactions } from '@/components/ui/CampaignReactions';
+import { useReactions } from '@/hooks/useReactions';
 // import React from 'react';
 // import { cn } from '@/lib/utils';
 
@@ -160,6 +162,7 @@ export function CampaignModal({
   const [linksText, setLinksText] = useState('');
   const [channelsText, setChannelsText] = useState('');
   const [targetsText, setTargetsText] = useState('');
+  const [testsText, setTestsText] = useState('');
   const [availableVerticals, setAvailableVerticals] = useState<string[]>([]);
 
   const supabase = createClientComponentClient();
@@ -168,8 +171,14 @@ export function CampaignModal({
   const { notification, showSuccess, showError, hideNotification } =
     useNotification();
 
+  // Добавляем хук для реакций
+  const {
+    userReactions,
+    reactionCounts,
+    toggleReaction
+  } = useReactions([campaign.id]);
+
   useEffect(() => {
-    console.log('CampaignModal: Campaign prop received/changed:', campaign);
     setEditedCampaign({
       ...campaign,
       video_url: campaign.video_url || null,
@@ -194,6 +203,26 @@ export function CampaignModal({
       setTargetsText(campaign.targets.join('\n'));
     } else {
       setTargetsText('');
+    }
+
+    // Инициализация текста для тестов
+    if (Array.isArray(campaign.pre_tests)) {
+      setTestsText(
+        campaign.pre_tests.map((test) => {
+          if (typeof test === 'object' && test && 'label' in test && 'url' in test) {
+            return `${test.label} - ${test.url}`;
+          }
+          return String(test);
+        }).join('\n')
+      );
+    } else if (campaign.pre_tests && typeof campaign.pre_tests === 'object') {
+      setTestsText(
+        Object.entries(campaign.pre_tests).map(([label, value]) => `${label} - ${value}`).join('\n')
+      );
+    } else if (typeof campaign.pre_tests === 'string') {
+      setTestsText(campaign.pre_tests);
+    } else {
+      setTestsText('');
     }
   }, [campaign]);
 
@@ -231,37 +260,34 @@ export function CampaignModal({
     };
 
     const fetchVerticals = async () => {
-      console.log('Fetching verticals from Supabase...');
-      
       // Сначала пробуем загрузить из таблицы verticals
       const { data: verticals, error: verticalsError } = await supabase
         .from('verticals')
         .select('name')
         .order('name');
-      
+
       if (verticalsError) {
         console.error('Error fetching from verticals table:', verticalsError);
-        
+
         // Если не получилось, берем уникальные вертикали из кампаний
-        console.log('Fallback: fetching unique verticals from campaigns...');
         const { data: campaigns, error: campaignsError } = await supabase
           .from('campaigns_v2')
           .select('campaign_vertical')
           .not('campaign_vertical', 'is', null);
-        
+
         if (campaignsError) {
-          console.error('Error fetching campaigns for verticals:', campaignsError);
+          console.error(
+            'Error fetching campaigns for verticals:',
+            campaignsError
+          );
         } else {
           const uniqueVerticals = Array.from(
-            new Set(campaigns?.map(c => c.campaign_vertical).filter(Boolean))
+            new Set(campaigns?.map((c) => c.campaign_vertical).filter(Boolean))
           ).sort();
-          console.log('Unique verticals from campaigns:', uniqueVerticals);
           setAvailableVerticals(uniqueVerticals);
         }
       } else {
-        console.log('Fetched verticals from verticals table:', verticals);
-        const verticalNames = verticals?.map(v => v.name) || [];
-        console.log('Vertical names:', verticalNames);
+        const verticalNames = verticals?.map((v) => v.name) || [];
         setAvailableVerticals(verticalNames);
       }
     };
@@ -333,23 +359,23 @@ export function CampaignModal({
     setIsSaving(true);
     try {
       // Проверяем подключение к Supabase
-      console.log('Checking Supabase connection...');
       const { error: testError } = await supabase
         .from('campaigns_v2')
         .select('id')
         .eq('id', campaign.id)
         .single();
-      
+
       if (testError) {
         console.error('Supabase connection test failed:', testError);
         showError(`Ошибка подключения к базе данных: ${testError.message}`);
         return;
       }
-      
-      console.log('Supabase connection OK, proceeding with save...');
-      
+
       // Автоматически рассчитываем статус по датам
-      const getStatusFromDates = (startDate: string, endDate: string): 'active' | 'completed' | 'planned' => {
+      const getStatusFromDates = (
+        startDate: string,
+        endDate: string
+      ): 'active' | 'completed' | 'planned' => {
         const now = new Date();
         const start = new Date(startDate);
         const end = new Date(endDate);
@@ -363,17 +389,16 @@ export function CampaignModal({
         }
       };
 
-      const calculatedStatus = editedCampaign.flight_period?.start_date && editedCampaign.flight_period?.end_date
-        ? getStatusFromDates(editedCampaign.flight_period.start_date, editedCampaign.flight_period.end_date)
-        : editedCampaign.status;
+      const calculatedStatus =
+        editedCampaign.flight_period?.start_date &&
+        editedCampaign.flight_period?.end_date
+          ? getStatusFromDates(
+              editedCampaign.flight_period.start_date,
+              editedCampaign.flight_period.end_date
+            )
+          : editedCampaign.status;
 
-      console.log('Saving campaign with data:', {
-        campaign_name: editedCampaign.campaign_name,
-        campaign_type: editedCampaign.campaign_type,
-        campaign_vertical: editedCampaign.campaign_vertical,
-        status: calculatedStatus,
-        id: campaign.id
-      });
+
 
       const { data, error } = await supabase
         .from('campaigns_v2')
@@ -406,7 +431,7 @@ export function CampaignModal({
           message: error.message,
           details: error.details,
           hint: error.hint,
-          code: error.code
+          code: error.code,
         });
         showError(`Ошибка при сохранении кампании: ${error.message}`);
         return;
@@ -447,8 +472,13 @@ export function CampaignModal({
     } catch (error) {
       console.error('Network or unexpected error:', error);
       if (error instanceof Error) {
-        if (error.message.includes('Failed to fetch') || error.message.includes('ERR_CONNECTION_CLOSED')) {
-          showError('Ошибка подключения к серверу. Проверьте интернет-соединение и попробуйте снова.');
+        if (
+          error.message.includes('Failed to fetch') ||
+          error.message.includes('ERR_CONNECTION_CLOSED')
+        ) {
+          showError(
+            'Ошибка подключения к серверу. Проверьте интернет-соединение и попробуйте снова.'
+          );
         } else {
           showError(`Неожиданная ошибка: ${error.message}`);
         }
@@ -461,52 +491,23 @@ export function CampaignModal({
   };
 
   const handleDelete = async () => {
-    console.log('=== handleDelete FUNCTION CALLED ===');
-    console.log('handleDelete called, userRole:', userRole);
-    console.log('campaign.id:', campaign.id);
-    console.log('showDeleteConfirm state:', showDeleteConfirm);
-
     if (userRole !== 'super_admin') {
-      console.log('User is not super_admin, showing error');
       showError('Только супер-админ может удалять кампании');
       return;
     }
 
-    console.log('Starting delete process for campaign:', campaign.id);
-
     // Проверим текущего пользователя
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-    console.log('Current user:', {
-      user: user?.id,
-      email: user?.email,
-      userError,
-    });
+    await supabase.auth.getUser();
 
     setIsDeleting(true);
 
     try {
-      console.log('Calling supabase delete...');
-      console.log(
-        'Table: campaigns_v2, ID to delete:',
-        campaign.id,
-        'Type:',
-        typeof campaign.id
-      );
-
       // Сначала проверим, существует ли кампания
       const { data: existingCampaign, error: selectError } = await supabase
         .from('campaigns_v2')
         .select('id, campaign_name')
         .eq('id', campaign.id)
         .single();
-
-      console.log('Existing campaign check:', {
-        existingCampaign,
-        selectError,
-      });
 
       if (selectError) {
         console.error('Error checking existing campaign:', selectError);
@@ -515,24 +516,16 @@ export function CampaignModal({
       }
 
       if (!existingCampaign) {
-        console.log('Campaign not found in database');
         showError('Кампания не найдена в базе данных');
         return;
       }
 
       // Удаляем кампанию напрямую (теперь RLS политики разрешают это для super_admin)
-      console.log('Calling supabase delete with RLS policy...');
       const { error, data } = await supabase
         .from('campaigns_v2')
         .delete()
         .eq('id', campaign.id)
         .select();
-
-      console.log('Delete result:', {
-        error,
-        data,
-        deletedCount: data?.length,
-      });
 
       if (error) {
         console.error('Error deleting campaign:', error);
@@ -548,12 +541,10 @@ export function CampaignModal({
         return;
       }
 
-      console.log('Campaign deleted successfully');
       showSuccess('Кампания успешно удалена!');
 
       // Закрываем модальное окно через небольшую задержку и перезагружаем страницу
       setTimeout(() => {
-        console.log('Closing modal and reloading page');
         onClose();
         // Перезагружаем страницу чтобы обновить список кампаний
         window.location.reload();
@@ -562,7 +553,6 @@ export function CampaignModal({
       console.error('Error deleting campaign:', error);
       showError('Ошибка при удалении кампании');
     } finally {
-      console.log('Cleaning up delete state');
       setIsDeleting(false);
       setShowDeleteConfirm(false);
     }
@@ -571,21 +561,7 @@ export function CampaignModal({
   const isSuperAdmin = userRole === 'super_admin';
   const isAdmin = userRole === 'super_admin' || userRole === 'editor';
 
-  // Добавляем логирование для отладки
-  console.log(
-    'CampaignModal render - userRole:',
-    userRole,
-    'isSuperAdmin:',
-    isSuperAdmin,
-    'isAdmin:',
-    isAdmin
-  );
-  console.log(
-    'showDeleteConfirm state:',
-    showDeleteConfirm,
-    'isDeleting:',
-    isDeleting
-  );
+
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm !mt-0">
@@ -618,7 +594,6 @@ export function CampaignModal({
                 {isSuperAdmin && (
                   <button
                     onClick={() => {
-                      console.log('Delete button clicked (not editing mode)!');
                       setShowDeleteConfirm(true);
                     }}
                     className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors"
@@ -651,7 +626,6 @@ export function CampaignModal({
                 {isSuperAdmin && (
                   <button
                     onClick={() => {
-                      console.log('Delete button clicked (editing mode)!');
                       setShowDeleteConfirm(true);
                     }}
                     className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors"
@@ -730,7 +704,7 @@ export function CampaignModal({
                 <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">
                   {editedCampaign.campaign_name}
                 </h1>
-                <div className="flex gap-2 flex-wrap">
+                <div className="flex gap-2 flex-wrap items-center mb-3">
                   <span
                     className={`px-3 py-1 rounded-full text-sm font-medium backdrop-blur-sm ${
                       editedCampaign.campaign_vertical === 'Авито'
@@ -747,10 +721,60 @@ export function CampaignModal({
                     {editedCampaign.campaign_type}
                   </span>
                 </div>
+                
+                {/* Реакции */}
+                <CampaignReactions
+                  campaignId={campaign.id}
+                  userReaction={userReactions[campaign.id] || null}
+                  reactionCounts={reactionCounts[campaign.id] || {}}
+                  onToggleReaction={toggleReaction}
+                  disabled={false}
+                  size="md"
+                />
               </div>
             </div>
           </div>
         ) : null}
+
+        {/* Заголовок и бейджи для кампаний без изображения */}
+        {!isEditing && !editedCampaign.image_url && (
+          <div className="mt-12 mb-6">
+            <div className="text-center">
+              <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                {editedCampaign.campaign_name}
+              </h1>
+              <div className="flex gap-2 flex-wrap items-center justify-center mb-4">
+                <span
+                  className={`px-3 py-1 rounded-full text-sm font-medium ${
+                    editedCampaign.campaign_vertical === 'Авито'
+                      ? 'text-black'
+                      : 'text-white'
+                  }`}
+                  style={getVerticalColorClass(
+                    editedCampaign.campaign_vertical
+                  )}
+                >
+                  {editedCampaign.campaign_vertical}
+                </span>
+                <span className="px-3 py-1 rounded-full text-sm font-medium border border-gray-600 text-white bg-gray-700">
+                  {editedCampaign.campaign_type}
+                </span>
+              </div>
+              
+              {/* Реакции */}
+              <div className="flex justify-center">
+                <CampaignReactions
+                  campaignId={campaign.id}
+                  userReaction={userReactions[campaign.id] || null}
+                  reactionCounts={reactionCounts[campaign.id] || {}}
+                  onToggleReaction={toggleReaction}
+                  disabled={false}
+                  size="md"
+                />
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Основная информация — на всю ширину */}
@@ -1117,66 +1141,91 @@ export function CampaignModal({
               icon={<span>🧪</span>}
               className="md:col-span-2"
             >
-              {Array.isArray(editedCampaign.pre_tests) &&
-              editedCampaign.pre_tests.length > 0 ? (
-                <ul className="list-disc ml-6">
-                  {editedCampaign.pre_tests.map((item: unknown, i: number) => {
-                    if (
-                      item &&
-                      typeof item === 'object' &&
-                      'label' in item &&
-                      'url' in item
-                    ) {
-                      const testItem = item as { label: string; url: string };
-                      return (
-                        <li key={i}>
-                          <a
-                            href={testItem.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-400 underline"
-                          >
-                            {testItem.label}
-                          </a>
-                        </li>
-                      );
-                    } else if (typeof item === 'string') {
-                      return <li key={i}>{item}</li>;
-                    }
-                    return null;
-                  })}
-                </ul>
-              ) : editedCampaign.pre_tests &&
-                typeof editedCampaign.pre_tests === 'object' &&
-                !Array.isArray(editedCampaign.pre_tests) ? (
-                <ul className="list-disc ml-6">
-                  {Object.entries(editedCampaign.pre_tests).map(
-                    ([label, value]: [string, unknown], i) => (
-                      <li key={i}>
-                        {typeof value === 'string' &&
-                        value.startsWith('http') ? (
-                          <a
-                            href={value}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-400 underline"
-                          >
-                            {label}
-                          </a>
-                        ) : (
-                          <span>
-                            {label}: {String(value)}
-                          </span>
-                        )}
-                      </li>
-                    )
-                  )}
-                </ul>
-              ) : typeof editedCampaign.pre_tests === 'string' ? (
-                <div>{editedCampaign.pre_tests}</div>
-              ) : !editedCampaign.pre_tests ? (
-                <span className="text-gray-500">Нет данных</span>
-              ) : null}
+              {isEditing ? (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Тесты (формат: Название - URL)
+                    </label>
+                    <textarea
+                      value={testsText}
+                      onChange={(e) =>
+                        handleArrayTextChange(
+                          'pre_tests',
+                          e.target.value,
+                          setTestsText
+                        )
+                      }
+                      rows={4}
+                      placeholder="Пре-тест - https://example.com/pretest&#10;Пост-тест - https://example.com/posttest"
+                      className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {Array.isArray(editedCampaign.pre_tests) &&
+                  editedCampaign.pre_tests.length > 0 ? (
+                    <ul className="list-disc ml-6">
+                      {editedCampaign.pre_tests.map((item: unknown, i: number) => {
+                        if (
+                          item &&
+                          typeof item === 'object' &&
+                          'label' in item &&
+                          'url' in item
+                        ) {
+                          const testItem = item as { label: string; url: string };
+                          return (
+                            <li key={i}>
+                              <a
+                                href={testItem.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-400 underline"
+                              >
+                                {testItem.label}
+                              </a>
+                            </li>
+                          );
+                        } else if (typeof item === 'string') {
+                          return <li key={i}>{item}</li>;
+                        }
+                        return null;
+                      })}
+                    </ul>
+                  ) : editedCampaign.pre_tests &&
+                    typeof editedCampaign.pre_tests === 'object' &&
+                    !Array.isArray(editedCampaign.pre_tests) ? (
+                    <ul className="list-disc ml-6">
+                      {Object.entries(editedCampaign.pre_tests).map(
+                        ([label, value]: [string, unknown], i) => (
+                          <li key={i}>
+                            {typeof value === 'string' &&
+                            value.startsWith('http') ? (
+                              <a
+                                href={value}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-400 underline"
+                              >
+                                {label}
+                              </a>
+                            ) : (
+                              <span>
+                                {label}: {String(value)}
+                              </span>
+                            )}
+                          </li>
+                        )
+                      )}
+                    </ul>
+                  ) : typeof editedCampaign.pre_tests === 'string' ? (
+                    <div>{editedCampaign.pre_tests}</div>
+                  ) : !editedCampaign.pre_tests ? (
+                    <span className="text-gray-500">Нет данных</span>
+                  ) : null}
+                </>
+              )}
             </Section>
           </div>
         </div>
@@ -1196,7 +1245,6 @@ export function CampaignModal({
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-90 backdrop-blur-sm"
           style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
           onClick={(e) => {
-            console.log('Delete modal backdrop clicked');
             // Закрываем только если клик по backdrop, а не по содержимому
             if (e.target === e.currentTarget) {
               setShowDeleteConfirm(false);
@@ -1207,7 +1255,6 @@ export function CampaignModal({
             className="bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-6 mx-4 relative"
             style={{ zIndex: 101 }}
             onClick={(e) => {
-              console.log('Delete modal content clicked');
               e.stopPropagation(); // Предотвращаем закрытие при клике по содержимому
             }}
           >
@@ -1226,10 +1273,8 @@ export function CampaignModal({
                 <button
                   type="button"
                   onMouseDown={(e) => {
-                    console.log('Cancel button mousedown!', e);
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log('Closing delete confirmation from mousedown');
                     setShowDeleteConfirm(false);
                   }}
                   disabled={isDeleting}
@@ -1241,11 +1286,9 @@ export function CampaignModal({
                 <button
                   type="button"
                   onMouseDown={(e) => {
-                    console.log('Delete button mousedown!', e);
                     e.preventDefault();
                     e.stopPropagation();
                     if (!isDeleting) {
-                      console.log('Calling handleDelete from mousedown');
                       handleDelete();
                     }
                   }}

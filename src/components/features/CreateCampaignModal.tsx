@@ -87,35 +87,38 @@ export function CreateCampaignModal({
 
     const fetchVerticals = async () => {
       console.log('Fetching verticals from Supabase...');
-      
+
       // Сначала пробуем загрузить из таблицы verticals
       const { data: verticals, error: verticalsError } = await supabase
         .from('verticals')
         .select('name')
         .order('name');
-      
+
       if (verticalsError) {
         console.error('Error fetching from verticals table:', verticalsError);
-        
+
         // Если не получилось, берем уникальные вертикали из кампаний
         console.log('Fallback: fetching unique verticals from campaigns...');
         const { data: campaigns, error: campaignsError } = await supabase
           .from('campaigns_v2')
           .select('campaign_vertical')
           .not('campaign_vertical', 'is', null);
-        
+
         if (campaignsError) {
-          console.error('Error fetching campaigns for verticals:', campaignsError);
+          console.error(
+            'Error fetching campaigns for verticals:',
+            campaignsError
+          );
         } else {
           const uniqueVerticals = Array.from(
-            new Set(campaigns?.map(c => c.campaign_vertical).filter(Boolean))
+            new Set(campaigns?.map((c) => c.campaign_vertical).filter(Boolean))
           ).sort();
           console.log('Unique verticals from campaigns:', uniqueVerticals);
           setAvailableVerticals(uniqueVerticals);
         }
       } else {
         console.log('Fetched verticals from verticals table:', verticals);
-        const verticalNames = verticals?.map(v => v.name) || [];
+        const verticalNames = verticals?.map((v) => v.name) || [];
         console.log('Vertical names:', verticalNames);
         setAvailableVerticals(verticalNames);
       }

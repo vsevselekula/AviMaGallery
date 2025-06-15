@@ -2,13 +2,22 @@ import Image from 'next/image';
 import { Campaign } from '@/lib/types';
 import { cn, getVerticalColorClass } from '@/lib/utils';
 import { isValidImageUrl } from '@/lib/imageUtils';
+import { CampaignReactionsDisplay } from '@/components/ui/CampaignReactions';
+import { ReactionType } from '@/types/reactions';
 
 interface CampaignCardProps {
   campaign: Campaign;
   className?: string;
+  reactionCounts?: { [K in ReactionType]?: number };
+  showReactions?: boolean;
 }
 
-export function CampaignCard({ campaign, className }: CampaignCardProps) {
+export function CampaignCard({ 
+  campaign, 
+  className, 
+  reactionCounts = {}, 
+  showReactions = true 
+}: CampaignCardProps) {
   const isActive = new Date(campaign.flight_period.end_date) > new Date();
   const hasImage = isValidImageUrl(campaign.image_url);
 
@@ -82,12 +91,18 @@ export function CampaignCard({ campaign, className }: CampaignCardProps) {
         <p className="text-sm text-gray-300 mt-2 line-clamp-2">
           {campaign.key_message}
         </p>
-        <div className="mt-2">
+        <div className="mt-2 flex items-center justify-between">
           <span className="text-xs text-gray-400">
             {new Date(campaign.flight_period.start_date).toLocaleDateString(
               'ru-RU'
             )}
           </span>
+          {showReactions && (
+            <CampaignReactionsDisplay 
+              reactionCounts={reactionCounts} 
+              size="sm" 
+            />
+          )}
         </div>
       </div>
     </div>

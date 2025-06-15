@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import { Campaign } from '@/lib/types';
 import { CampaignModal } from './CampaignModal';
 import { CampaignCard } from './CampaignCard';
+import { useReactions } from '@/hooks/useReactions';
 
 interface CampaignListProps {
   campaigns: Campaign[];
@@ -27,11 +28,25 @@ export function CampaignList({
   const [selectedType, setSelectedType] = useState<string>('');
   const [selectedVertical, setSelectedVertical] = useState<string>('');
 
+  // Получаем реакции для всех кампаний
+  const campaignIds = useMemo(() => campaigns.map(c => c.id), [campaigns]);
+  const { reactionCounts, refetch: refetchReactions } = useReactions(campaignIds);
+
   const handleCampaignUpdated = (updatedCampaign: Campaign) => {
     if (onCampaignUpdated) {
       onCampaignUpdated(updatedCampaign);
     }
     setSelectedCampaign(null);
+  };
+
+  const handleModalClose = () => {
+    setSelectedCampaign(null);
+    // Обновляем реакции при закрытии модального окна
+    refetchReactions();
+    // Дополнительное обновление через небольшую задержку на случай задержки синхронизации
+    setTimeout(() => {
+      refetchReactions();
+    }, 500);
   };
 
   const uniqueTypes = useMemo(
@@ -122,7 +137,11 @@ export function CampaignList({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredCampaigns.map((campaign) => (
           <div key={campaign.id} onClick={() => setSelectedCampaign(campaign)}>
-            <CampaignCard campaign={campaign} />
+            <CampaignCard 
+              campaign={campaign} 
+              reactionCounts={reactionCounts[campaign.id] || {}}
+              showReactions={true}
+            />
           </div>
         ))}
       </div>
@@ -130,7 +149,7 @@ export function CampaignList({
       {selectedCampaign && (
         <CampaignModal
           campaign={selectedCampaign}
-          onClose={() => setSelectedCampaign(null)}
+          onClose={handleModalClose}
           onCampaignUpdated={handleCampaignUpdated}
         />
       )}
