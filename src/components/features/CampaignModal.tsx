@@ -160,7 +160,7 @@ export function CampaignModal({
   const [linksText, setLinksText] = useState('');
   const [channelsText, setChannelsText] = useState('');
   const [targetsText, setTargetsText] = useState('');
-  
+
   const supabase = createClientComponentClient();
 
   // Добавляем хук для нотификаций
@@ -370,7 +370,7 @@ export function CampaignModal({
     console.log('handleDelete called, userRole:', userRole);
     console.log('campaign.id:', campaign.id);
     console.log('showDeleteConfirm state:', showDeleteConfirm);
-    
+
     if (userRole !== 'super_admin') {
       console.log('User is not super_admin, showing error');
       showError('Только супер-админ может удалять кампании');
@@ -378,38 +378,53 @@ export function CampaignModal({
     }
 
     console.log('Starting delete process for campaign:', campaign.id);
-    
+
     // Проверим текущего пользователя
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    console.log('Current user:', { user: user?.id, email: user?.email, userError });
-    
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+    console.log('Current user:', {
+      user: user?.id,
+      email: user?.email,
+      userError,
+    });
+
     setIsDeleting(true);
-    
+
     try {
       console.log('Calling supabase delete...');
-      console.log('Table: campaigns_v2, ID to delete:', campaign.id, 'Type:', typeof campaign.id);
-      
+      console.log(
+        'Table: campaigns_v2, ID to delete:',
+        campaign.id,
+        'Type:',
+        typeof campaign.id
+      );
+
       // Сначала проверим, существует ли кампания
       const { data: existingCampaign, error: selectError } = await supabase
         .from('campaigns_v2')
         .select('id, campaign_name')
         .eq('id', campaign.id)
         .single();
-      
-      console.log('Existing campaign check:', { existingCampaign, selectError });
-      
+
+      console.log('Existing campaign check:', {
+        existingCampaign,
+        selectError,
+      });
+
       if (selectError) {
         console.error('Error checking existing campaign:', selectError);
         showError(`Ошибка при проверке кампании: ${selectError.message}`);
         return;
       }
-      
+
       if (!existingCampaign) {
         console.log('Campaign not found in database');
         showError('Кампания не найдена в базе данных');
         return;
       }
-      
+
       // Удаляем кампанию напрямую (теперь RLS политики разрешают это для super_admin)
       console.log('Calling supabase delete with RLS policy...');
       const { error, data } = await supabase
@@ -418,7 +433,11 @@ export function CampaignModal({
         .eq('id', campaign.id)
         .select();
 
-      console.log('Delete result:', { error, data, deletedCount: data?.length });
+      console.log('Delete result:', {
+        error,
+        data,
+        deletedCount: data?.length,
+      });
 
       if (error) {
         console.error('Error deleting campaign:', error);
@@ -428,13 +447,15 @@ export function CampaignModal({
 
       if (!data || data.length === 0) {
         console.error('No records deleted - possible RLS policy issue');
-        showError('Не удалось удалить кампанию. Возможно, недостаточно прав доступа.');
+        showError(
+          'Не удалось удалить кампанию. Возможно, недостаточно прав доступа.'
+        );
         return;
       }
 
       console.log('Campaign deleted successfully');
       showSuccess('Кампания успешно удалена!');
-      
+
       // Закрываем модальное окно через небольшую задержку и перезагружаем страницу
       setTimeout(() => {
         console.log('Closing modal and reloading page');
@@ -442,7 +463,6 @@ export function CampaignModal({
         // Перезагружаем страницу чтобы обновить список кампаний
         window.location.reload();
       }, 1500);
-
     } catch (error) {
       console.error('Error deleting campaign:', error);
       showError('Ошибка при удалении кампании');
@@ -455,10 +475,22 @@ export function CampaignModal({
 
   const isSuperAdmin = userRole === 'super_admin';
   const isAdmin = userRole === 'super_admin' || userRole === 'editor';
-  
+
   // Добавляем логирование для отладки
-  console.log('CampaignModal render - userRole:', userRole, 'isSuperAdmin:', isSuperAdmin, 'isAdmin:', isAdmin);
-  console.log('showDeleteConfirm state:', showDeleteConfirm, 'isDeleting:', isDeleting);
+  console.log(
+    'CampaignModal render - userRole:',
+    userRole,
+    'isSuperAdmin:',
+    isSuperAdmin,
+    'isAdmin:',
+    isAdmin
+  );
+  console.log(
+    'showDeleteConfirm state:',
+    showDeleteConfirm,
+    'isDeleting:',
+    isDeleting
+  );
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm !mt-0">
@@ -1027,7 +1059,7 @@ export function CampaignModal({
 
       {/* Модальное окно подтверждения удаления - вынесено за пределы основного модального окна */}
       {showDeleteConfirm && (
-        <div 
+        <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-90 backdrop-blur-sm"
           style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
           onClick={(e) => {
@@ -1038,7 +1070,7 @@ export function CampaignModal({
             }
           }}
         >
-          <div 
+          <div
             className="bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-6 mx-4 relative"
             style={{ zIndex: 101 }}
             onClick={(e) => {
@@ -1054,8 +1086,8 @@ export function CampaignModal({
                 Удалить кампанию?
               </h3>
               <p className="text-sm text-gray-300 mb-6">
-                Вы уверены, что хотите удалить кампанию "{campaign.campaign_name}"? 
-                Это действие нельзя отменить.
+                Вы уверены, что хотите удалить кампанию "
+                {campaign.campaign_name}"? Это действие нельзя отменить.
               </p>
               <div className="flex gap-3 justify-center">
                 <button

@@ -33,7 +33,9 @@ export default function DashboardPage() {
     };
 
     const fetchUserRole = async () => {
-      const { data: { user: supabaseUser } } = await supabase.auth.getUser();
+      const {
+        data: { user: supabaseUser },
+      } = await supabase.auth.getUser();
       if (supabaseUser) {
         const { data: roleData } = await supabase
           .from('user_roles')
@@ -62,7 +64,8 @@ export default function DashboardPage() {
     setCampaigns((prevCampaigns) => [newCampaign, ...prevCampaigns]);
   };
 
-  const canCreateCampaigns = userRole === 'super_admin' || userRole === 'editor';
+  const canCreateCampaigns =
+    userRole === 'super_admin' || userRole === 'editor';
 
   if (loading) {
     return (
@@ -94,7 +97,7 @@ export default function DashboardPage() {
           onCampaignUpdated={handleCampaignUpdated}
         />
       </div>
-      
+
       {showCreateModal && (
         <CreateCampaignModal
           onClose={() => setShowCreateModal(false)}

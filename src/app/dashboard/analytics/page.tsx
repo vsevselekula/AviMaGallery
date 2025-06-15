@@ -18,6 +18,7 @@ import { format, isPast, isWithinInterval } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { getVerticalColorClass } from '@/lib/utils';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import Image from 'next/image';
 
 ChartJS.register(
   ArcElement,
@@ -32,7 +33,60 @@ ChartJS.register(
 export default function Analytics() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedVertical, setSelectedVertical] = useState<string>('all');
+  const [selectedVerticalForChannels, setSelectedVerticalForChannels] = useState<string>('all');
+  const [selectedChannel, setSelectedChannel] = useState<string | null>(null);
+  const [selectedChannelCampaigns, setSelectedChannelCampaigns] = useState<Campaign[]>([]);
+  const [selectedCampaignForModal, setSelectedCampaignForModal] = useState<Campaign | null>(null);
   const supabase = createClientComponentClient();
+
+  // Функция для обработки клика по столбцу канала
+  const handleChannelClick = (channelName: string) => {
+    const filteredCampaigns = selectedVerticalForChannels === 'all' 
+      ? campaigns 
+      : campaigns.filter(c => c.campaign_vertical === selectedVerticalForChannels);
+    
+    const campaignsWithChannel = filteredCampaigns.filter(campaign => 
+      campaign.channels && campaign.channels.includes(channelName)
+    );
+    
+    setSelectedChannel(channelName);
+    setSelectedChannelCampaigns(campaignsWithChannel);
+  };
+
+  // Функция для закрытия детального просмотра
+  const handleCloseChannelDetails = () => {
+    setSelectedChannel(null);
+    setSelectedChannelCampaigns([]);
+  };
+
+  // Функции для модального окна кампании
+  const handleOpenCampaignModal = (campaign: Campaign) => {
+    setSelectedCampaignForModal(campaign);
+  };
+
+  const handleCloseCampaignModal = () => {
+    setSelectedCampaignForModal(null);
+  };
+
+  // Сбрасываем выбранный канал при изменении фильтра вертикали
+  useEffect(() => {
+    if (selectedChannel) {
+      handleCloseChannelDetails();
+    }
+  }, [selectedVerticalForChannels, selectedChannel]);
+
+  // Обработка клавиши Escape для закрытия модального окна
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && selectedCampaignForModal) {
+        handleCloseCampaignModal();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [selectedCampaignForModal]);
 
   useEffect(() => {
     const fetchCampaigns = async () => {
@@ -63,8 +117,17 @@ export default function Analytics() {
     campaignsByType,
     campaignsByMonth,
     channelsPopularity,
+    availableVerticals,
   } = useMemo(() => {
     const now = new Date();
+
+    // Получаем список всех доступных вертикалей
+    const availableVerticals = Array.from(new Set(campaigns.map(c => c.campaign_vertical))).sort();
+
+    // Фильтруем кампании по выбранной вертикали для графика по месяцам
+    const filteredCampaignsForTimeline = selectedVertical === 'all' 
+      ? campaigns 
+      : campaigns.filter(c => c.campaign_vertical === selectedVertical);
 
     const active = campaigns.filter((campaign) =>
       isWithinInterval(now, {
@@ -133,38 +196,77 @@ export default function Analytics() {
       ],
     };
 
-    // Кампании по месяцам запуска
+    // Кампании по месяцам запуска (с учетом фильтра по вертикали)
     const monthCounts: { [key: string]: number } = {};
-    campaigns.forEach((c) => {
-      const monthYear = format(
-        new Date(c.flight_period.start_date),
-        'MMMM yyyy',
-        { locale: ru }
-      );
+    
+    // Находим диапазон дат для всех кампаний (не только отфильтрованных)
+    const allDates = campaigns.map(c => new Date(c.flight_period.start_date));
+    const minDate = allDates.length > 0 ? new Date(Math.min(...allDates.map(d => d.getTime()))) : new Date();
+    const maxDate = allDates.length > 0 ? new Date(Math.max(...allDates.map(d => d.getTime()))) : new Date();
+    
+    // Создаем полный список месяцев от минимальной до максимальной даты
+    const allMonths: { monthYear: string; date: Date }[] = [];
+    const currentDate = new Date(minDate.getFullYear(), minDate.getMonth(), 1);
+    const endDate = new Date(maxDate.getFullYear(), maxDate.getMonth(), 1);
+    
+    while (currentDate <= endDate) {
+      const monthYear = format(currentDate, 'LLLL yyyy', { locale: ru });
+      allMonths.push({
+        monthYear,
+        date: new Date(currentDate)
+      });
+      monthCounts[monthYear] = 0; // Инициализируем нулем
+      currentDate.setMonth(currentDate.getMonth() + 1);
+    }
+    
+    // Заполняем реальными данными
+    filteredCampaignsForTimeline.forEach((c) => {
+      const startDate = new Date(c.flight_period.start_date);
+      const monthYear = format(startDate, 'LLLL yyyy', { locale: ru });
       monthCounts[monthYear] = (monthCounts[monthYear] || 0) + 1;
     });
-    // Сортируем месяцы
-    const sortedMonths = Object.keys(monthCounts).sort((a, b) => {
-      const dateA = new Date(a.replace(/ (\d{4})/, ', $1'));
-      const dateB = new Date(b.replace(/ (\d{4})/, ', $1'));
-      return dateA.getTime() - dateB.getTime();
-    });
+    
+    // Сортируем месяцы по датам
+    const sortedMonths = allMonths
+      .sort((a, b) => a.date.getTime() - b.date.getTime())
+      .map(m => m.monthYear);
+    
+    // Определяем цвет графика в зависимости от выбранной вертикали
+    const getChartColor = () => {
+      if (selectedVertical === 'all') {
+        return { backgroundColor: '#60A5FA', borderColor: '#3B82F6' }; // blue
+      }
+      const verticalColor = getVerticalColorClass(selectedVertical);
+      return { 
+        backgroundColor: verticalColor.backgroundColor, 
+        borderColor: verticalColor.backgroundColor 
+      };
+    };
+    
+    const chartColors = getChartColor();
+    
     const campaignsByMonthData = {
       labels: sortedMonths,
       datasets: [
         {
-          label: 'Количество кампаний',
+          label: selectedVertical === 'all' 
+            ? 'Количество кампаний' 
+            : `Кампании: ${selectedVertical}`,
           data: sortedMonths.map((month) => monthCounts[month]),
-          backgroundColor: '#60A5FA', // blue-400
-          borderColor: '#3B82F6',
+          backgroundColor: chartColors.backgroundColor,
+          borderColor: chartColors.borderColor,
           borderWidth: 1,
         },
       ],
     };
 
-    // Популярность каналов
+    // Популярность каналов (с учетом фильтра по вертикали)
+    const filteredCampaignsForChannels = selectedVerticalForChannels === 'all' 
+      ? campaigns 
+      : campaigns.filter(c => c.campaign_vertical === selectedVerticalForChannels);
+    
     const channelCounts: { [key: string]: number } = {};
-    campaigns.forEach((c) => {
+    filteredCampaignsForChannels.forEach((c) => {
       (c.channels ?? []).forEach((ch) => {
         channelCounts[ch] = (channelCounts[ch] || 0) + 1;
       });
@@ -172,14 +274,31 @@ export default function Analytics() {
     const sortedChannels = Object.keys(channelCounts).sort(
       (a, b) => channelCounts[b] - channelCounts[a]
     );
+    
+    // Определяем цвет графика каналов в зависимости от выбранной вертикали
+    const getChannelsChartColor = () => {
+      if (selectedVerticalForChannels === 'all') {
+        return { backgroundColor: '#F59E0B', borderColor: '#F59E0B' }; // amber
+      }
+      const verticalColor = getVerticalColorClass(selectedVerticalForChannels);
+      return { 
+        backgroundColor: verticalColor.backgroundColor, 
+        borderColor: verticalColor.backgroundColor 
+      };
+    };
+    
+    const channelsChartColors = getChannelsChartColor();
+    
     const channelsPopularity = {
       labels: sortedChannels,
       datasets: [
         {
-          label: 'Частота использования',
+          label: selectedVerticalForChannels === 'all' 
+            ? 'Частота использования' 
+            : `Частота использования: ${selectedVerticalForChannels}`,
           data: sortedChannels.map((ch) => channelCounts[ch]),
-          backgroundColor: '#F59E0B',
-          borderColor: '#F59E0B',
+          backgroundColor: channelsChartColors.backgroundColor,
+          borderColor: channelsChartColors.borderColor,
           borderWidth: 1,
         },
       ],
@@ -193,8 +312,9 @@ export default function Analytics() {
       campaignsByType: campaignsByTypeData,
       campaignsByMonth: campaignsByMonthData,
       channelsPopularity,
+      availableVerticals,
     };
-  }, [campaigns]);
+  }, [campaigns, selectedVertical, selectedVerticalForChannels]);
 
   const donutOptions = {
     responsive: true,
@@ -259,6 +379,28 @@ export default function Analytics() {
     },
   };
 
+  // Настройки для графика каналов с обработчиком клика
+  const channelsBarOptions = {
+    ...barOptions,
+    onClick: (event: unknown, elements: { index: number }[]) => {
+      if (elements.length > 0) {
+        const elementIndex = elements[0].index;
+        const channelName = channelsPopularity.labels[elementIndex];
+        handleChannelClick(channelName);
+      }
+    },
+    plugins: {
+      ...barOptions.plugins,
+      tooltip: {
+        callbacks: {
+          afterLabel: () => {
+            return 'Нажмите для просмотра кампаний';
+          },
+        },
+      },
+    },
+  };
+
   if (loading) {
     return (
       <main className="min-h-screen bg-gray-900 p-8 flex flex-col items-center justify-center text-white text-xl">
@@ -312,22 +454,450 @@ export default function Analytics() {
       </div>
 
       <div className="bg-gray-800 rounded-lg p-6 shadow-md">
-        <h2 className="text-xl font-semibold text-white mb-4">
-          Кампании по месяцам запуска
-        </h2>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+          <h2 className="text-xl font-semibold text-white mb-2 sm:mb-0">
+            Кампании по месяцам запуска
+          </h2>
+          <div className="flex items-center gap-2">
+            <label className="text-sm text-gray-300">Вертикаль:</label>
+            <select
+              value={selectedVertical}
+              onChange={(e) => setSelectedVertical(e.target.value)}
+              className="px-3 py-1 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            >
+              <option value="all">Все вертикали</option>
+              {availableVerticals.map((vertical) => (
+                <option key={vertical} value={vertical}>
+                  {vertical}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
         <div className="h-96">
           <Bar data={campaignsByMonth} options={barOptions} />
         </div>
       </div>
 
       <div className="bg-gray-800 rounded-lg p-6 shadow-md mt-8">
-        <h2 className="text-xl font-semibold text-white mb-4">
-          Популярность каналов
-        </h2>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+          <h2 className="text-xl font-semibold text-white mb-2 sm:mb-0">
+            Популярность каналов
+          </h2>
+          <div className="flex items-center gap-2">
+            <label className="text-sm text-gray-300">Вертикаль:</label>
+            <select
+              value={selectedVerticalForChannels}
+              onChange={(e) => setSelectedVerticalForChannels(e.target.value)}
+              className="px-3 py-1 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            >
+              <option value="all">Все вертикали</option>
+              {availableVerticals.map((vertical) => (
+                <option key={vertical} value={vertical}>
+                  {vertical}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
         <div className="h-96">
-          <Bar data={channelsPopularity} options={barOptions} />
+          <Bar data={channelsPopularity} options={channelsBarOptions} />
+        </div>
+        
+        {/* Подсказка для пользователя */}
+        <div className="mt-2 text-sm text-gray-400 text-center">
+          💡 Нажмите на столбец канала, чтобы увидеть список кампаний
         </div>
       </div>
+
+      {/* Детальный просмотр кампаний выбранного канала */}
+      {selectedChannel && (
+        <div className="bg-gray-800 rounded-lg p-6 shadow-md mt-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-white">
+              Кампании с каналом "{selectedChannel}"
+              {selectedVerticalForChannels !== 'all' && (
+                <span className="text-gray-400 ml-2">
+                  (вертикаль: {selectedVerticalForChannels})
+                </span>
+              )}
+            </h2>
+            <button
+              onClick={handleCloseChannelDetails}
+              className="text-gray-400 hover:text-white transition-colors"
+            >
+              ✕
+            </button>
+          </div>
+          
+          <div className="mb-4 text-gray-300">
+            Найдено кампаний: <span className="font-semibold text-white">{selectedChannelCampaigns.length}</span>
+            <span className="ml-4 text-sm text-gray-400">
+              💡 Нажмите на строку для просмотра деталей кампании
+            </span>
+          </div>
+          
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left text-gray-300">
+              <thead className="text-xs text-gray-400 uppercase bg-gray-700">
+                <tr>
+                  <th scope="col" className="px-6 py-3">Название кампании</th>
+                  <th scope="col" className="px-6 py-3">Вертикаль</th>
+                  <th scope="col" className="px-6 py-3">Тип</th>
+                  <th scope="col" className="px-6 py-3">Статус</th>
+                  <th scope="col" className="px-6 py-3">Период</th>
+                  <th scope="col" className="px-6 py-3">Все каналы</th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectedChannelCampaigns.map((campaign) => {
+                  const verticalColor = getVerticalColorClass(campaign.campaign_vertical);
+                  const startDate = campaign.flight_period?.start_date 
+                    ? format(new Date(campaign.flight_period.start_date), 'dd.MM.yyyy', { locale: ru })
+                    : 'Не указано';
+                  const endDate = campaign.flight_period?.end_date 
+                    ? format(new Date(campaign.flight_period.end_date), 'dd.MM.yyyy', { locale: ru })
+                    : 'Не указано';
+                  
+                  return (
+                    <tr 
+                      key={campaign.id} 
+                      className="bg-gray-800 border-b border-gray-700 hover:bg-gray-700 cursor-pointer transition-colors"
+                      onClick={() => handleOpenCampaignModal(campaign)}
+                    >
+                      <td className="px-6 py-4 font-medium text-white">
+                        {campaign.campaign_name}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span 
+                          className="inline-block w-3 h-3 rounded-full mr-2"
+                          style={{ backgroundColor: verticalColor.backgroundColor }}
+                        ></span>
+                        {campaign.campaign_vertical}
+                      </td>
+                      <td className="px-6 py-4">{campaign.campaign_type}</td>
+                      <td className="px-6 py-4">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          campaign.status === 'active' 
+                            ? 'bg-green-900 text-green-300' 
+                            : campaign.status === 'completed'
+                            ? 'bg-red-900 text-red-300'
+                            : 'bg-yellow-900 text-yellow-300'
+                        }`}>
+                          {campaign.status === 'active' ? 'Активная' : 
+                           campaign.status === 'completed' ? 'Завершена' : 'Запланирована'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        {startDate} - {endDate}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex flex-wrap gap-1">
+                          {(campaign.channels || []).map((channel, index) => (
+                            <span 
+                              key={index}
+                              className={`px-2 py-1 rounded text-xs ${
+                                channel === selectedChannel 
+                                  ? 'bg-blue-900 text-blue-300 font-semibold' 
+                                  : 'bg-gray-700 text-gray-300'
+                              }`}
+                            >
+                              {channel}
+                            </span>
+                          ))}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          
+          {selectedChannelCampaigns.length === 0 && (
+            <div className="text-center py-8 text-gray-400">
+              Кампании с каналом "{selectedChannel}" не найдены
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Детальная таблица каналов по вертикалям */}
+      <div className="bg-gray-800 rounded-lg p-6 shadow-md mt-8">
+        <h2 className="text-xl font-semibold text-white mb-4">
+          Детальная аналитика каналов по вертикалям
+        </h2>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left text-gray-300">
+            <thead className="text-xs text-gray-400 uppercase bg-gray-700">
+              <tr>
+                <th scope="col" className="px-6 py-3">Вертикаль</th>
+                <th scope="col" className="px-6 py-3">Топ-3 канала</th>
+                <th scope="col" className="px-6 py-3">Всего кампаний</th>
+                <th scope="col" className="px-6 py-3">Уникальных каналов</th>
+              </tr>
+            </thead>
+            <tbody>
+              {availableVerticals.map((vertical) => {
+                const verticalCampaigns = campaigns.filter(c => c.campaign_vertical === vertical);
+                const verticalChannelCounts: { [key: string]: number } = {};
+                
+                verticalCampaigns.forEach((c) => {
+                  (c.channels ?? []).forEach((ch) => {
+                    verticalChannelCounts[ch] = (verticalChannelCounts[ch] || 0) + 1;
+                  });
+                });
+                
+                const topChannels = Object.entries(verticalChannelCounts)
+                  .sort(([,a], [,b]) => b - a)
+                  .slice(0, 3)
+                  .map(([channel, count]) => `${channel} (${count})`)
+                  .join(', ');
+                
+                const uniqueChannelsCount = Object.keys(verticalChannelCounts).length;
+                const verticalColor = getVerticalColorClass(vertical);
+                
+                return (
+                  <tr key={vertical} className="bg-gray-800 border-b border-gray-700 hover:bg-gray-700">
+                    <td className="px-6 py-4 font-medium">
+                      <span 
+                        className="inline-block w-3 h-3 rounded-full mr-2"
+                        style={{ backgroundColor: verticalColor.backgroundColor }}
+                      ></span>
+                      {vertical}
+                    </td>
+                    <td className="px-6 py-4">{topChannels || 'Нет данных'}</td>
+                    <td className="px-6 py-4">{verticalCampaigns.length}</td>
+                    <td className="px-6 py-4">{uniqueChannelsCount}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Модальное окно детального просмотра кампании */}
+      {selectedCampaignForModal && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          onClick={handleCloseCampaignModal}
+        >
+          <div 
+            className="bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Заголовок модального окна */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-700">
+              <h2 className="text-2xl font-bold text-white">
+                {selectedCampaignForModal.campaign_name}
+              </h2>
+              <button
+                onClick={handleCloseCampaignModal}
+                className="text-gray-400 hover:text-white transition-colors text-2xl"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Содержимое модального окна */}
+            <div className="p-6">
+              {/* Основная информация */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-400 mb-1">
+                      Вертикаль
+                    </label>
+                    <div className="flex items-center">
+                      <span 
+                        className="inline-block w-3 h-3 rounded-full mr-2"
+                        style={{ backgroundColor: getVerticalColorClass(selectedCampaignForModal.campaign_vertical).backgroundColor }}
+                      ></span>
+                      <span className="text-white">{selectedCampaignForModal.campaign_vertical}</span>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-400 mb-1">
+                      Тип кампании
+                    </label>
+                    <span className="text-white">{selectedCampaignForModal.campaign_type}</span>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-400 mb-1">
+                      Статус
+                    </label>
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      selectedCampaignForModal.status === 'active' 
+                        ? 'bg-green-900 text-green-300' 
+                        : selectedCampaignForModal.status === 'completed'
+                        ? 'bg-red-900 text-red-300'
+                        : 'bg-yellow-900 text-yellow-300'
+                    }`}>
+                      {selectedCampaignForModal.status === 'active' ? 'Активная' : 
+                       selectedCampaignForModal.status === 'completed' ? 'Завершена' : 'Запланирована'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-400 mb-1">
+                      Период проведения
+                    </label>
+                    <div className="text-white">
+                      {selectedCampaignForModal.flight_period?.start_date && selectedCampaignForModal.flight_period?.end_date ? (
+                        <>
+                          {format(new Date(selectedCampaignForModal.flight_period.start_date), 'dd MMMM yyyy', { locale: ru })}
+                          {' - '}
+                          {format(new Date(selectedCampaignForModal.flight_period.end_date), 'dd MMMM yyyy', { locale: ru })}
+                        </>
+                      ) : (
+                        'Не указано'
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-400 mb-1">
+                      География
+                    </label>
+                    <span className="text-white">{selectedCampaignForModal.geo || 'Не указано'}</span>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-400 mb-1">
+                      Аудитория
+                    </label>
+                    <span className="text-white">{selectedCampaignForModal.audience || 'Не указано'}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Ключевое сообщение */}
+              {selectedCampaignForModal.key_message && (
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-400 mb-2">
+                    Ключевое сообщение
+                  </label>
+                  <div className="bg-gray-700 rounded-lg p-4 text-white">
+                    {selectedCampaignForModal.key_message}
+                  </div>
+                </div>
+              )}
+
+              {/* Описание */}
+              {selectedCampaignForModal.description && (
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-400 mb-2">
+                    Описание
+                  </label>
+                  <div className="bg-gray-700 rounded-lg p-4 text-white">
+                    {selectedCampaignForModal.description}
+                  </div>
+                </div>
+              )}
+
+              {/* Каналы */}
+              {selectedCampaignForModal.channels && selectedCampaignForModal.channels.length > 0 && (
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-400 mb-2">
+                    Каналы
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedCampaignForModal.channels.map((channel, index) => (
+                      <span 
+                        key={index}
+                        className={`px-3 py-1 rounded-full text-sm ${
+                          channel === selectedChannel 
+                            ? 'bg-blue-900 text-blue-300 font-semibold border border-blue-500' 
+                            : 'bg-gray-700 text-gray-300'
+                        }`}
+                      >
+                        {channel}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Цели */}
+              {selectedCampaignForModal.objectives && selectedCampaignForModal.objectives.length > 0 && (
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-400 mb-2">
+                    Цели кампании
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedCampaignForModal.objectives.map((objective, index) => (
+                      <span 
+                        key={index}
+                        className="px-3 py-1 bg-purple-900 text-purple-300 rounded-full text-sm"
+                      >
+                        {objective}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Слоган */}
+              {selectedCampaignForModal.slogan && (
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-400 mb-2">
+                    Слоган
+                  </label>
+                  <div className="bg-gray-700 rounded-lg p-4 text-white italic">
+                    "{selectedCampaignForModal.slogan}"
+                  </div>
+                </div>
+              )}
+
+              {/* Медиа */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {selectedCampaignForModal.image_url && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-400 mb-2">
+                      Изображение
+                    </label>
+                    <Image 
+                      src={selectedCampaignForModal.image_url} 
+                      alt="Campaign visual"
+                      width={400}
+                      height={192}
+                      className="w-full h-48 object-cover rounded-lg"
+                    />
+                  </div>
+                )}
+                
+                {selectedCampaignForModal.video_url && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-400 mb-2">
+                      Видео
+                    </label>
+                    <video 
+                      src={selectedCampaignForModal.video_url} 
+                      controls
+                      className="w-full h-48 rounded-lg"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Подвал модального окна */}
+            <div className="flex justify-end p-6 border-t border-gray-700">
+              <button
+                onClick={handleCloseCampaignModal}
+                className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition-colors"
+              >
+                Закрыть
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

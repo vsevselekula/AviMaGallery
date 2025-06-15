@@ -12,12 +12,16 @@ interface CreateCampaignModalProps {
   onCampaignCreated: (campaign: Campaign) => void;
 }
 
-export function CreateCampaignModal({ onClose, onCampaignCreated }: CreateCampaignModalProps) {
+export function CreateCampaignModal({
+  onClose,
+  onCampaignCreated,
+}: CreateCampaignModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
   const supabase = createClientComponentClient();
-  const { showSuccess, showError, notification, hideNotification } = useNotification();
+  const { showSuccess, showError, notification, hideNotification } =
+    useNotification();
 
   const [formData, setFormData] = useState({
     campaign_name: '',
@@ -26,7 +30,7 @@ export function CreateCampaignModal({ onClose, onCampaignCreated }: CreateCampai
     campaign_vertical: '',
     flight_period: {
       start_date: '',
-      end_date: ''
+      end_date: '',
     },
     geo: '',
     audience: '',
@@ -39,7 +43,7 @@ export function CreateCampaignModal({ onClose, onCampaignCreated }: CreateCampai
     type: '',
     slogan: '',
     description: '',
-    targets: [] as string[]
+    targets: [] as string[],
   });
 
   // Текстовые поля для массивов
@@ -49,7 +53,10 @@ export function CreateCampaignModal({ onClose, onCampaignCreated }: CreateCampai
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+      if (
+        modalRef.current &&
+        !modalRef.current.contains(event.target as Node)
+      ) {
         onClose();
       }
     };
@@ -62,7 +69,9 @@ export function CreateCampaignModal({ onClose, onCampaignCreated }: CreateCampai
 
   useEffect(() => {
     const fetchUserRole = async () => {
-      const { data: { user: supabaseUser } } = await supabase.auth.getUser();
+      const {
+        data: { user: supabaseUser },
+      } = await supabase.auth.getUser();
       if (supabaseUser) {
         const { data: roleData } = await supabase
           .from('user_roles')
@@ -78,11 +87,14 @@ export function CreateCampaignModal({ onClose, onCampaignCreated }: CreateCampai
   }, [supabase]);
 
   // Функция для автоматического определения статуса по датам
-  const getStatusFromDates = (startDate: string, endDate: string): 'active' | 'completed' | 'planned' => {
+  const getStatusFromDates = (
+    startDate: string,
+    endDate: string
+  ): 'active' | 'completed' | 'planned' => {
     const now = new Date();
     const start = new Date(startDate);
     const end = new Date(endDate);
-    
+
     if (now < start) {
       return 'planned'; // Будущая кампания
     } else if (now > end) {
@@ -93,37 +105,44 @@ export function CreateCampaignModal({ onClose, onCampaignCreated }: CreateCampai
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
-  const handleDateChange = (field: 'start_date' | 'end_date', value: string) => {
-    setFormData(prev => ({
+  const handleDateChange = (
+    field: 'start_date' | 'end_date',
+    value: string
+  ) => {
+    setFormData((prev) => ({
       ...prev,
       flight_period: {
         ...prev.flight_period,
-        [field]: value
-      }
+        [field]: value,
+      },
     }));
   };
 
-  const handleArrayTextChange = (field: string, text: string, setter: (text: string) => void) => {
+  const handleArrayTextChange = (
+    field: string,
+    text: string,
+    setter: (text: string) => void
+  ) => {
     setter(text);
-    const lines = text.split('\n').filter(line => line.trim() !== '');
-    
+    const lines = text.split('\n').filter((line) => line.trim() !== '');
+
     if (field === 'links') {
-      const items = lines.map(line => {
+      const items = lines.map((line) => {
         const parts = line.split(' - ');
         return {
           label: parts[0] || '',
-          url: parts[1] || parts[0] || ''
+          url: parts[1] || parts[0] || '',
         };
       });
-      setFormData(prev => ({ ...prev, [field]: items }));
+      setFormData((prev) => ({ ...prev, [field]: items }));
     } else {
-      setFormData(prev => ({ ...prev, [field]: lines }));
+      setFormData((prev) => ({ ...prev, [field]: lines }));
     }
   };
 
@@ -148,7 +167,10 @@ export function CreateCampaignModal({ onClose, onCampaignCreated }: CreateCampai
       showError('Дата окончания обязательна');
       return false;
     }
-    if (new Date(formData.flight_period.start_date) >= new Date(formData.flight_period.end_date)) {
+    if (
+      new Date(formData.flight_period.start_date) >=
+      new Date(formData.flight_period.end_date)
+    ) {
       showError('Дата окончания должна быть позже даты начала');
       return false;
     }
@@ -168,7 +190,10 @@ export function CreateCampaignModal({ onClose, onCampaignCreated }: CreateCampai
     setIsCreating(true);
     try {
       // Автоматически определяем статус по датам
-      const status = getStatusFromDates(formData.flight_period.start_date, formData.flight_period.end_date);
+      const status = getStatusFromDates(
+        formData.flight_period.start_date,
+        formData.flight_period.end_date
+      );
 
       // Подготавливаем данные для вставки (только поля из схемы БД)
       const insertData = {
@@ -190,7 +215,7 @@ export function CreateCampaignModal({ onClose, onCampaignCreated }: CreateCampai
         description: formData.description || null,
         targets: formData.targets.length > 0 ? formData.targets : null,
         pre_tests: null, // Пока оставляем пустым
-        post_tests: null // Пока оставляем пустым
+        post_tests: null, // Пока оставляем пустым
       };
 
       console.log('Creating campaign with data:', insertData);
@@ -201,7 +226,7 @@ export function CreateCampaignModal({ onClose, onCampaignCreated }: CreateCampai
         campaign_type: formData.campaign_type,
         campaign_vertical: formData.campaign_vertical,
         flight_period: formData.flight_period,
-        status: status
+        status: status,
       };
 
       console.log('Trying minimal data first:', minimalData);
@@ -214,7 +239,12 @@ export function CreateCampaignModal({ onClose, onCampaignCreated }: CreateCampai
 
       if (error) {
         console.error('Error creating campaign:', error);
-        console.error('Error details:', error.message, error.details, error.hint);
+        console.error(
+          'Error details:',
+          error.message,
+          error.details,
+          error.hint
+        );
         showError(`Ошибка при создании кампании: ${error.message}`);
         return;
       }
@@ -232,7 +262,14 @@ export function CreateCampaignModal({ onClose, onCampaignCreated }: CreateCampai
     }
   };
 
-  const verticals = ['Услуги', 'Работа', 'Авто', 'Недвижимость', 'Товары', 'Авито'];
+  const verticals = [
+    'Услуги',
+    'Работа',
+    'Авто',
+    'Недвижимость',
+    'Товары',
+    'Авито',
+  ];
   const campaignTypes = ['T1', 'T2'];
 
   return (
@@ -249,7 +286,9 @@ export function CreateCampaignModal({ onClose, onCampaignCreated }: CreateCampai
             ×
           </button>
 
-          <h2 className="text-2xl font-bold text-white mb-6">Создать новую кампанию</h2>
+          <h2 className="text-2xl font-bold text-white mb-6">
+            Создать новую кампанию
+          </h2>
 
           <div className="space-y-6">
             {/* Основная информация */}
@@ -261,7 +300,9 @@ export function CreateCampaignModal({ onClose, onCampaignCreated }: CreateCampai
                 <input
                   type="text"
                   value={formData.campaign_name}
-                  onChange={(e) => handleInputChange('campaign_name', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange('campaign_name', e.target.value)
+                  }
                   className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Введите название кампании"
                 />
@@ -272,12 +313,16 @@ export function CreateCampaignModal({ onClose, onCampaignCreated }: CreateCampai
                 </label>
                 <select
                   value={formData.campaign_type}
-                  onChange={(e) => handleInputChange('campaign_type', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange('campaign_type', e.target.value)
+                  }
                   className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Выберите тип кампании</option>
-                  {campaignTypes.map(type => (
-                    <option key={type} value={type}>{type}</option>
+                  {campaignTypes.map((type) => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -289,12 +334,16 @@ export function CreateCampaignModal({ onClose, onCampaignCreated }: CreateCampai
               </label>
               <select
                 value={formData.campaign_vertical}
-                onChange={(e) => handleInputChange('campaign_vertical', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange('campaign_vertical', e.target.value)
+                }
                 className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Выберите вертикаль</option>
-                {verticals.map(vertical => (
-                  <option key={vertical} value={vertical}>{vertical}</option>
+                {verticals.map((vertical) => (
+                  <option key={vertical} value={vertical}>
+                    {vertical}
+                  </option>
                 ))}
               </select>
             </div>
@@ -308,7 +357,9 @@ export function CreateCampaignModal({ onClose, onCampaignCreated }: CreateCampai
                 <input
                   type="date"
                   value={formData.flight_period.start_date}
-                  onChange={(e) => handleDateChange('start_date', e.target.value)}
+                  onChange={(e) =>
+                    handleDateChange('start_date', e.target.value)
+                  }
                   className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -326,25 +377,45 @@ export function CreateCampaignModal({ onClose, onCampaignCreated }: CreateCampai
             </div>
 
             {/* Показываем предварительный статус */}
-            {formData.flight_period.start_date && formData.flight_period.end_date && (
-              <div className="bg-gray-800 p-4 rounded-lg">
-                <p className="text-sm text-gray-300">
-                  <span className="font-medium">Статус кампании:</span>{' '}
-                  <span className={`font-medium ${
-                    getStatusFromDates(formData.flight_period.start_date, formData.flight_period.end_date) === 'active' 
-                      ? 'text-green-400' 
-                      : getStatusFromDates(formData.flight_period.start_date, formData.flight_period.end_date) === 'planned'
-                      ? 'text-blue-400'
-                      : 'text-gray-400'
-                  }`}>
-                    {getStatusFromDates(formData.flight_period.start_date, formData.flight_period.end_date) === 'active' && 'Активна'}
-                    {getStatusFromDates(formData.flight_period.start_date, formData.flight_period.end_date) === 'planned' && 'Запланирована'}
-                    {getStatusFromDates(formData.flight_period.start_date, formData.flight_period.end_date) === 'completed' && 'Завершена'}
-                  </span>
-                  <span className="text-xs text-gray-400 ml-2">(определяется автоматически по датам)</span>
-                </p>
-              </div>
-            )}
+            {formData.flight_period.start_date &&
+              formData.flight_period.end_date && (
+                <div className="bg-gray-800 p-4 rounded-lg">
+                  <p className="text-sm text-gray-300">
+                    <span className="font-medium">Статус кампании:</span>{' '}
+                    <span
+                      className={`font-medium ${
+                        getStatusFromDates(
+                          formData.flight_period.start_date,
+                          formData.flight_period.end_date
+                        ) === 'active'
+                          ? 'text-green-400'
+                          : getStatusFromDates(
+                                formData.flight_period.start_date,
+                                formData.flight_period.end_date
+                              ) === 'planned'
+                            ? 'text-blue-400'
+                            : 'text-gray-400'
+                      }`}
+                    >
+                      {getStatusFromDates(
+                        formData.flight_period.start_date,
+                        formData.flight_period.end_date
+                      ) === 'active' && 'Активна'}
+                      {getStatusFromDates(
+                        formData.flight_period.start_date,
+                        formData.flight_period.end_date
+                      ) === 'planned' && 'Запланирована'}
+                      {getStatusFromDates(
+                        formData.flight_period.start_date,
+                        formData.flight_period.end_date
+                      ) === 'completed' && 'Завершена'}
+                    </span>
+                    <span className="text-xs text-gray-400 ml-2">
+                      (определяется автоматически по датам)
+                    </span>
+                  </p>
+                </div>
+              )}
 
             {/* Описания */}
             <div>
@@ -353,7 +424,9 @@ export function CreateCampaignModal({ onClose, onCampaignCreated }: CreateCampai
               </label>
               <textarea
                 value={formData.key_message}
-                onChange={(e) => handleInputChange('key_message', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange('key_message', e.target.value)
+                }
                 rows={3}
                 className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Основное сообщение кампании"
@@ -366,7 +439,9 @@ export function CreateCampaignModal({ onClose, onCampaignCreated }: CreateCampai
               </label>
               <textarea
                 value={formData.description}
-                onChange={(e) => handleInputChange('description', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange('description', e.target.value)
+                }
                 rows={2}
                 className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Подробное описание кампании"
@@ -394,7 +469,9 @@ export function CreateCampaignModal({ onClose, onCampaignCreated }: CreateCampai
                 <input
                   type="text"
                   value={formData.audience}
-                  onChange={(e) => handleInputChange('audience', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange('audience', e.target.value)
+                  }
                   className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Целевая аудитория"
                 />
@@ -408,7 +485,9 @@ export function CreateCampaignModal({ onClose, onCampaignCreated }: CreateCampai
               </label>
               <ImageUpload
                 value={formData.image_url}
-                onChange={(imageUrl) => handleInputChange('image_url', imageUrl)}
+                onChange={(imageUrl) =>
+                  handleInputChange('image_url', imageUrl)
+                }
                 onError={(error) => showError(error)}
                 campaignId="new-campaign"
                 maxSizeMB={10}
@@ -437,7 +516,13 @@ export function CreateCampaignModal({ onClose, onCampaignCreated }: CreateCampai
                 </label>
                 <textarea
                   value={objectivesText}
-                  onChange={(e) => handleArrayTextChange('objectives', e.target.value, setObjectivesText)}
+                  onChange={(e) =>
+                    handleArrayTextChange(
+                      'objectives',
+                      e.target.value,
+                      setObjectivesText
+                    )
+                  }
                   rows={3}
                   className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Цель 1&#10;Цель 2&#10;Цель 3"
@@ -449,7 +534,13 @@ export function CreateCampaignModal({ onClose, onCampaignCreated }: CreateCampai
                 </label>
                 <textarea
                   value={channelsText}
-                  onChange={(e) => handleArrayTextChange('channels', e.target.value, setChannelsText)}
+                  onChange={(e) =>
+                    handleArrayTextChange(
+                      'channels',
+                      e.target.value,
+                      setChannelsText
+                    )
+                  }
                   rows={3}
                   className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="TV&#10;Digital&#10;Radio"
@@ -463,7 +554,9 @@ export function CreateCampaignModal({ onClose, onCampaignCreated }: CreateCampai
               </label>
               <textarea
                 value={linksText}
-                onChange={(e) => handleArrayTextChange('links', e.target.value, setLinksText)}
+                onChange={(e) =>
+                  handleArrayTextChange('links', e.target.value, setLinksText)
+                }
                 rows={3}
                 className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Сайт - https://example.com&#10;Лендинг - https://landing.com"
@@ -489,7 +582,7 @@ export function CreateCampaignModal({ onClose, onCampaignCreated }: CreateCampai
           </div>
         </div>
       </div>
-      
+
       <Notification
         message={notification.message}
         type={notification.type}
@@ -498,4 +591,4 @@ export function CreateCampaignModal({ onClose, onCampaignCreated }: CreateCampai
       />
     </>
   );
-} 
+}

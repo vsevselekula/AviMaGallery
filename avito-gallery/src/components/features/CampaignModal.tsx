@@ -239,8 +239,6 @@ export function CampaignModal({
                   </div>
                 </div>
               )}
-
-
             </>
           )}
         </div>
