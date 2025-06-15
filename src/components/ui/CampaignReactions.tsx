@@ -7,7 +7,10 @@ interface CampaignReactionsProps {
   campaignId: string;
   userReaction: ReactionType | null;
   reactionCounts: { [K in ReactionType]?: number };
-  onToggleReaction: (campaignId: string, reactionType: ReactionType) => Promise<boolean>;
+  onToggleReaction: (
+    campaignId: string,
+    reactionType: ReactionType
+  ) => Promise<boolean>;
   disabled?: boolean;
   size?: 'sm' | 'md' | 'lg';
   showLabels?: boolean;
@@ -20,7 +23,7 @@ export function CampaignReactions({
   onToggleReaction,
   disabled = false,
   size = 'md',
-  showLabels = false
+  showLabels = false,
 }: CampaignReactionsProps) {
   const [isAnimating, setIsAnimating] = useState<ReactionType | null>(null);
 
@@ -28,7 +31,7 @@ export function CampaignReactions({
     if (disabled) return;
 
     setIsAnimating(reactionType);
-    
+
     try {
       await onToggleReaction(campaignId, reactionType);
     } catch (error) {
@@ -45,19 +48,19 @@ export function CampaignReactions({
         return {
           button: 'px-2 py-1 text-xs',
           emoji: 'text-sm',
-          count: 'text-xs'
+          count: 'text-xs',
         };
       case 'lg':
         return {
           button: 'px-4 py-2 text-base',
           emoji: 'text-xl',
-          count: 'text-sm'
+          count: 'text-sm',
         };
       default:
         return {
           button: 'px-3 py-1.5 text-sm',
           emoji: 'text-base',
-          count: 'text-xs'
+          count: 'text-xs',
         };
     }
   };
@@ -65,7 +68,10 @@ export function CampaignReactions({
   const sizeClasses = getSizeClasses();
 
   // Получаем общее количество реакций
-  const totalReactions = Object.values(reactionCounts).reduce((sum, count) => sum + (count || 0), 0);
+  const totalReactions = Object.values(reactionCounts).reduce(
+    (sum, count) => sum + (count || 0),
+    0
+  );
 
   return (
     <div className="flex items-center gap-2 flex-wrap">
@@ -75,7 +81,7 @@ export function CampaignReactions({
           const count = reactionCounts[config.type] || 0;
           const isActive = userReaction === config.type;
           const isCurrentlyAnimating = isAnimating === config.type;
-          
+
           return (
             <button
               key={config.type}
@@ -84,16 +90,17 @@ export function CampaignReactions({
               className={`
                 ${sizeClasses.button}
                 flex items-center gap-1 rounded-full transition-all duration-200 backdrop-blur-sm
-                ${isActive 
-                  ? 'bg-blue-500/20 text-blue-200 shadow-lg' 
-                  : 'bg-white/10 text-white/80 hover:bg-white/20 hover:text-white'
+                ${
+                  isActive
+                    ? 'bg-blue-500/20 text-blue-200 shadow-lg'
+                    : 'bg-white/10 text-white/80 hover:bg-white/20 hover:text-white'
                 }
                 ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:scale-105 active:scale-95'}
                 ${isCurrentlyAnimating ? 'animate-pulse scale-110' : ''}
               `}
               title={showLabels ? undefined : config.label}
             >
-              <span 
+              <span
                 className={`
                   ${sizeClasses.emoji} 
                   transition-transform duration-200
@@ -102,17 +109,15 @@ export function CampaignReactions({
               >
                 {config.emoji}
               </span>
-              
+
               {count > 0 && (
                 <span className={`${sizeClasses.count} font-medium`}>
                   {count}
                 </span>
               )}
-              
+
               {showLabels && (
-                <span className={sizeClasses.count}>
-                  {config.label}
-                </span>
+                <span className={sizeClasses.count}>{config.label}</span>
               )}
             </button>
           );
@@ -122,7 +127,12 @@ export function CampaignReactions({
       {/* Общий счетчик реакций */}
       {totalReactions > 0 && !showLabels && (
         <div className="text-xs text-gray-500 dark:text-gray-400 ml-2">
-          {totalReactions} {totalReactions === 1 ? 'реакция' : totalReactions < 5 ? 'реакции' : 'реакций'}
+          {totalReactions}{' '}
+          {totalReactions === 1
+            ? 'реакция'
+            : totalReactions < 5
+              ? 'реакции'
+              : 'реакций'}
         </div>
       )}
     </div>
@@ -132,7 +142,7 @@ export function CampaignReactions({
 // Компонент для отображения только счетчиков (без возможности взаимодействия)
 export function CampaignReactionsDisplay({
   reactionCounts,
-  size = 'sm'
+  size = 'sm',
 }: {
   reactionCounts: { [K in ReactionType]?: number };
   size?: 'sm' | 'md' | 'lg';
@@ -143,25 +153,25 @@ export function CampaignReactionsDisplay({
         return {
           container: 'gap-1',
           emoji: 'text-xs',
-          count: 'text-xs'
+          count: 'text-xs',
         };
       case 'lg':
         return {
           container: 'gap-2',
           emoji: 'text-lg',
-          count: 'text-sm'
+          count: 'text-sm',
         };
       default:
         return {
           container: 'gap-1.5',
           emoji: 'text-sm',
-          count: 'text-xs'
+          count: 'text-xs',
         };
     }
   };
 
   const sizeClasses = getSizeClasses();
-  
+
   // Фильтруем только реакции с количеством > 0
   const activeReactions = Object.entries(reactionCounts)
     .filter(([, count]) => (count || 0) > 0)
@@ -182,10 +192,10 @@ export function CampaignReactionsDisplay({
             key={reactionType}
             className="flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded-full"
           >
-            <span className={sizeClasses.emoji}>
-              {config.emoji}
-            </span>
-            <span className={`${sizeClasses.count} font-medium text-gray-600 dark:text-gray-300`}>
+            <span className={sizeClasses.emoji}>{config.emoji}</span>
+            <span
+              className={`${sizeClasses.count} font-medium text-gray-600 dark:text-gray-300`}
+            >
               {count}
             </span>
           </div>
@@ -193,4 +203,4 @@ export function CampaignReactionsDisplay({
       })}
     </div>
   );
-} 
+}

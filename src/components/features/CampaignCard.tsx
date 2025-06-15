@@ -12,11 +12,11 @@ interface CampaignCardProps {
   showReactions?: boolean;
 }
 
-export function CampaignCard({ 
-  campaign, 
-  className, 
-  reactionCounts = {}, 
-  showReactions = true 
+export function CampaignCard({
+  campaign,
+  className,
+  reactionCounts = {},
+  showReactions = true,
 }: CampaignCardProps) {
   const isActive = new Date(campaign.flight_period.end_date) > new Date();
   const hasImage = isValidImageUrl(campaign.image_url);
@@ -98,9 +98,9 @@ export function CampaignCard({
             )}
           </span>
           {showReactions && (
-            <CampaignReactionsDisplay 
-              reactionCounts={reactionCounts} 
-              size="sm" 
+            <CampaignReactionsDisplay
+              reactionCounts={reactionCounts}
+              size="sm"
             />
           )}
         </div>

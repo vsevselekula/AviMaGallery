@@ -25,7 +25,7 @@ export default function DashboardPage() {
 
       if (error) {
         console.error('Error fetching campaigns_v2:', error);
-        
+
         // Если это сетевая ошибка, попробуем еще раз через 2 секунды
         if (error.message?.includes('Failed to fetch') || error.code === '') {
           setTimeout(() => {
@@ -33,7 +33,7 @@ export default function DashboardPage() {
           }, 2000);
           return;
         }
-        
+
         setLoading(false);
       } else {
         setCampaigns(data as Campaign[]);

@@ -172,11 +172,9 @@ export function CampaignModal({
     useNotification();
 
   // Добавляем хук для реакций
-  const {
-    userReactions,
-    reactionCounts,
-    toggleReaction
-  } = useReactions([campaign.id]);
+  const { userReactions, reactionCounts, toggleReaction } = useReactions([
+    campaign.id,
+  ]);
 
   useEffect(() => {
     setEditedCampaign({
@@ -208,16 +206,25 @@ export function CampaignModal({
     // Инициализация текста для тестов
     if (Array.isArray(campaign.pre_tests)) {
       setTestsText(
-        campaign.pre_tests.map((test) => {
-          if (typeof test === 'object' && test && 'label' in test && 'url' in test) {
-            return `${test.label} - ${test.url}`;
-          }
-          return String(test);
-        }).join('\n')
+        campaign.pre_tests
+          .map((test) => {
+            if (
+              typeof test === 'object' &&
+              test &&
+              'label' in test &&
+              'url' in test
+            ) {
+              return `${test.label} - ${test.url}`;
+            }
+            return String(test);
+          })
+          .join('\n')
       );
     } else if (campaign.pre_tests && typeof campaign.pre_tests === 'object') {
       setTestsText(
-        Object.entries(campaign.pre_tests).map(([label, value]) => `${label} - ${value}`).join('\n')
+        Object.entries(campaign.pre_tests)
+          .map(([label, value]) => `${label} - ${value}`)
+          .join('\n')
       );
     } else if (typeof campaign.pre_tests === 'string') {
       setTestsText(campaign.pre_tests);
@@ -398,8 +405,6 @@ export function CampaignModal({
             )
           : editedCampaign.status;
 
-
-
       const { data, error } = await supabase
         .from('campaigns_v2')
         .update({
@@ -561,8 +566,6 @@ export function CampaignModal({
   const isSuperAdmin = userRole === 'super_admin';
   const isAdmin = userRole === 'super_admin' || userRole === 'editor';
 
-
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm !mt-0">
       <div
@@ -721,7 +724,7 @@ export function CampaignModal({
                     {editedCampaign.campaign_type}
                   </span>
                 </div>
-                
+
                 {/* Реакции */}
                 <CampaignReactions
                   campaignId={campaign.id}
@@ -760,7 +763,7 @@ export function CampaignModal({
                   {editedCampaign.campaign_type}
                 </span>
               </div>
-              
+
               {/* Реакции */}
               <div className="flex justify-center">
                 <CampaignReactions
@@ -1167,31 +1170,36 @@ export function CampaignModal({
                   {Array.isArray(editedCampaign.pre_tests) &&
                   editedCampaign.pre_tests.length > 0 ? (
                     <ul className="list-disc ml-6">
-                      {editedCampaign.pre_tests.map((item: unknown, i: number) => {
-                        if (
-                          item &&
-                          typeof item === 'object' &&
-                          'label' in item &&
-                          'url' in item
-                        ) {
-                          const testItem = item as { label: string; url: string };
-                          return (
-                            <li key={i}>
-                              <a
-                                href={testItem.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-400 underline"
-                              >
-                                {testItem.label}
-                              </a>
-                            </li>
-                          );
-                        } else if (typeof item === 'string') {
-                          return <li key={i}>{item}</li>;
+                      {editedCampaign.pre_tests.map(
+                        (item: unknown, i: number) => {
+                          if (
+                            item &&
+                            typeof item === 'object' &&
+                            'label' in item &&
+                            'url' in item
+                          ) {
+                            const testItem = item as {
+                              label: string;
+                              url: string;
+                            };
+                            return (
+                              <li key={i}>
+                                <a
+                                  href={testItem.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-400 underline"
+                                >
+                                  {testItem.label}
+                                </a>
+                              </li>
+                            );
+                          } else if (typeof item === 'string') {
+                            return <li key={i}>{item}</li>;
+                          }
+                          return null;
                         }
-                        return null;
-                      })}
+                      )}
                     </ul>
                   ) : editedCampaign.pre_tests &&
                     typeof editedCampaign.pre_tests === 'object' &&

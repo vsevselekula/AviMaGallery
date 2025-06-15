@@ -12,7 +12,8 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 console.log('🔧 Создание таблицы реакций...');
 console.log('Environment check:');
 if (!supabaseUrl) console.error('- NEXT_PUBLIC_SUPABASE_URL is missing');
-if (!supabaseServiceKey) console.error('- SUPABASE_SERVICE_ROLE_KEY is missing');
+if (!supabaseServiceKey)
+  console.error('- SUPABASE_SERVICE_ROLE_KEY is missing');
 
 if (!supabaseUrl || !supabaseServiceKey) {
   console.error('❌ Отсутствуют необходимые переменные окружения в .env.local');
@@ -24,46 +25,56 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 async function createReactionsTable() {
   try {
     console.log('📖 Читаем SQL файл...');
-    
+
     // Читаем SQL файл
     const sqlPath = path.join(process.cwd(), 'create_reactions_table.sql');
     const sqlContent = fs.readFileSync(sqlPath, 'utf8');
-    
+
     console.log('🚀 Выполняем SQL миграцию...');
-    
+
     // Разбиваем SQL на отдельные команды (по точке с запятой)
     const sqlCommands = sqlContent
       .split(';')
-      .map(cmd => cmd.trim())
-      .filter(cmd => cmd.length > 0 && !cmd.startsWith('--') && !cmd.startsWith('/*'));
-    
+      .map((cmd) => cmd.trim())
+      .filter(
+        (cmd) =>
+          cmd.length > 0 && !cmd.startsWith('--') && !cmd.startsWith('/*')
+      );
+
     console.log(`📝 Найдено ${sqlCommands.length} SQL команд для выполнения`);
-    
+
     // Выполняем каждую команду отдельно
     for (let i = 0; i < sqlCommands.length; i++) {
       const command = sqlCommands[i];
-      
+
       // Пропускаем комментарии и пустые строки
-      if (command.startsWith('--') || command.startsWith('/*') || command.trim() === '') {
+      if (
+        command.startsWith('--') ||
+        command.startsWith('/*') ||
+        command.trim() === ''
+      ) {
         continue;
       }
-      
+
       console.log(`⚡ Выполняем команду ${i + 1}/${sqlCommands.length}...`);
-      
+
       try {
-        const { data, error } = await supabase.rpc('exec_sql', { 
-          sql_query: command + ';' 
+        const { data, error } = await supabase.rpc('exec_sql', {
+          sql_query: command + ';',
         });
-        
+
         if (error) {
           // Если RPC функция не существует, пробуем прямой SQL
           const { data: directData, error: directError } = await supabase
             .from('_temp_sql_execution')
             .select('*')
             .limit(0);
-          
+
           if (directError) {
-            console.log(`⚠️  Команда ${i + 1} вызвала ошибку (возможно, уже выполнена):`, error.message);
+            console.log(
+              `⚠️  Команда ${i + 1} вызвала ошибку (возможно, уже выполнена):`,
+              error.message
+            );
           }
         } else {
           console.log(`✅ Команда ${i + 1} выполнена успешно`);
@@ -72,21 +83,21 @@ async function createReactionsTable() {
         console.log(`⚠️  Команда ${i + 1} вызвала ошибку:`, cmdError);
       }
     }
-    
+
     console.log('🔍 Проверяем создание таблицы...');
-    
+
     // Проверяем, что таблица создана
     const { data: tableCheck, error: checkError } = await supabase
       .from('campaign_reactions')
       .select('count(*)')
       .limit(1);
-    
+
     if (checkError) {
       console.error('❌ Ошибка при проверке таблицы:', checkError.message);
-      
+
       // Пробуем создать таблицу напрямую с базовой структурой
       console.log('🔧 Пробуем создать таблицу напрямую...');
-      
+
       const basicTableSQL = `
         CREATE TABLE IF NOT EXISTS public.campaign_reactions (
           id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -112,24 +123,24 @@ async function createReactionsTable() {
         CREATE POLICY "Enable delete for own reactions" ON public.campaign_reactions
           FOR DELETE USING (auth.uid() = user_id);
       `;
-      
+
       console.log('📝 Создаем базовую структуру таблицы...');
       // Здесь нужно будет выполнить SQL через Supabase Dashboard
-      console.log('⚠️  Пожалуйста, выполните следующий SQL в Supabase Dashboard:');
-      console.log('=' .repeat(80));
+      console.log(
+        '⚠️  Пожалуйста, выполните следующий SQL в Supabase Dashboard:'
+      );
+      console.log('='.repeat(80));
       console.log(basicTableSQL);
-      console.log('=' .repeat(80));
-      
+      console.log('='.repeat(80));
     } else {
       console.log('✅ Таблица campaign_reactions успешно создана!');
       console.log('📊 Текущее количество записей:', tableCheck);
     }
-    
+
     console.log('🎉 Миграция завершена!');
-    
   } catch (error) {
     console.error('❌ Ошибка при создании таблицы:', error);
-    
+
     // Выводим инструкции для ручного создания
     console.log('\n📋 Инструкции для ручного создания:');
     console.log('1. Откройте Supabase Dashboard');
@@ -140,4 +151,4 @@ async function createReactionsTable() {
 }
 
 // Запускаем создание таблицы
-createReactionsTable(); 
+createReactionsTable();

@@ -29,8 +29,9 @@ export function CampaignList({
   const [selectedVertical, setSelectedVertical] = useState<string>('');
 
   // Получаем реакции для всех кампаний
-  const campaignIds = useMemo(() => campaigns.map(c => c.id), [campaigns]);
-  const { reactionCounts, refetch: refetchReactions } = useReactions(campaignIds);
+  const campaignIds = useMemo(() => campaigns.map((c) => c.id), [campaigns]);
+  const { reactionCounts, refetch: refetchReactions } =
+    useReactions(campaignIds);
 
   const handleCampaignUpdated = (updatedCampaign: Campaign) => {
     if (onCampaignUpdated) {
@@ -137,8 +138,8 @@ export function CampaignList({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredCampaigns.map((campaign) => (
           <div key={campaign.id} onClick={() => setSelectedCampaign(campaign)}>
-            <CampaignCard 
-              campaign={campaign} 
+            <CampaignCard
+              campaign={campaign}
               reactionCounts={reactionCounts[campaign.id] || {}}
               showReactions={true}
             />

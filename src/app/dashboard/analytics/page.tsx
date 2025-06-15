@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { Campaign } from '@/lib/types';
 import {
@@ -43,9 +43,10 @@ export default function Analytics() {
   const [selectedCampaignForModal, setSelectedCampaignForModal] =
     useState<Campaign | null>(null);
   const supabase = createClientComponentClient();
+  const chartRef = useRef(null);
 
   // Функция для обработки клика по столбцу канала
-  const handleChannelClick = (channelName: string) => {
+  const handleChannelClick = useCallback((channelName: string) => {
     const filteredCampaigns =
       selectedVerticalForChannels === 'all'
         ? campaigns
@@ -56,16 +57,16 @@ export default function Analytics() {
     const campaignsWithChannel = filteredCampaigns.filter(
       (campaign) => campaign.channels && campaign.channels.includes(channelName)
     );
-
+    
     setSelectedChannel(channelName);
     setSelectedChannelCampaigns(campaignsWithChannel);
-  };
+  }, [campaigns, selectedVerticalForChannels]);
 
   // Функция для закрытия детального просмотра
-  const handleCloseChannelDetails = () => {
+  const handleCloseChannelDetails = useCallback(() => {
     setSelectedChannel(null);
     setSelectedChannelCampaigns([]);
-  };
+  }, []);
 
   // Функции для модального окна кампании
   const handleOpenCampaignModal = (campaign: Campaign) => {
@@ -81,7 +82,8 @@ export default function Analytics() {
     if (selectedChannel) {
       handleCloseChannelDetails();
     }
-  }, [selectedVerticalForChannels, selectedChannel]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedVerticalForChannels, handleCloseChannelDetails]); // ВАЖНО: НЕ включаем selectedChannel в зависимости!
 
   useEffect(() => {
     const fetchCampaigns = async () => {
@@ -102,7 +104,9 @@ export default function Analytics() {
     };
 
     fetchCampaigns();
-  }, [supabase, selectedChannel]);
+  }, [supabase]);
+
+ // Убираем selectedChannel из зависимостей
 
   const {
     totalCampaigns,
@@ -391,10 +395,11 @@ export default function Analytics() {
   // Настройки для графика каналов с обработчиком клика
   const channelsBarOptions = {
     ...barOptions,
-    onClick: (event: unknown, elements: { index: number }[]) => {
+    onClick: (event: unknown, elements: Array<{ index: number }>) => {
       if (elements && elements.length > 0) {
         const elementIndex = elements[0].index;
-        const channelName = channelsPopularity.labels[elementIndex];
+        const channelName = channelsPopularity.labels[elementIndex] as string;
+        console.log('Chart clicked, channel:', channelName);
         handleChannelClick(channelName);
       }
     },
@@ -407,10 +412,6 @@ export default function Analytics() {
           },
         },
       },
-    },
-    interaction: {
-      intersect: false,
-      mode: 'index' as const,
     },
   };
 
@@ -514,7 +515,11 @@ export default function Analytics() {
           </div>
         </div>
         <div className="h-96">
-          <Bar data={channelsPopularity} options={channelsBarOptions} />
+          <Bar 
+            ref={chartRef}
+            data={channelsPopularity} 
+            options={channelsBarOptions}
+          />
         </div>
 
         {/* Подсказка для пользователя */}
