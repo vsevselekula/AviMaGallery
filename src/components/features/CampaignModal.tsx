@@ -160,6 +160,7 @@ export function CampaignModal({
   const [linksText, setLinksText] = useState('');
   const [channelsText, setChannelsText] = useState('');
   const [targetsText, setTargetsText] = useState('');
+  const [availableVerticals, setAvailableVerticals] = useState<string[]>([]);
 
   const supabase = createClientComponentClient();
 
@@ -228,7 +229,45 @@ export function CampaignModal({
         }
       }
     };
+
+    const fetchVerticals = async () => {
+      console.log('Fetching verticals from Supabase...');
+      
+      // Сначала пробуем загрузить из таблицы verticals
+      const { data: verticals, error: verticalsError } = await supabase
+        .from('verticals')
+        .select('name')
+        .order('name');
+      
+      if (verticalsError) {
+        console.error('Error fetching from verticals table:', verticalsError);
+        
+        // Если не получилось, берем уникальные вертикали из кампаний
+        console.log('Fallback: fetching unique verticals from campaigns...');
+        const { data: campaigns, error: campaignsError } = await supabase
+          .from('campaigns_v2')
+          .select('campaign_vertical')
+          .not('campaign_vertical', 'is', null);
+        
+        if (campaignsError) {
+          console.error('Error fetching campaigns for verticals:', campaignsError);
+        } else {
+          const uniqueVerticals = Array.from(
+            new Set(campaigns?.map(c => c.campaign_vertical).filter(Boolean))
+          ).sort();
+          console.log('Unique verticals from campaigns:', uniqueVerticals);
+          setAvailableVerticals(uniqueVerticals);
+        }
+      } else {
+        console.log('Fetched verticals from verticals table:', verticals);
+        const verticalNames = verticals?.map(v => v.name) || [];
+        console.log('Vertical names:', verticalNames);
+        setAvailableVerticals(verticalNames);
+      }
+    };
+
     fetchUserRole();
+    fetchVerticals();
   }, [supabase]);
 
   const handleInputChange = (
@@ -293,6 +332,49 @@ export function CampaignModal({
 
     setIsSaving(true);
     try {
+      // Проверяем подключение к Supabase
+      console.log('Checking Supabase connection...');
+      const { error: testError } = await supabase
+        .from('campaigns_v2')
+        .select('id')
+        .eq('id', campaign.id)
+        .single();
+      
+      if (testError) {
+        console.error('Supabase connection test failed:', testError);
+        showError(`Ошибка подключения к базе данных: ${testError.message}`);
+        return;
+      }
+      
+      console.log('Supabase connection OK, proceeding with save...');
+      
+      // Автоматически рассчитываем статус по датам
+      const getStatusFromDates = (startDate: string, endDate: string): 'active' | 'completed' | 'planned' => {
+        const now = new Date();
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+
+        if (now < start) {
+          return 'planned';
+        } else if (now > end) {
+          return 'completed';
+        } else {
+          return 'active';
+        }
+      };
+
+      const calculatedStatus = editedCampaign.flight_period?.start_date && editedCampaign.flight_period?.end_date
+        ? getStatusFromDates(editedCampaign.flight_period.start_date, editedCampaign.flight_period.end_date)
+        : editedCampaign.status;
+
+      console.log('Saving campaign with data:', {
+        campaign_name: editedCampaign.campaign_name,
+        campaign_type: editedCampaign.campaign_type,
+        campaign_vertical: editedCampaign.campaign_vertical,
+        status: calculatedStatus,
+        id: campaign.id
+      });
+
       const { data, error } = await supabase
         .from('campaigns_v2')
         .update({
@@ -306,7 +388,7 @@ export function CampaignModal({
           objectives: editedCampaign.objectives,
           channels: editedCampaign.channels,
           links: editedCampaign.links,
-          status: editedCampaign.status,
+          status: calculatedStatus,
           image_url: editedCampaign.image_url,
           video_url: editedCampaign.video_url,
           type: editedCampaign.type,
@@ -320,8 +402,13 @@ export function CampaignModal({
         .single();
 
       if (error) {
-        console.error('Error updating campaign:', error);
-        showError('Ошибка при сохранении кампании');
+        console.error('Supabase error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        showError(`Ошибка при сохранении кампании: ${error.message}`);
         return;
       }
 
@@ -358,8 +445,16 @@ export function CampaignModal({
         showSuccess('Кампания успешно обновлена!');
       }
     } catch (error) {
-      console.error('Error saving campaign:', error);
-      showError('Ошибка при сохранении кампании');
+      console.error('Network or unexpected error:', error);
+      if (error instanceof Error) {
+        if (error.message.includes('Failed to fetch') || error.message.includes('ERR_CONNECTION_CLOSED')) {
+          showError('Ошибка подключения к серверу. Проверьте интернет-соединение и попробуйте снова.');
+        } else {
+          showError(`Неожиданная ошибка: ${error.message}`);
+        }
+      } else {
+        showError('Произошла неизвестная ошибка при сохранении кампании');
+      }
     } finally {
       setIsSaving(false);
     }
@@ -662,6 +757,61 @@ export function CampaignModal({
           <div className="bg-gray-800 rounded-xl p-6 md:col-span-2">
             {isEditing ? (
               <div className="space-y-4">
+                {/* Название кампании */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Название кампании *
+                  </label>
+                  <input
+                    type="text"
+                    value={editedCampaign.campaign_name || ''}
+                    onChange={(e) =>
+                      handleInputChange('campaign_name', e.target.value)
+                    }
+                    className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Введите название кампании"
+                  />
+                </div>
+
+                {/* Тип кампании и вертикаль */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Тип кампании *
+                    </label>
+                    <select
+                      value={editedCampaign.campaign_type || ''}
+                      onChange={(e) =>
+                        handleInputChange('campaign_type', e.target.value)
+                      }
+                      className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">Выберите тип кампании</option>
+                      <option value="T1">T1</option>
+                      <option value="T2">T2</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Вертикаль *
+                    </label>
+                    <select
+                      value={editedCampaign.campaign_vertical || ''}
+                      onChange={(e) =>
+                        handleInputChange('campaign_vertical', e.target.value)
+                      }
+                      className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">Выберите вертикаль</option>
+                      {availableVerticals.map((vertical) => (
+                        <option key={vertical} value={vertical}>
+                          {vertical}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -703,7 +853,7 @@ export function CampaignModal({
                     Ключевое сообщение
                   </label>
                   <textarea
-                    value={editedCampaign.key_message}
+                    value={editedCampaign.key_message || ''}
                     onChange={(e) =>
                       handleInputChange('key_message', e.target.value)
                     }
@@ -726,7 +876,7 @@ export function CampaignModal({
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
                       Тип
@@ -738,6 +888,7 @@ export function CampaignModal({
                         handleInputChange('type', e.target.value)
                       }
                       className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Дополнительный тип (опционально)"
                     />
                   </div>
                   <div>
@@ -751,26 +902,8 @@ export function CampaignModal({
                         handleInputChange('slogan', e.target.value)
                       }
                       className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Слоган кампании (опционально)"
                     />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Статус
-                    </label>
-                    <select
-                      value={editedCampaign.status}
-                      onChange={(e) =>
-                        handleInputChange(
-                          'status',
-                          e.target.value as 'active' | 'completed' | 'planned'
-                        )
-                      }
-                      className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="planned">Запланирована</option>
-                      <option value="active">Активна</option>
-                      <option value="completed">Завершена</option>
-                    </select>
                   </div>
                 </div>
               </div>
@@ -830,7 +963,7 @@ export function CampaignModal({
                     </label>
                     <input
                       type="text"
-                      value={editedCampaign.geo}
+                      value={editedCampaign.geo || ''}
                       onChange={(e) => handleInputChange('geo', e.target.value)}
                       className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
@@ -840,7 +973,7 @@ export function CampaignModal({
                       Аудитория
                     </label>
                     <textarea
-                      value={editedCampaign.audience}
+                      value={editedCampaign.audience || ''}
                       onChange={(e) =>
                         handleInputChange('audience', e.target.value)
                       }

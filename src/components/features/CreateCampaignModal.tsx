@@ -50,6 +50,7 @@ export function CreateCampaignModal({
   const [objectivesText, setObjectivesText] = useState('');
   const [channelsText, setChannelsText] = useState('');
   const [linksText, setLinksText] = useState('');
+  const [availableVerticals, setAvailableVerticals] = useState<string[]>([]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -83,7 +84,45 @@ export function CreateCampaignModal({
         }
       }
     };
+
+    const fetchVerticals = async () => {
+      console.log('Fetching verticals from Supabase...');
+      
+      // Сначала пробуем загрузить из таблицы verticals
+      const { data: verticals, error: verticalsError } = await supabase
+        .from('verticals')
+        .select('name')
+        .order('name');
+      
+      if (verticalsError) {
+        console.error('Error fetching from verticals table:', verticalsError);
+        
+        // Если не получилось, берем уникальные вертикали из кампаний
+        console.log('Fallback: fetching unique verticals from campaigns...');
+        const { data: campaigns, error: campaignsError } = await supabase
+          .from('campaigns_v2')
+          .select('campaign_vertical')
+          .not('campaign_vertical', 'is', null);
+        
+        if (campaignsError) {
+          console.error('Error fetching campaigns for verticals:', campaignsError);
+        } else {
+          const uniqueVerticals = Array.from(
+            new Set(campaigns?.map(c => c.campaign_vertical).filter(Boolean))
+          ).sort();
+          console.log('Unique verticals from campaigns:', uniqueVerticals);
+          setAvailableVerticals(uniqueVerticals);
+        }
+      } else {
+        console.log('Fetched verticals from verticals table:', verticals);
+        const verticalNames = verticals?.map(v => v.name) || [];
+        console.log('Vertical names:', verticalNames);
+        setAvailableVerticals(verticalNames);
+      }
+    };
+
     fetchUserRole();
+    fetchVerticals();
   }, [supabase]);
 
   // Функция для автоматического определения статуса по датам
@@ -262,14 +301,6 @@ export function CreateCampaignModal({
     }
   };
 
-  const verticals = [
-    'Услуги',
-    'Работа',
-    'Авто',
-    'Недвижимость',
-    'Товары',
-    'Авито',
-  ];
   const campaignTypes = ['T1', 'T2'];
 
   return (
@@ -340,7 +371,7 @@ export function CreateCampaignModal({
                 className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Выберите вертикаль</option>
-                {verticals.map((vertical) => (
+                {availableVerticals.map((vertical) => (
                   <option key={vertical} value={vertical}>
                     {vertical}
                   </option>
