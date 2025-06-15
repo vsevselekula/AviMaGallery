@@ -11,7 +11,7 @@ export async function updateCampaign(
   updatedCampaign: Campaign
 ): Promise<Campaign> {
   const { data, error } = await supabase
-    .from('campaigns')
+    .from('campaigns_v2')
     .update({
       campaign_name: updatedCampaign.campaign_name,
       campaign_type: updatedCampaign.campaign_type,
@@ -22,9 +22,15 @@ export async function updateCampaign(
       audience: updatedCampaign.audience,
       objectives: updatedCampaign.objectives,
       channels: updatedCampaign.channels,
-      materials: updatedCampaign.materials,
       links: updatedCampaign.links,
-      attachments: updatedCampaign.attachments,
+      status: updatedCampaign.status,
+      image_url: updatedCampaign.image_url,
+      video_url: updatedCampaign.video_url,
+      type: updatedCampaign.type,
+      slogan: updatedCampaign.slogan,
+      description: updatedCampaign.description,
+      targets: updatedCampaign.targets,
+      updated_at: new Date().toISOString(),
     })
     .eq('id', campaignId)
     .select()
@@ -42,7 +48,7 @@ export async function updateCampaign(
 }
 
 export async function getCampaigns(): Promise<Campaign[]> {
-  const { data, error } = await supabase.from('campaigns').select('*');
+  const { data, error } = await supabase.from('campaigns_v2').select('*');
 
   if (error) {
     throw new Error(error.message);
@@ -53,7 +59,7 @@ export async function getCampaigns(): Promise<Campaign[]> {
 
 export async function getCampaignById(id: string): Promise<Campaign> {
   const { data, error } = await supabase
-    .from('campaigns')
+    .from('campaigns_v2')
     .select('*')
     .eq('id', id)
     .single();

@@ -6,10 +6,13 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { CampaignList } from '@/components/features/CampaignList';
 import { HeroBanner } from '@/components/features/HeroBanner';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { CreateCampaignModal } from '@/components/features/CreateCampaignModal';
 
 export default function DashboardPage() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const supabase = createClientComponentClient();
 
   useEffect(() => {
@@ -29,7 +32,22 @@ export default function DashboardPage() {
       }
     };
 
+    const fetchUserRole = async () => {
+      const { data: { user: supabaseUser } } = await supabase.auth.getUser();
+      if (supabaseUser) {
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', supabaseUser.id)
+          .single();
+        if (roleData) {
+          setUserRole(roleData.role);
+        }
+      }
+    };
+
     fetchCampaigns();
+    fetchUserRole();
   }, [supabase]);
 
   const handleCampaignUpdated = (updatedCampaign: Campaign) => {
@@ -39,6 +57,12 @@ export default function DashboardPage() {
       )
     );
   };
+
+  const handleCampaignCreated = (newCampaign: Campaign) => {
+    setCampaigns((prevCampaigns) => [newCampaign, ...prevCampaigns]);
+  };
+
+  const canCreateCampaigns = userRole === 'super_admin' || userRole === 'editor';
 
   if (loading) {
     return (
@@ -52,12 +76,31 @@ export default function DashboardPage() {
     <div className="flex-1">
       <HeroBanner campaigns={campaigns} />
       <div className="px-8 mt-8">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-white">Все кампании</h2>
+          {canCreateCampaigns && (
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+            >
+              <span className="text-xl">+</span>
+              Создать кампанию
+            </button>
+          )}
+        </div>
         <CampaignList
           campaigns={campaigns}
-          title="Все кампании"
+          title=""
           onCampaignUpdated={handleCampaignUpdated}
         />
       </div>
+      
+      {showCreateModal && (
+        <CreateCampaignModal
+          onClose={() => setShowCreateModal(false)}
+          onCampaignCreated={handleCampaignCreated}
+        />
+      )}
     </div>
   );
 }

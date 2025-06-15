@@ -180,7 +180,9 @@ export function CampaignCalendar() {
                     </div>
                     <span
                       className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                        campaign.campaign_vertical === 'Авито' ? 'text-black' : 'text-white'
+                        campaign.campaign_vertical === 'Авито'
+                          ? 'text-black'
+                          : 'text-white'
                       }`}
                       style={getVerticalColorClass(campaign.campaign_vertical)}
                     >

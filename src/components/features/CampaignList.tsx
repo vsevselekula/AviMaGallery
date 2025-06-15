@@ -51,10 +51,9 @@ export function CampaignList({
         campaign.campaign_name
           .toLowerCase()
           .includes(searchQuery.toLowerCase()) ||
-        (campaign.key_message
-          ? campaign.key_message.toLowerCase()
-          : ''
-        ).includes(searchQuery.toLowerCase());
+        (campaign.key_message || '')
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase());
 
       const matchesType =
         selectedType === '' ||

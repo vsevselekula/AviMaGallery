@@ -102,7 +102,9 @@ export function HeroBanner({ campaigns, className }: HeroBannerProps) {
             <div className="flex items-center gap-2 mb-4">
               <span
                 className={`px-3 rounded-full text-sm font-medium h-8 flex items-center justify-center max-w-32 overflow-hidden min-w-0 flex-shrink-0 ${
-                  heroCampaign.campaign_vertical === 'Авито' ? 'text-black' : 'text-white'
+                  heroCampaign.campaign_vertical === 'Авито'
+                    ? 'text-black'
+                    : 'text-white'
                 }`}
                 style={getVerticalColorClass(heroCampaign.campaign_vertical)}
               >

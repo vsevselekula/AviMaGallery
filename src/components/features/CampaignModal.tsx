@@ -11,7 +11,7 @@ import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { getVerticalColorClass } from '@/lib/utils';
 import { useEffect, useRef } from 'react';
-import { supabase } from '@/lib/supabase';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 // import { ImageUpload } from './ImageUpload';
 import { VideoPlayer } from '@/components/ui/VideoPlayer';
 import { Notification } from '@/components/ui/Notification';
@@ -155,9 +155,13 @@ export function CampaignModal({
   });
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [linksText, setLinksText] = useState('');
   const [channelsText, setChannelsText] = useState('');
   const [targetsText, setTargetsText] = useState('');
+  
+  const supabase = createClientComponentClient();
 
   // Добавляем хук для нотификаций
   const { notification, showSuccess, showError, hideNotification } =
@@ -225,7 +229,7 @@ export function CampaignModal({
       }
     };
     fetchUserRole();
-  }, []);
+  }, [supabase]);
 
   const handleInputChange = (
     field: keyof Campaign,
@@ -301,13 +305,10 @@ export function CampaignModal({
           audience: editedCampaign.audience,
           objectives: editedCampaign.objectives,
           channels: editedCampaign.channels,
-          materials: editedCampaign.materials,
           links: editedCampaign.links,
-          attachments: editedCampaign.attachments,
           status: editedCampaign.status,
           image_url: editedCampaign.image_url,
           video_url: editedCampaign.video_url,
-          video_type: editedCampaign.video_type,
           type: editedCampaign.type,
           slogan: editedCampaign.slogan,
           description: editedCampaign.description,
@@ -364,13 +365,110 @@ export function CampaignModal({
     }
   };
 
+  const handleDelete = async () => {
+    console.log('=== handleDelete FUNCTION CALLED ===');
+    console.log('handleDelete called, userRole:', userRole);
+    console.log('campaign.id:', campaign.id);
+    console.log('showDeleteConfirm state:', showDeleteConfirm);
+    
+    if (userRole !== 'super_admin') {
+      console.log('User is not super_admin, showing error');
+      showError('Только супер-админ может удалять кампании');
+      return;
+    }
+
+    console.log('Starting delete process for campaign:', campaign.id);
+    
+    // Проверим текущего пользователя
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    console.log('Current user:', { user: user?.id, email: user?.email, userError });
+    
+    setIsDeleting(true);
+    
+    try {
+      console.log('Calling supabase delete...');
+      console.log('Table: campaigns_v2, ID to delete:', campaign.id, 'Type:', typeof campaign.id);
+      
+      // Сначала проверим, существует ли кампания
+      const { data: existingCampaign, error: selectError } = await supabase
+        .from('campaigns_v2')
+        .select('id, campaign_name')
+        .eq('id', campaign.id)
+        .single();
+      
+      console.log('Existing campaign check:', { existingCampaign, selectError });
+      
+      if (selectError) {
+        console.error('Error checking existing campaign:', selectError);
+        showError(`Ошибка при проверке кампании: ${selectError.message}`);
+        return;
+      }
+      
+      if (!existingCampaign) {
+        console.log('Campaign not found in database');
+        showError('Кампания не найдена в базе данных');
+        return;
+      }
+      
+      // Удаляем кампанию напрямую (теперь RLS политики разрешают это для super_admin)
+      console.log('Calling supabase delete with RLS policy...');
+      const { error, data } = await supabase
+        .from('campaigns_v2')
+        .delete()
+        .eq('id', campaign.id)
+        .select();
+
+      console.log('Delete result:', { error, data, deletedCount: data?.length });
+
+      if (error) {
+        console.error('Error deleting campaign:', error);
+        showError(`Ошибка при удалении кампании: ${error.message}`);
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        console.error('No records deleted - possible RLS policy issue');
+        showError('Не удалось удалить кампанию. Возможно, недостаточно прав доступа.');
+        return;
+      }
+
+      console.log('Campaign deleted successfully');
+      showSuccess('Кампания успешно удалена!');
+      
+      // Закрываем модальное окно через небольшую задержку и перезагружаем страницу
+      setTimeout(() => {
+        console.log('Closing modal and reloading page');
+        onClose();
+        // Перезагружаем страницу чтобы обновить список кампаний
+        window.location.reload();
+      }, 1500);
+
+    } catch (error) {
+      console.error('Error deleting campaign:', error);
+      showError('Ошибка при удалении кампании');
+    } finally {
+      console.log('Cleaning up delete state');
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+    }
+  };
+
+  const isSuperAdmin = userRole === 'super_admin';
   const isAdmin = userRole === 'super_admin' || userRole === 'editor';
+  
+  // Добавляем логирование для отладки
+  console.log('CampaignModal render - userRole:', userRole, 'isSuperAdmin:', isSuperAdmin, 'isAdmin:', isAdmin);
+  console.log('showDeleteConfirm state:', showDeleteConfirm, 'isDeleting:', isDeleting);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm !mt-0">
       <div
         ref={modalRef}
         className="bg-gray-900 rounded-2xl shadow-2xl max-w-5xl w-full p-8 relative overflow-y-auto max-h-[90vh]"
+        onClick={(e) => {
+          // Предотвращаем закрытие модального окна при клике по содержимому
+          e.stopPropagation();
+        }}
       >
         <button
           onClick={onClose}
@@ -383,12 +481,25 @@ export function CampaignModal({
         {isAdmin && (
           <div className="absolute top-4 left-4 flex gap-2">
             {!isEditing ? (
-              <button
-                onClick={() => setIsEditing(true)}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
-              >
-                ✏️ Редактировать
-              </button>
+              <>
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+                >
+                  ✏️ Редактировать
+                </button>
+                {isSuperAdmin && (
+                  <button
+                    onClick={() => {
+                      console.log('Delete button clicked (not editing mode)!');
+                      setShowDeleteConfirm(true);
+                    }}
+                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors"
+                  >
+                    🗑️ Удалить
+                  </button>
+                )}
+              </>
             ) : (
               <div className="flex gap-2">
                 <button
@@ -410,6 +521,17 @@ export function CampaignModal({
                 >
                   ❌ Отмена
                 </button>
+                {isSuperAdmin && (
+                  <button
+                    onClick={() => {
+                      console.log('Delete button clicked (editing mode)!');
+                      setShowDeleteConfirm(true);
+                    }}
+                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors"
+                  >
+                    🗑️ Удалить
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -484,7 +606,9 @@ export function CampaignModal({
                 <div className="flex gap-2 flex-wrap">
                   <span
                     className={`px-3 py-1 rounded-full text-sm font-medium backdrop-blur-sm ${
-                      editedCampaign.campaign_vertical === 'Авито' ? 'text-black' : 'text-white'
+                      editedCampaign.campaign_vertical === 'Авито'
+                        ? 'text-black'
+                        : 'text-white'
                     }`}
                     style={getVerticalColorClass(
                       editedCampaign.campaign_vertical
@@ -900,6 +1024,77 @@ export function CampaignModal({
           onClose={hideNotification}
         />
       </div>
+
+      {/* Модальное окно подтверждения удаления - вынесено за пределы основного модального окна */}
+      {showDeleteConfirm && (
+        <div 
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-90 backdrop-blur-sm"
+          style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
+          onClick={(e) => {
+            console.log('Delete modal backdrop clicked');
+            // Закрываем только если клик по backdrop, а не по содержимому
+            if (e.target === e.currentTarget) {
+              setShowDeleteConfirm(false);
+            }
+          }}
+        >
+          <div 
+            className="bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-6 mx-4 relative"
+            style={{ zIndex: 101 }}
+            onClick={(e) => {
+              console.log('Delete modal content clicked');
+              e.stopPropagation(); // Предотвращаем закрытие при клике по содержимому
+            }}
+          >
+            <div className="text-center">
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                <span className="text-2xl">⚠️</span>
+              </div>
+              <h3 className="text-lg font-medium text-white mb-2">
+                Удалить кампанию?
+              </h3>
+              <p className="text-sm text-gray-300 mb-6">
+                Вы уверены, что хотите удалить кампанию "{campaign.campaign_name}"? 
+                Это действие нельзя отменить.
+              </p>
+              <div className="flex gap-3 justify-center">
+                <button
+                  type="button"
+                  onMouseDown={(e) => {
+                    console.log('Cancel button mousedown!', e);
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Closing delete confirmation from mousedown');
+                    setShowDeleteConfirm(false);
+                  }}
+                  disabled={isDeleting}
+                  className="px-4 py-2 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-500 text-white rounded-lg text-sm font-medium transition-colors cursor-pointer"
+                  style={{ pointerEvents: 'auto' }}
+                >
+                  Отмена
+                </button>
+                <button
+                  type="button"
+                  onMouseDown={(e) => {
+                    console.log('Delete button mousedown!', e);
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (!isDeleting) {
+                      console.log('Calling handleDelete from mousedown');
+                      handleDelete();
+                    }
+                  }}
+                  disabled={isDeleting}
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white rounded-lg text-sm font-medium transition-colors cursor-pointer"
+                  style={{ pointerEvents: 'auto' }}
+                >
+                  {isDeleting ? '🔄 Удаление...' : '🗑️ Удалить'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

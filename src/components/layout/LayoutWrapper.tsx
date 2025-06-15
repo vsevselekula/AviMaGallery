@@ -38,7 +38,7 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
           onClose={() => setIsSidebarOpen(false)}
         />
       )}
-      
+
       {/* Кнопка бургер меню */}
       {showSidebar && !isSidebarOpen && (
         <button
@@ -60,7 +60,7 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
           </svg>
         </button>
       )}
-      
+
       <main
         className={cn(
           'flex-1 overflow-auto transition-all duration-300',

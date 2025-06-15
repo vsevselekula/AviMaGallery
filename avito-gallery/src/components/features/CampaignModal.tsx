@@ -240,27 +240,7 @@ export function CampaignModal({
                 </div>
               )}
 
-              {editedCampaign.attachments &&
-                editedCampaign.attachments.length > 0 && (
-                  <div className="mt-6">
-                    <h3 className="text-xl font-bold text-gray-300 mb-2">
-                      Вложения
-                    </h3>
-                    <div className="space-y-2">
-                      {editedCampaign.attachments.map((attachment, index) => (
-                        <a
-                          key={index}
-                          href={attachment.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
-                        >
-                          {attachment.label}
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                )}
+
             </>
           )}
         </div>

@@ -45,7 +45,9 @@ export function CampaignList({
         campaign.campaign_name
           .toLowerCase()
           .includes(searchQuery.toLowerCase()) ||
-        campaign.key_message.toLowerCase().includes(searchQuery.toLowerCase());
+        (campaign.key_message || '')
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase());
       const matchesType =
         !selectedType || campaign.campaign_type === selectedType;
       const matchesVertical =
