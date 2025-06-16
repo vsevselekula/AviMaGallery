@@ -169,7 +169,9 @@ export function AdminPanel() {
       <div className="p-6">
         {activeTab === 'users' && (
           <div>
-            <h2 className="text-xl font-semibold text-white mb-4">Управление пользователями</h2>
+            <h2 className="text-xl font-semibold text-white mb-4">
+              Управление пользователями
+            </h2>
             <div className="bg-gray-700 rounded-lg border border-gray-600 overflow-hidden">
               <table className="min-w-full divide-y divide-gray-600">
                 <thead className="bg-gray-600">
@@ -198,7 +200,9 @@ export function AdminPanel() {
                             onChange={(e) => setEditedRole(e.target.value)}
                             className="border border-gray-500 rounded-lg px-3 py-1 text-sm bg-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           >
-                            <option value="super_admin">Супер администратор</option>
+                            <option value="super_admin">
+                              Супер администратор
+                            </option>
                             <option value="editor">Редактор</option>
                             <option value="viewer">Просмотр</option>
                           </select>

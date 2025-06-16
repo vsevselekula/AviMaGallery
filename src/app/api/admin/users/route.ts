@@ -2,13 +2,16 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { UserRole, UserData, UserRoleData } from '@/lib/types';
 import { User } from '@supabase/auth-js';
+import { logger } from '@/lib/logger';
 
 // Инициализация Supabase клиента с service role key
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-console.log('Supabase URL:', supabaseUrl ? 'Loaded' : 'Missing');
-console.log('Supabase Service Key:', supabaseServiceKey ? 'Loaded' : 'Missing');
+logger.api.debug('Supabase configuration check', {
+  hasUrl: !!supabaseUrl,
+  hasServiceKey: !!supabaseServiceKey,
+});
 
 if (!supabaseUrl || !supabaseServiceKey) {
   throw new Error('Missing Supabase environment variables');
@@ -30,7 +33,7 @@ export async function GET() {
       await supabase.auth.admin.listUsers();
 
     if (authUsersError) {
-      console.error('Error listing users from auth:', authUsersError);
+      logger.api.error('Error listing users from auth', authUsersError);
       return NextResponse.json(
         { error: authUsersError.message },
         { status: 500 }
@@ -45,7 +48,7 @@ export async function GET() {
       .select('user_id, role');
 
     if (userRolesError) {
-      console.error('Error listing user roles:', userRolesError);
+      logger.api.error('Error listing user roles', userRolesError);
       return NextResponse.json(
         { error: userRolesError.message },
         { status: 500 }
@@ -68,7 +71,7 @@ export async function GET() {
 
     return NextResponse.json(usersWithRoles, { status: 200 });
   } catch (error: unknown) {
-    console.error('Unexpected error in API route:', error);
+    logger.api.error('Unexpected error in API route', error);
     return NextResponse.json(
       {
         error: error instanceof Error ? error.message : 'Internal Server Error',

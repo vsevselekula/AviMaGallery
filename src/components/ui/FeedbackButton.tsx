@@ -12,14 +12,18 @@ export default function FeedbackButton() {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       setIsAuthenticated(!!user);
     };
 
     checkAuth();
 
     // Подписываемся на изменения авторизации
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
       setIsAuthenticated(!!session?.user);
     });
 
@@ -43,16 +47,20 @@ export default function FeedbackButton() {
           setIsModalOpen(true);
         }}
         className={`fixed bottom-6 right-6 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 z-40 group ${
-          isAuthenticated 
-            ? 'bg-blue-600 hover:bg-blue-700' 
+          isAuthenticated
+            ? 'bg-blue-600 hover:bg-blue-700'
             : 'bg-gray-600 hover:bg-gray-500'
         }`}
-        title={isAuthenticated ? "Предложить улучшение" : "Войдите в систему для отправки предложений"}
+        title={
+          isAuthenticated
+            ? 'Предложить улучшение'
+            : 'Войдите в систему для отправки предложений'
+        }
       >
         <div className="flex items-center gap-2">
           <span className="text-xl">💡</span>
           <span className="hidden group-hover:block text-sm font-medium whitespace-nowrap">
-            {isAuthenticated ? "Предложить улучшение" : "Требуется авторизация"}
+            {isAuthenticated ? 'Предложить улучшение' : 'Требуется авторизация'}
           </span>
         </div>
       </button>
@@ -75,4 +83,4 @@ export default function FeedbackButton() {
       />
     </>
   );
-} 
+}

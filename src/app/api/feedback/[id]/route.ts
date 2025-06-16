@@ -11,8 +11,8 @@ const supabaseAdmin = createClient(
   {
     auth: {
       autoRefreshToken: false,
-      persistSession: false
-    }
+      persistSession: false,
+    },
   }
 );
 
@@ -23,7 +23,10 @@ export async function PATCH(
 ) {
   try {
     const supabase = createRouteHandlerClient({ cookies });
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -47,7 +50,10 @@ export async function PATCH(
       .single();
 
     if (fetchError || !currentFeedback) {
-      return NextResponse.json({ error: 'Feedback not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Feedback not found' },
+        { status: 404 }
+      );
     }
 
     // Проверяем права доступа
@@ -68,60 +74,31 @@ export async function PATCH(
 
     if (error) {
       console.error('Error updating feedback:', error);
-      return NextResponse.json({ error: 'Failed to update feedback' }, { status: 500 });
+      return NextResponse.json(
+        { error: 'Failed to update feedback' },
+        { status: 500 }
+      );
     }
 
     // Если статус изменился и это сделал админ, логируем изменение
     if (body.status && body.status !== currentFeedback.status && isAdmin) {
-      console.log('Status changed for feedback:', feedbackId, 'from', currentFeedback.status, 'to', body.status);
+      console.log(
+        'Status changed for feedback:',
+        feedbackId,
+        'from',
+        currentFeedback.status,
+        'to',
+        body.status
+      );
       // TODO: Добавить отправку email уведомлений
     }
 
     return NextResponse.json(updatedFeedback);
   } catch (error) {
     console.error('Error in feedback PATCH:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }
-
-// Функция отправки email уведомления (заглушка)
-async function sendStatusUpdateEmail(
-  userEmail: string,
-  feedbackTitle: string,
-  newStatus: string,
-  adminNotes?: string
-) {
-  // TODO: Интеграция с email сервисом (Resend, SendGrid, etc.)
-  console.log('Sending email notification:', {
-    to: userEmail,
-    subject: `Обновление статуса заявки: ${feedbackTitle}`,
-    status: newStatus,
-    notes: adminNotes
-  });
-  
-  // Пример интеграции с Resend:
-  /*
-  const resend = new Resend(process.env.RESEND_API_KEY);
-  
-  await resend.emails.send({
-    from: 'noreply@yourdomain.com',
-    to: userEmail,
-    subject: `Обновление статуса заявки: ${feedbackTitle}`,
-    html: `
-      <h2>Статус вашей заявки изменился</h2>
-      <p><strong>Заявка:</strong> ${feedbackTitle}</p>
-      <p><strong>Новый статус:</strong> ${getStatusLabel(newStatus)}</p>
-      ${adminNotes ? `<p><strong>Комментарий:</strong> ${adminNotes}</p>` : ''}
-    `
-  });
-  */
-}
-
-function getStatusLabel(status: string): string {
-  const labels = {
-    'new': 'Новая',
-    'in_progress': 'В работе',
-    'completed': 'Выполнено'
-  };
-  return labels[status as keyof typeof labels] || status;
-} 

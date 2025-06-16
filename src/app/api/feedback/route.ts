@@ -10,8 +10,8 @@ const supabaseAdmin = createClient(
   {
     auth: {
       autoRefreshToken: false,
-      persistSession: false
-    }
+      persistSession: false,
+    },
   }
 );
 
@@ -19,7 +19,10 @@ const supabaseAdmin = createClient(
 export async function GET() {
   try {
     const supabase = createRouteHandlerClient({ cookies });
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -47,20 +50,26 @@ export async function GET() {
 
     if (error) {
       console.error('Error fetching feedback:', error);
-      return NextResponse.json({ error: 'Failed to fetch feedback' }, { status: 500 });
+      return NextResponse.json(
+        { error: 'Failed to fetch feedback' },
+        { status: 500 }
+      );
     }
 
     // Форматируем данные для фронтенда
-    const formattedFeedback = feedback?.map(item => ({
+    const formattedFeedback = feedback?.map((item) => ({
       ...item,
       user_email: `user-${item.user_id.slice(0, 8)}@example.com`,
-      user_name: `Пользователь ${item.user_id.slice(0, 8)}`
+      user_name: `Пользователь ${item.user_id.slice(0, 8)}`,
     }));
 
     return NextResponse.json(formattedFeedback);
   } catch (error) {
     console.error('Error in feedback GET:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }
 
@@ -68,18 +77,31 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const supabase = createRouteHandlerClient({ cookies });
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await request.json();
-    const { title, description, category, current_page, user_agent, attachments = [] } = body;
+    const {
+      title,
+      description,
+      category,
+      current_page,
+      user_agent,
+      attachments = [],
+    } = body;
 
     // Валидация
     if (!title || !description || !category) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      );
     }
 
     const { data: feedback, error } = await supabaseAdmin
@@ -91,19 +113,25 @@ export async function POST(request: NextRequest) {
         category,
         current_page,
         user_agent,
-        attachments: attachments
+        attachments: attachments,
       })
       .select()
       .single();
 
     if (error) {
       console.error('Error creating feedback:', error);
-      return NextResponse.json({ error: 'Failed to create feedback' }, { status: 500 });
+      return NextResponse.json(
+        { error: 'Failed to create feedback' },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json(feedback, { status: 201 });
   } catch (error) {
     console.error('Error in feedback POST:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
-} 
+}

@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { FeedbackCategory, FEEDBACK_CATEGORIES, CreateFeedbackData } from '@/types/feedback';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { FeedbackCategory, FEEDBACK_CATEGORIES } from '@/types/feedback';
+import { toast } from 'react-hot-toast';
 
 interface FeedbackModalProps {
   isOpen: boolean;
@@ -10,43 +10,68 @@ interface FeedbackModalProps {
   onSuccess?: () => void;
 }
 
-export default function FeedbackModal({ isOpen, onClose, onSuccess }: FeedbackModalProps) {
-  const [formData, setFormData] = useState<CreateFeedbackData>({
+export default function FeedbackModal({
+  isOpen,
+  onClose,
+  onSuccess,
+}: FeedbackModalProps) {
+  const [formData, setFormData] = useState({
     title: '',
     description: '',
-    category: 'improvement'
+    category: 'bug' as FeedbackCategory,
   });
+  const [attachments, setAttachments] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [attachments, setAttachments] = useState<File[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
 
-  const supabase = createClientComponentClient();
+  // Обработчик добавления файлов
+  const handleFileAdd = useCallback(
+    (files: File[]) => {
+      const validFiles = files.filter((file) => {
+        if (!file.type.startsWith('image/')) {
+          toast.error(`Файл ${file.name} не является изображением`);
+          return false;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+          toast.error(`Файл ${file.name} превышает размер 5MB`);
+          return false;
+        }
+        return true;
+      });
 
-  // Обработка вставки из буфера обмена (Ctrl+V)
+      if (attachments.length + validFiles.length > 3) {
+        toast.error('Максимум 3 файла');
+        return;
+      }
+
+      setAttachments((prev) => [...prev, ...validFiles]);
+      setError(null);
+    },
+    [attachments.length]
+  );
+
+  // Обработчик вставки из буфера обмена
   useEffect(() => {
     const handlePaste = (e: ClipboardEvent) => {
       if (!isOpen) return;
-      
-      const items = e.clipboardData?.items;
-      if (!items) return;
 
-      for (let i = 0; i < items.length; i++) {
-        const item = items[i];
-        if (item.type.startsWith('image/')) {
-          const file = item.getAsFile();
-          if (file) {
-            handleFileAdd(file);
-          }
-        }
+      const items = Array.from(e.clipboardData?.items || []);
+      const imageFiles = items
+        .filter((item) => item.type.startsWith('image/'))
+        .map((item) => item.getAsFile())
+        .filter((file): file is File => file !== null);
+
+      if (imageFiles.length > 0) {
+        handleFileAdd(imageFiles);
       }
     };
 
     document.addEventListener('paste', handlePaste);
     return () => document.removeEventListener('paste', handlePaste);
-  }, [isOpen]);
+  }, [isOpen, handleFileAdd]);
 
   // Обработка drag & drop
   const handleDragOver = (e: React.DragEvent) => {
@@ -64,139 +89,74 @@ export default function FeedbackModal({ isOpen, onClose, onSuccess }: FeedbackMo
     setIsDragOver(false);
 
     const files = Array.from(e.dataTransfer.files);
-    files.forEach(file => {
+    files.forEach((file) => {
       if (file.type.startsWith('image/')) {
-        handleFileAdd(file);
+        handleFileAdd([file]);
       }
     });
   };
 
-  const handleFileAdd = (file: File) => {
-    // Проверяем размер файла (максимум 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      setError('Размер файла не должен превышать 5MB');
-      return;
-    }
-
-    // Проверяем количество файлов (максимум 3)
-    if (attachments.length >= 3) {
-      setError('Можно прикрепить максимум 3 файла');
-      return;
-    }
-
-    setAttachments(prev => [...prev, file]);
-    setError(null);
-  };
-
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    files.forEach(handleFileAdd);
+    handleFileAdd(files);
   };
 
   const removeAttachment = (index: number) => {
-    setAttachments(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const uploadAttachments = async (): Promise<string[]> => {
-    if (attachments.length === 0) return [];
-
-    try {
-      // Пробуем загрузить через API
-      const formData = new FormData();
-      attachments.forEach(file => {
-        formData.append('files', file);
-      });
-
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Ошибка загрузки файлов');
-      }
-
-      const { urls } = await response.json();
-      return urls;
-
-    } catch (error) {
-      console.error('Error uploading via API:', error);
-      
-      // Fallback: пробуем прямую загрузку в Storage
-      console.log('Trying direct storage upload as fallback...');
-      
-      // Получаем текущего пользователя
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Пользователь не авторизован');
-
-      const uploadPromises = attachments.map(async (file, index) => {
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${Date.now()}-${index}.${fileExt}`;
-        const filePath = `${user.id}/feedback-attachments/${fileName}`;
-
-        const { data, error } = await supabase.storage
-          .from('attachments')
-          .upload(filePath, file);
-
-        if (error) {
-          console.error('Error uploading file:', error);
-          console.error('Error details:', JSON.stringify(error, null, 2));
-          throw new Error(`Ошибка загрузки файла ${file.name}: ${error.message || 'Неизвестная ошибка'}`);
-        }
-
-        // Получаем публичный URL
-        const { data: { publicUrl } } = supabase.storage
-          .from('attachments')
-          .getPublicUrl(filePath);
-
-        return publicUrl;
-      });
-
-      return Promise.all(uploadPromises);
-    }
+    setAttachments((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.title.trim() || !formData.description.trim()) {
+      toast.error('Заполните все обязательные поля');
+      return;
+    }
+
     setIsSubmitting(true);
     setError(null);
 
     try {
-      // Загружаем файлы сначала
-      const attachmentUrls = await uploadAttachments();
+      // Загружаем файлы через API
+      const uploadPromises = attachments.map(async (file) => {
+        const formData = new FormData();
+        formData.append('file', file);
 
-      // Проверяем авторизацию
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      if (authError || !user) {
-        throw new Error('Необходимо войти в систему для отправки заявки');
-      }
+        const uploadResponse = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
 
-      // Отправляем данные напрямую в Supabase
-      const { data: feedback, error } = await supabase
-        .from('feedback')
-        .insert({
-          user_id: user.id,
-          title: formData.title,
-          description: formData.description,
-          category: formData.category,
-          current_page: window.location.pathname,
-          user_agent: navigator.userAgent,
-          attachments: attachmentUrls
-        })
-        .select()
-        .single();
+        if (!uploadResponse.ok) {
+          throw new Error(`Ошибка загрузки файла ${file.name}`);
+        }
 
-      if (error) {
-        console.error('Error creating feedback:', error);
-        throw new Error('Ошибка при отправке заявки: ' + error.message);
+        const uploadResult = await uploadResponse.json();
+        return uploadResult.url;
+      });
+
+      const uploadedUrls = await Promise.all(uploadPromises);
+
+      // Создаем заявку
+      const response = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...formData,
+          attachments: uploadedUrls,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Ошибка при отправке заявки');
       }
 
       // Сброс формы
       setFormData({
         title: '',
         description: '',
-        category: 'improvement'
+        category: 'bug',
       });
       setAttachments([]);
 
@@ -214,7 +174,7 @@ export default function FeedbackModal({ isOpen, onClose, onSuccess }: FeedbackMo
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-      <div 
+      <div
         ref={modalRef}
         className={`bg-gray-800 rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto border border-gray-700 shadow-2xl ${
           isDragOver ? 'border-blue-500 border-2' : ''
@@ -247,7 +207,12 @@ export default function FeedbackModal({ isOpen, onClose, onSuccess }: FeedbackMo
                   <button
                     key={key}
                     type="button"
-                    onClick={() => setFormData(prev => ({ ...prev, category: key as FeedbackCategory }))}
+                    onClick={() =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        category: key as FeedbackCategory,
+                      }))
+                    }
                     className={`p-3 rounded-lg border text-left transition-colors ${
                       formData.category === key
                         ? 'border-blue-500 bg-blue-900/50 text-white'
@@ -256,7 +221,9 @@ export default function FeedbackModal({ isOpen, onClose, onSuccess }: FeedbackMo
                   >
                     <div className="flex items-center gap-2">
                       <span className="text-lg">{config.icon}</span>
-                      <span className="text-sm font-medium">{config.label}</span>
+                      <span className="text-sm font-medium">
+                        {config.label}
+                      </span>
                     </div>
                   </button>
                 ))}
@@ -265,7 +232,10 @@ export default function FeedbackModal({ isOpen, onClose, onSuccess }: FeedbackMo
 
             {/* Заголовок */}
             <div>
-              <label htmlFor="title" className="block text-sm font-medium text-gray-300 mb-1">
+              <label
+                htmlFor="title"
+                className="block text-sm font-medium text-gray-300 mb-1"
+              >
                 Заголовок *
               </label>
               <input
@@ -273,7 +243,9 @@ export default function FeedbackModal({ isOpen, onClose, onSuccess }: FeedbackMo
                 id="title"
                 required
                 value={formData.title}
-                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, title: e.target.value }))
+                }
                 className="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Кратко опишите суть предложения"
               />
@@ -281,7 +253,10 @@ export default function FeedbackModal({ isOpen, onClose, onSuccess }: FeedbackMo
 
             {/* Описание */}
             <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-1">
+              <label
+                htmlFor="description"
+                className="block text-sm font-medium text-gray-300 mb-1"
+              >
                 Описание *
               </label>
               <textarea
@@ -289,7 +264,12 @@ export default function FeedbackModal({ isOpen, onClose, onSuccess }: FeedbackMo
                 required
                 rows={4}
                 value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    description: e.target.value,
+                  }))
+                }
                 className="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                 placeholder="Подробно опишите ваше предложение или проблему"
               />
@@ -300,12 +280,12 @@ export default function FeedbackModal({ isOpen, onClose, onSuccess }: FeedbackMo
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Скриншоты (необязательно)
               </label>
-              
+
               {/* Зона загрузки */}
-              <div 
+              <div
                 className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors ${
-                  isDragOver 
-                    ? 'border-blue-500 bg-blue-900/20' 
+                  isDragOver
+                    ? 'border-blue-500 bg-blue-900/20'
                     : 'border-gray-600 hover:border-gray-500'
                 }`}
               >
@@ -340,7 +320,10 @@ export default function FeedbackModal({ isOpen, onClose, onSuccess }: FeedbackMo
               {attachments.length > 0 && (
                 <div className="mt-3 space-y-2">
                   {attachments.map((file, index) => (
-                    <div key={index} className="flex items-center justify-between bg-gray-700 p-2 rounded border border-gray-600">
+                    <div
+                      key={index}
+                      className="flex items-center justify-between bg-gray-700 p-2 rounded border border-gray-600"
+                    >
                       <div className="flex items-center gap-2">
                         <span className="text-sm">🖼️</span>
                         <span className="text-sm text-gray-300 truncate max-w-[200px]">
@@ -381,7 +364,11 @@ export default function FeedbackModal({ isOpen, onClose, onSuccess }: FeedbackMo
               </button>
               <button
                 type="submit"
-                disabled={isSubmitting || !formData.title.trim() || !formData.description.trim()}
+                disabled={
+                  isSubmitting ||
+                  !formData.title.trim() ||
+                  !formData.description.trim()
+                }
                 className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors disabled:hover:bg-blue-600"
               >
                 {isSubmitting ? 'Отправка...' : 'Отправить'}
@@ -392,4 +379,4 @@ export default function FeedbackModal({ isOpen, onClose, onSuccess }: FeedbackMo
       </div>
     </div>
   );
-} 
+}

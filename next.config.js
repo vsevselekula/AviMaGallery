@@ -14,12 +14,12 @@ const nextConfig = {
   },
   trailingSlash: true,
   eslint: {
-    // Отключаем ESLint во время билда для production
-    ignoreDuringBuilds: true,
+    // Включаем обратно проверки качества кода
+    ignoreDuringBuilds: false,
   },
   typescript: {
-    // Отключаем проверку типов во время билда для production
-    ignoreBuildErrors: true,
+    // Включаем обратно проверку типов во время билда для production
+    ignoreBuildErrors: false,
   },
 };
 

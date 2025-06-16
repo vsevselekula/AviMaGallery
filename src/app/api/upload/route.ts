@@ -7,8 +7,8 @@ const supabase = createClient(
   {
     auth: {
       autoRefreshToken: false,
-      persistSession: false
-    }
+      persistSession: false,
+    },
   }
 );
 
@@ -28,7 +28,10 @@ export async function POST(request: NextRequest) {
 
     // Проверяем тип файла
     if (!file.type.startsWith('image/')) {
-      return NextResponse.json({ error: 'Only images are allowed' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Only images are allowed' },
+        { status: 400 }
+      );
     }
 
     // Генерируем уникальное имя файла
@@ -45,7 +48,7 @@ export async function POST(request: NextRequest) {
       .from('feedback-attachments')
       .upload(filePath, buffer, {
         contentType: file.type,
-        duplex: 'half'
+        duplex: 'half',
       });
 
     if (uploadError) {
@@ -54,19 +57,21 @@ export async function POST(request: NextRequest) {
     }
 
     // Получаем публичный URL
-    const { data: { publicUrl } } = supabase.storage
-      .from('feedback-attachments')
-      .getPublicUrl(filePath);
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from('feedback-attachments').getPublicUrl(filePath);
 
     return NextResponse.json({
       url: publicUrl,
       name: file.name,
       size: file.size,
-      type: file.type
+      type: file.type,
     });
-
   } catch (error) {
     console.error('Upload error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
-} 
+}

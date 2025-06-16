@@ -1,6 +1,7 @@
 import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { logger } from '@/lib/logger';
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
@@ -10,16 +11,22 @@ export async function middleware(req: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession();
 
-  console.log('Middleware - Current path:', req.nextUrl.pathname);
-  console.log('Middleware - Session exists:', !!session);
+  logger.auth.debug('Processing request', {
+    path: req.nextUrl.pathname,
+    hasSession: !!session,
+  });
 
   // Публичные маршруты, которые не требуют авторизации
   const publicPaths = ['/auth'];
-  const isPublicPath = publicPaths.some(path => req.nextUrl.pathname.startsWith(path));
+  const isPublicPath = publicPaths.some((path) =>
+    req.nextUrl.pathname.startsWith(path)
+  );
 
   // Если пользователь не аутентифицирован и пытается получить доступ к защищенным маршрутам
   if (!session && !isPublicPath) {
-    console.log('Middleware - No session, redirecting to login');
+    logger.auth.info('Redirecting unauthenticated user to login', {
+      requestedPath: req.nextUrl.pathname,
+    });
     const redirectUrl = req.nextUrl.clone();
     redirectUrl.pathname = '/auth/login';
     redirectUrl.searchParams.set('redirectedFrom', req.nextUrl.pathname);
@@ -28,7 +35,7 @@ export async function middleware(req: NextRequest) {
 
   // Если пользователь аутентифицирован и пытается получить доступ к страницам аутентификации
   if (session && req.nextUrl.pathname.startsWith('/auth')) {
-    console.log('Middleware - Session exists, redirecting to dashboard');
+    logger.auth.info('Redirecting authenticated user from auth pages to dashboard');
     const redirectUrl = req.nextUrl.clone();
     redirectUrl.pathname = '/dashboard';
     return NextResponse.redirect(redirectUrl);
@@ -36,9 +43,7 @@ export async function middleware(req: NextRequest) {
 
   // Если пользователь аутентифицирован и пытается получить доступ к корневой странице
   if (session && req.nextUrl.pathname === '/') {
-    console.log(
-      'Middleware - Session exists, redirecting from root to dashboard'
-    );
+    logger.auth.info('Redirecting authenticated user from root to dashboard');
     const redirectUrl = req.nextUrl.clone();
     redirectUrl.pathname = '/dashboard';
     return NextResponse.redirect(redirectUrl);

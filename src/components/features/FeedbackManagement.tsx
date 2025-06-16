@@ -1,28 +1,60 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { 
-  Feedback, 
-  FeedbackStatus, 
-  FeedbackCategory, 
+import Image from 'next/image';
+import {
+  Feedback,
+  FeedbackStatus,
+  FeedbackCategory,
   AttachmentData,
   FEEDBACK_CATEGORIES,
-  FEEDBACK_STATUSES
+  FEEDBACK_STATUSES,
 } from '@/types/feedback';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { Button } from '@/components/ui/Button';
 import { toast } from 'react-hot-toast';
 
+// Функция для рендеринга вложений
+const renderAttachment = (attachment: string | AttachmentData) => {
+  if (typeof attachment === 'string') {
+    // Base64 изображение или URL
+    return (
+      <Image
+        src={attachment}
+        alt="Attachment"
+        width={300}
+        height={192}
+        className="max-w-xs max-h-48 rounded border border-gray-600 object-cover"
+      />
+    );
+  } else {
+    // Объект с данными
+    return (
+      <Image
+        src={attachment.data}
+        alt={attachment.name || 'Attachment'}
+        width={300}
+        height={192}
+        className="max-w-xs max-h-48 rounded border border-gray-600 object-cover"
+      />
+    );
+  }
+};
+
 export default function FeedbackManagement() {
-  const supabase = createClientComponentClient();
   const [feedback, setFeedback] = useState<Feedback[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(null);
+  const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(
+    null
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [filterStatus, setFilterStatus] = useState<FeedbackStatus | 'all'>('all');
-  const [filterCategory, setFilterCategory] = useState<FeedbackCategory | 'all'>('all');
+  const [filterStatus, setFilterStatus] = useState<FeedbackStatus | 'all'>(
+    'all'
+  );
+  const [filterCategory, setFilterCategory] = useState<
+    FeedbackCategory | 'all'
+  >('all');
 
   useEffect(() => {
     fetchFeedback();
@@ -48,7 +80,10 @@ export default function FeedbackManagement() {
     }
   };
 
-  const handleStatusChange = async (feedbackId: string, newStatus: FeedbackStatus) => {
+  const handleStatusChange = async (
+    feedbackId: string,
+    newStatus: FeedbackStatus
+  ) => {
     try {
       const response = await fetch(`/api/feedback/${feedbackId}`, {
         method: 'PATCH',
@@ -63,11 +98,11 @@ export default function FeedbackManagement() {
       }
 
       // Обновляем локальное состояние
-      setFeedback(prev => prev.map(item => 
-        item.id === feedbackId 
-          ? { ...item, status: newStatus }
-          : item
-      ));
+      setFeedback((prev) =>
+        prev.map((item) =>
+          item.id === feedbackId ? { ...item, status: newStatus } : item
+        )
+      );
 
       toast.success('Статус обновлен');
     } catch (error) {
@@ -91,11 +126,11 @@ export default function FeedbackManagement() {
       }
 
       // Обновляем локальное состояние
-      setFeedback(prev => prev.map(item => 
-        item.id === feedbackId 
-          ? { ...item, admin_notes: notes }
-          : item
-      ));
+      setFeedback((prev) =>
+        prev.map((item) =>
+          item.id === feedbackId ? { ...item, admin_notes: notes } : item
+        )
+      );
 
       toast.success('Заметки сохранены');
     } catch (error) {
@@ -104,44 +139,23 @@ export default function FeedbackManagement() {
     }
   };
 
-  const filteredFeedback = feedback.filter(item => {
+  const filteredFeedback = feedback.filter((item) => {
     const statusMatch = filterStatus === 'all' || item.status === filterStatus;
-    const categoryMatch = filterCategory === 'all' || item.category === filterCategory;
+    const categoryMatch =
+      filterCategory === 'all' || item.category === filterCategory;
     return statusMatch && categoryMatch;
   });
 
   const getStatusCounts = () => {
     return {
       all: feedback.length,
-      new: feedback.filter(f => f.status === 'new').length,
-      in_progress: feedback.filter(f => f.status === 'in_progress').length,
-      completed: feedback.filter(f => f.status === 'completed').length,
+      new: feedback.filter((f) => f.status === 'new').length,
+      in_progress: feedback.filter((f) => f.status === 'in_progress').length,
+      completed: feedback.filter((f) => f.status === 'completed').length,
     };
   };
 
   const statusCounts = getStatusCounts();
-
-  const renderAttachment = (attachment: string | AttachmentData) => {
-    if (typeof attachment === 'string') {
-      // Base64 изображение или URL
-      return (
-        <img
-          src={attachment}
-          alt="Attachment"
-          className="max-w-xs max-h-48 rounded border border-gray-600"
-        />
-      );
-    } else {
-      // Объект с данными
-      return (
-        <img
-          src={attachment.data}
-          alt={attachment.name || 'Attachment'}
-          className="max-w-xs max-h-48 rounded border border-gray-600"
-        />
-      );
-    }
-  };
 
   if (loading) {
     return (
@@ -155,7 +169,10 @@ export default function FeedbackManagement() {
     return (
       <div className="bg-red-900/50 border border-red-700 rounded-lg p-4">
         <p className="text-red-300">{error}</p>
-        <Button onClick={fetchFeedback} className="mt-2 bg-blue-600 hover:bg-blue-700 text-white">
+        <Button
+          onClick={fetchFeedback}
+          className="mt-2 bg-blue-600 hover:bg-blue-700 text-white"
+        >
           Попробовать снова
         </Button>
       </div>
@@ -167,19 +184,27 @@ export default function FeedbackManagement() {
       {/* Статистика */}
       <div className="grid grid-cols-4 gap-4">
         <div className="bg-gray-700 p-4 rounded-lg border border-gray-600">
-          <div className="text-2xl font-bold text-white">{statusCounts.all}</div>
+          <div className="text-2xl font-bold text-white">
+            {statusCounts.all}
+          </div>
           <div className="text-sm text-gray-300">Всего заявок</div>
         </div>
         <div className="bg-yellow-900/50 p-4 rounded-lg border border-yellow-700">
-          <div className="text-2xl font-bold text-yellow-200">{statusCounts.new}</div>
+          <div className="text-2xl font-bold text-yellow-200">
+            {statusCounts.new}
+          </div>
           <div className="text-sm text-yellow-300">Новых</div>
         </div>
         <div className="bg-blue-900/50 p-4 rounded-lg border border-blue-700">
-          <div className="text-2xl font-bold text-blue-200">{statusCounts.in_progress}</div>
+          <div className="text-2xl font-bold text-blue-200">
+            {statusCounts.in_progress}
+          </div>
           <div className="text-sm text-blue-300">В работе</div>
         </div>
         <div className="bg-green-900/50 p-4 rounded-lg border border-green-700">
-          <div className="text-2xl font-bold text-green-200">{statusCounts.completed}</div>
+          <div className="text-2xl font-bold text-green-200">
+            {statusCounts.completed}
+          </div>
           <div className="text-sm text-green-300">Выполнено</div>
         </div>
       </div>
@@ -192,7 +217,9 @@ export default function FeedbackManagement() {
           </label>
           <select
             value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value as FeedbackStatus | 'all')}
+            onChange={(e) =>
+              setFilterStatus(e.target.value as FeedbackStatus | 'all')
+            }
             className="px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="all">Все статусы</option>
@@ -210,7 +237,9 @@ export default function FeedbackManagement() {
           </label>
           <select
             value={filterCategory}
-            onChange={(e) => setFilterCategory(e.target.value as FeedbackCategory | 'all')}
+            onChange={(e) =>
+              setFilterCategory(e.target.value as FeedbackCategory | 'all')
+            }
             className="px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="all">Все категории</option>
@@ -269,16 +298,24 @@ export default function FeedbackManagement() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-white">{item.user_name}</div>
-                    <div className="text-sm text-gray-300">{item.user_email}</div>
+                    <div className="text-sm text-gray-300">
+                      {item.user_email}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${FEEDBACK_CATEGORIES[item.category].color}`}>
-                      {FEEDBACK_CATEGORIES[item.category].icon} {FEEDBACK_CATEGORIES[item.category].label}
+                    <span
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${FEEDBACK_CATEGORIES[item.category].color}`}
+                    >
+                      {FEEDBACK_CATEGORIES[item.category].icon}{' '}
+                      {FEEDBACK_CATEGORIES[item.category].label}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${FEEDBACK_STATUSES[item.status].color}`}>
-                      {FEEDBACK_STATUSES[item.status].icon} {FEEDBACK_STATUSES[item.status].label}
+                    <span
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${FEEDBACK_STATUSES[item.status].color}`}
+                    >
+                      {FEEDBACK_STATUSES[item.status].icon}{' '}
+                      {FEEDBACK_STATUSES[item.status].label}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
@@ -304,7 +341,9 @@ export default function FeedbackManagement() {
         {filteredFeedback.length === 0 && (
           <div className="text-center py-12">
             <div className="text-gray-400">
-              {feedback.length === 0 ? 'Заявок пока нет' : 'Нет заявок по выбранным фильтрам'}
+              {feedback.length === 0
+                ? 'Заявок пока нет'
+                : 'Нет заявок по выбранным фильтрам'}
             </div>
           </div>
         )}
@@ -369,10 +408,18 @@ function FeedbackModal({
               <h3 className="font-medium text-white mb-2">{feedback.title}</h3>
               <p className="text-gray-300 mb-3">{feedback.description}</p>
               <div className="flex items-center gap-4 text-sm text-gray-400">
-                <span>От: {feedback.user_name} ({feedback.user_email})</span>
-                <span>Дата: {new Date(feedback.created_at).toLocaleDateString('ru-RU')}</span>
-                <span className={`px-2 py-1 rounded-full ${FEEDBACK_CATEGORIES[feedback.category].color}`}>
-                  {FEEDBACK_CATEGORIES[feedback.category].icon} {FEEDBACK_CATEGORIES[feedback.category].label}
+                <span>
+                  От: {feedback.user_name} ({feedback.user_email})
+                </span>
+                <span>
+                  Дата:{' '}
+                  {new Date(feedback.created_at).toLocaleDateString('ru-RU')}
+                </span>
+                <span
+                  className={`px-2 py-1 rounded-full ${FEEDBACK_CATEGORIES[feedback.category].color}`}
+                >
+                  {FEEDBACK_CATEGORIES[feedback.category].icon}{' '}
+                  {FEEDBACK_CATEGORIES[feedback.category].label}
                 </span>
               </div>
               {feedback.current_page && (
@@ -388,7 +435,9 @@ function FeedbackModal({
                       <div key={index} className="flex items-center gap-2">
                         {renderAttachment(attachment)}
                         <span className="text-sm text-gray-400">
-                          {typeof attachment === 'string' ? `Вложение ${index + 1}` : attachment.name}
+                          {typeof attachment === 'string'
+                            ? `Вложение ${index + 1}`
+                            : attachment.name}
                         </span>
                       </div>
                     ))}
@@ -452,4 +501,4 @@ function FeedbackModal({
       </div>
     </div>
   );
-} 
+}

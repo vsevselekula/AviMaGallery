@@ -40,43 +40,49 @@ export interface UpdateFeedbackData {
   admin_notes?: string;
 }
 
-export const FEEDBACK_CATEGORIES: Record<FeedbackCategory, { label: string; icon: string; color: string }> = {
+export const FEEDBACK_CATEGORIES: Record<
+  FeedbackCategory,
+  { label: string; icon: string; color: string }
+> = {
   bug: {
     label: 'Ошибка',
     icon: '🐛',
-    color: 'bg-red-100 text-red-800'
+    color: 'bg-red-100 text-red-800',
   },
   feature: {
     label: 'Новая функция',
     icon: '✨',
-    color: 'bg-blue-100 text-blue-800'
+    color: 'bg-blue-100 text-blue-800',
   },
   improvement: {
     label: 'Улучшение',
     icon: '🚀',
-    color: 'bg-green-100 text-green-800'
+    color: 'bg-green-100 text-green-800',
   },
   other: {
     label: 'Другое',
     icon: '💭',
-    color: 'bg-gray-100 text-gray-800'
-  }
+    color: 'bg-gray-100 text-gray-800',
+  },
 };
 
-export const FEEDBACK_STATUSES: Record<FeedbackStatus, { label: string; icon: string; color: string }> = {
+export const FEEDBACK_STATUSES: Record<
+  FeedbackStatus,
+  { label: string; icon: string; color: string }
+> = {
   new: {
     label: 'Новая',
     icon: '🆕',
-    color: 'bg-yellow-100 text-yellow-800'
+    color: 'bg-yellow-100 text-yellow-800',
   },
   in_progress: {
     label: 'В работе',
     icon: '⚙️',
-    color: 'bg-blue-100 text-blue-800'
+    color: 'bg-blue-100 text-blue-800',
   },
   completed: {
     label: 'Выполнено',
     icon: '✅',
-    color: 'bg-green-100 text-green-800'
-  }
-}; 
+    color: 'bg-green-100 text-green-800',
+  },
+};

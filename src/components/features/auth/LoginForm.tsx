@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { logger } from '@/lib/logger';
 
 export function LoginForm() {
   const router = useRouter();
@@ -17,12 +18,12 @@ export function LoginForm() {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
-    console.log('LoginForm - Starting login process...');
+    logger.auth.debug('Starting login process');
 
     const fullEmail = `${localEmailPart}@avito.ru`;
 
     try {
-      console.log('LoginForm - Attempting to sign in with:', {
+      logger.auth.debug('Attempting to sign in', {
         email: fullEmail,
       });
       const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -31,17 +32,17 @@ export function LoginForm() {
       });
 
       if (signInError) {
-        console.error('LoginForm - Sign in error:', signInError);
+        logger.auth.error('Sign in error', signInError);
         throw signInError;
       }
 
-      console.log('LoginForm - Sign in successful');
+      logger.auth.info('Sign in successful');
 
       // После успешного входа обновляем страницу
       router.refresh();
       router.push('/dashboard');
     } catch (error) {
-      console.error('LoginForm - Error:', error);
+      logger.auth.error('Login error', error);
       setError(
         error instanceof Error ? error.message : 'Произошла ошибка при входе'
       );
