@@ -5,6 +5,9 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { Button } from '@/components/ui/Button';
 import { UserData } from '@/lib/types';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import FeedbackManagement from './FeedbackManagement';
+
+type AdminTab = 'users' | 'feedback';
 
 export function AdminPanel() {
   const supabase = createClientComponentClient();
@@ -14,6 +17,7 @@ export function AdminPanel() {
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [editedRole, setEditedRole] = useState('');
+  const [activeTab, setActiveTab] = useState<AdminTab>('users');
 
   useEffect(() => {
     const fetchUsersAndRoles = async () => {
@@ -129,56 +133,108 @@ export function AdminPanel() {
   }
 
   return (
-    <div className="bg-gray-800 p-6 rounded-lg shadow-lg text-white">
-      <h2 className="text-xl font-bold mb-4">Управление пользователями</h2>
-      <table className="min-w-full bg-gray-700 rounded-lg overflow-hidden">
-        <thead>
-          <tr className="bg-gray-600">
-            <th className="py-2 px-4 text-left">Email</th>
-            <th className="py-2 px-4 text-left">Роль</th>
-            <th className="py-2 px-4 text-left">Действия</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map((user) => (
-            <tr key={user.id} className="border-t border-gray-600">
-              <td className="py-2 px-4">{user.email}</td>
-              <td className="py-2 px-4">
-                {editingUserId === user.id ? (
-                  <select
-                    value={editedRole}
-                    onChange={(e) => setEditedRole(e.target.value)}
-                    className="bg-gray-600 border border-gray-500 rounded p-1 text-white"
-                  >
-                    <option value="super_admin">Супер администратор</option>
-                    <option value="editor">Редактор</option>
-                    <option value="viewer">Просмотр</option>
-                  </select>
-                ) : (
-                  user.role
-                )}
-              </td>
-              <td className="py-2 px-4">
-                {editingUserId === user.id ? (
-                  <Button
-                    onClick={() => handleSaveRole(user.id)}
-                    className="bg-green-600 hover:bg-green-700 text-white text-sm px-3 py-1 rounded"
-                  >
-                    Сохранить
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={() => handleEditRole(user.id, user.role)}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-3 py-1 rounded"
-                  >
-                    Редактировать
-                  </Button>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="bg-gray-800 rounded-lg shadow-lg border border-gray-700">
+      {/* Заголовок */}
+      <div className="border-b border-gray-700 px-6 py-4">
+        <h1 className="text-2xl font-bold text-white">Админ-панель</h1>
+      </div>
+
+      {/* Табы */}
+      <div className="border-b border-gray-700">
+        <nav className="flex space-x-8 px-6">
+          <button
+            onClick={() => setActiveTab('users')}
+            className={`py-4 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'users'
+                ? 'border-blue-500 text-blue-400'
+                : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-500'
+            }`}
+          >
+            👥 Пользователи
+          </button>
+          <button
+            onClick={() => setActiveTab('feedback')}
+            className={`py-4 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'feedback'
+                ? 'border-blue-500 text-blue-400'
+                : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-500'
+            }`}
+          >
+            💡 Заявки на улучшение
+          </button>
+        </nav>
+      </div>
+
+      {/* Контент табов */}
+      <div className="p-6">
+        {activeTab === 'users' && (
+          <div>
+            <h2 className="text-xl font-semibold text-white mb-4">Управление пользователями</h2>
+            <div className="bg-gray-700 rounded-lg border border-gray-600 overflow-hidden">
+              <table className="min-w-full divide-y divide-gray-600">
+                <thead className="bg-gray-600">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                      Email
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                      Роль
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                      Действия
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-gray-700 divide-y divide-gray-600">
+                  {users.map((user) => (
+                    <tr key={user.id} className="hover:bg-gray-600">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                        {user.email}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                        {editingUserId === user.id ? (
+                          <select
+                            value={editedRole}
+                            onChange={(e) => setEditedRole(e.target.value)}
+                            className="border border-gray-500 rounded-lg px-3 py-1 text-sm bg-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          >
+                            <option value="super_admin">Супер администратор</option>
+                            <option value="editor">Редактор</option>
+                            <option value="viewer">Просмотр</option>
+                          </select>
+                        ) : (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-900 text-blue-200 border border-blue-700">
+                            {user.role}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        {editingUserId === user.id ? (
+                          <Button
+                            onClick={() => handleSaveRole(user.id)}
+                            className="bg-green-600 hover:bg-green-700 text-white text-sm px-3 py-1 rounded-lg"
+                          >
+                            Сохранить
+                          </Button>
+                        ) : (
+                          <Button
+                            onClick={() => handleEditRole(user.id, user.role)}
+                            className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-1 rounded-lg"
+                          >
+                            Редактировать
+                          </Button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'feedback' && <FeedbackManagement />}
+      </div>
     </div>
   );
 }

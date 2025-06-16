@@ -13,8 +13,12 @@ export async function middleware(req: NextRequest) {
   console.log('Middleware - Current path:', req.nextUrl.pathname);
   console.log('Middleware - Session exists:', !!session);
 
+  // Публичные маршруты, которые не требуют авторизации
+  const publicPaths = ['/auth'];
+  const isPublicPath = publicPaths.some(path => req.nextUrl.pathname.startsWith(path));
+
   // Если пользователь не аутентифицирован и пытается получить доступ к защищенным маршрутам
-  if (!session && !req.nextUrl.pathname.startsWith('/auth')) {
+  if (!session && !isPublicPath) {
     console.log('Middleware - No session, redirecting to login');
     const redirectUrl = req.nextUrl.clone();
     redirectUrl.pathname = '/auth/login';

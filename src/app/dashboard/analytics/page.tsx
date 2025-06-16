@@ -46,21 +46,25 @@ export default function Analytics() {
   const chartRef = useRef(null);
 
   // Функция для обработки клика по столбцу канала
-  const handleChannelClick = useCallback((channelName: string) => {
-    const filteredCampaigns =
-      selectedVerticalForChannels === 'all'
-        ? campaigns
-        : campaigns.filter(
-            (c) => c.campaign_vertical === selectedVerticalForChannels
-          );
+  const handleChannelClick = useCallback(
+    (channelName: string) => {
+      const filteredCampaigns =
+        selectedVerticalForChannels === 'all'
+          ? campaigns
+          : campaigns.filter(
+              (c) => c.campaign_vertical === selectedVerticalForChannels
+            );
 
-    const campaignsWithChannel = filteredCampaigns.filter(
-      (campaign) => campaign.channels && campaign.channels.includes(channelName)
-    );
-    
-    setSelectedChannel(channelName);
-    setSelectedChannelCampaigns(campaignsWithChannel);
-  }, [campaigns, selectedVerticalForChannels]);
+      const campaignsWithChannel = filteredCampaigns.filter(
+        (campaign) =>
+          campaign.channels && campaign.channels.includes(channelName)
+      );
+
+      setSelectedChannel(channelName);
+      setSelectedChannelCampaigns(campaignsWithChannel);
+    },
+    [campaigns, selectedVerticalForChannels]
+  );
 
   // Функция для закрытия детального просмотра
   const handleCloseChannelDetails = useCallback(() => {
@@ -106,7 +110,7 @@ export default function Analytics() {
     fetchCampaigns();
   }, [supabase]);
 
- // Убираем selectedChannel из зависимостей
+  // Убираем selectedChannel из зависимостей
 
   const {
     totalCampaigns,
@@ -515,9 +519,9 @@ export default function Analytics() {
           </div>
         </div>
         <div className="h-96">
-          <Bar 
+          <Bar
             ref={chartRef}
-            data={channelsPopularity} 
+            data={channelsPopularity}
             options={channelsBarOptions}
           />
         </div>

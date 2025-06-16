@@ -4,6 +4,7 @@ import Sidebar from './Sidebar';
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
+import FeedbackButton from '@/components/ui/FeedbackButton';
 
 interface LayoutWrapperProps {
   children: React.ReactNode;
@@ -69,6 +70,9 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
       >
         {children}
       </main>
+
+      {/* Плавающая кнопка обратной связи */}
+      {showSidebar && <FeedbackButton />}
     </div>
   );
 }
