@@ -140,7 +140,7 @@ function AnalyticsContent() {
   useEffect(() => {
     const fetchCampaigns = async () => {
       setLoading(true);
-      console.log('Fetching campaigns for Analytics page from Supabase...');
+
       const { data, error } = await supabase
         .from('campaigns_v2')
         .select('*')
@@ -149,7 +149,7 @@ function AnalyticsContent() {
       if (error) {
         console.error('Error fetching campaigns for Analytics page:', error);
       } else {
-        console.log('Successfully fetched campaigns for Analytics page:', data);
+
         setCampaigns(data as Campaign[]);
       }
       setLoading(false);
@@ -451,7 +451,7 @@ function AnalyticsContent() {
       if (elements && elements.length > 0) {
         const elementIndex = elements[0].index;
         const channelName = channelsPopularity.labels[elementIndex] as string;
-        console.log('Chart clicked, channel:', channelName);
+
         handleChannelClick(channelName);
       }
     },

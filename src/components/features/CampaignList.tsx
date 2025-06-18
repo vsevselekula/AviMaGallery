@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { Campaign } from '@/lib/types';
 import { CampaignCard } from './CampaignCard';
 import { CampaignFilters } from './CampaignFilters';
@@ -22,7 +22,6 @@ export function CampaignList({
   hideFilters,
 }: CampaignListProps) {
   const router = useRouter();
-  const pathname = usePathname();
 
   // Получаем реакции для всех кампаний - мемоизируем для предотвращения пересоздания
   const campaignIds = useMemo(() => campaigns.map((c) => c.id), [campaigns]);
@@ -42,10 +41,7 @@ export function CampaignList({
   } = useCampaignFilters(campaigns);
 
   const handleCampaignClick = (campaign: Campaign) => {
-    console.log('🔍 CampaignList click:', {
-      pathname,
-      campaignId: campaign.id,
-    });
+
 
     // Добавляем параметр campaign к текущему URL
     const currentUrl = new URL(window.location.href);

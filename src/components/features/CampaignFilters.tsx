@@ -54,7 +54,7 @@ export function CampaignFilters({
       try {
         // Используем таймаут для быстрого фоллбека если таблица недоступна
         const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Timeout')), 1000)
+          setTimeout(() => reject(new Error('Timeout')), 5000)
         );
 
         const fetchPromise = supabase

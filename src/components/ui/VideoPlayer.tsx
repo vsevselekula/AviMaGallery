@@ -19,7 +19,7 @@ export function VideoPlayer({
   const videoRef = useRef<HTMLVideoElement>(null);
 
   // Логирование для отладки
-  console.log('VideoPlayer props:', { videoUrl, posterUrl, className });
+
 
   // Проверяем, является ли это Google Drive ссылкой
   const isGoogleDriveUrl = videoUrl?.includes('drive.google.com');
@@ -40,7 +40,7 @@ export function VideoPlayer({
   const togglePlay = async () => {
     if (isGoogleDriveUrl) {
       // Для Google Drive iframe нельзя контролировать воспроизведение
-      console.log('Google Drive video - controls handled by iframe');
+
       return;
     }
 
@@ -145,21 +145,21 @@ export function VideoPlayer({
             className="w-full h-full object-cover"
             poster={posterUrl}
             onPlay={() => {
-              console.log('Video started playing');
+        
               setIsPlaying(true);
             }}
             onPause={() => {
-              console.log('Video paused');
+        
               setIsPlaying(false);
             }}
             onError={(e) => {
               console.error('Video error:', e);
             }}
             onLoadStart={() => {
-              console.log('Video load started');
+        
             }}
             onCanPlay={() => {
-              console.log('Video can play');
+        
             }}
             onMouseEnter={() => setShowControls(true)}
             onMouseLeave={() => setShowControls(false)}

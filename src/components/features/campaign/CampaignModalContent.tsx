@@ -451,7 +451,7 @@ export function CampaignModalContent({ campaign }: CampaignModalContentProps) {
       </CampaignSection>
 
       {/* Таргеты */}
-      <CampaignSection title="" icon={<span>🎯</span>}>
+      <CampaignSection title="Цели кампании" icon={<span>🎯</span>}>
         <div className="space-y-4">
           {Array.isArray(campaign.targets) && campaign.targets.length > 0 ? (
             <div className="flex flex-wrap gap-2">

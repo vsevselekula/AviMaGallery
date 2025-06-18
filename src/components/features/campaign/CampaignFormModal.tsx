@@ -1,7 +1,7 @@
 'use client';
 
 import { Campaign } from '@/lib/types';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { Notification } from '@/components/ui/Notification';
 import { useNotification } from '@/hooks/useNotification';
@@ -71,9 +71,11 @@ export function CampaignFormModal({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [availableVerticals, setAvailableVerticals] = useState<string[]>([]);
 
-  const supabase = createClientComponentClient();
+  const supabase = useMemo(() => createClientComponentClient(), []);
   const { notification, showSuccess, showError, hideNotification } =
     useNotification();
+
+
 
   // Обработчик клика вне модального окна
   useEffect(() => {
@@ -100,7 +102,7 @@ export function CampaignFormModal({
           data: { user },
         } = await supabase.auth.getUser();
         if (user) {
-          logger.info('AUTH', `Fetching role for user: ${user.id}`);
+
 
           const { data: userRole, error } = await supabase
             .from('user_roles')
@@ -116,11 +118,11 @@ export function CampaignFormModal({
             );
             setUserRole('editor');
           } else {
-            logger.info('AUTH', `User role found: ${userRole.role}`);
+
             setUserRole(userRole?.role || 'editor');
           }
         } else {
-          logger.warn('AUTH', 'No authenticated user found');
+
           setUserRole('viewer');
         }
       } catch (error) {
@@ -342,7 +344,7 @@ export function CampaignFormModal({
           'DB',
           `Updating campaign ${campaign!.id} with role: ${userRole}`
         );
-        logger.info('DB', `Update data:`, JSON.stringify(updateData, null, 2));
+
 
         const { data, error } = await supabase
           .from('campaigns_v2')
