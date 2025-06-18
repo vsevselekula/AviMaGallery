@@ -117,7 +117,6 @@ export function CampaignEditForm({
                 {campaignTypes.map((type) => (
                   <option key={type.id} value={type.name}>
                     {type.name}
-                    {type.description && ` - ${type.description}`}
                   </option>
                 ))}
               </select>
