@@ -149,7 +149,6 @@ function AnalyticsContent() {
       if (error) {
         console.error('Error fetching campaigns for Analytics page:', error);
       } else {
-
         setCampaigns(data as Campaign[]);
       }
       setLoading(false);

@@ -20,6 +20,7 @@ interface CampaignFormModalProps {
   onClose: () => void;
   onCampaignUpdated?: (updatedCampaign: Campaign) => void;
   onCampaignCreated?: (newCampaign: Campaign) => void;
+  onCampaignDeleted?: (deletedCampaignId: string) => void;
 }
 
 // Пустая кампания для создания
@@ -54,6 +55,7 @@ export function CampaignFormModal({
   onClose,
   onCampaignUpdated,
   onCampaignCreated,
+  onCampaignDeleted,
 }: CampaignFormModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const isCreateMode = !campaign;
@@ -77,9 +79,16 @@ export function CampaignFormModal({
 
 
 
+
+
   // Обработчик клика вне модального окна
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      // Не закрываем модальное окно, если открыто окно подтверждения удаления
+      if (showDeleteConfirm) {
+        return;
+      }
+      
       if (
         modalRef.current &&
         !modalRef.current.contains(event.target as Node)
@@ -92,7 +101,7 @@ export function CampaignFormModal({
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [onClose]);
+  }, [onClose, showDeleteConfirm]);
 
   // Получение роли пользователя
   useEffect(() => {
@@ -102,8 +111,6 @@ export function CampaignFormModal({
           data: { user },
         } = await supabase.auth.getUser();
         if (user) {
-
-
           const { data: userRole, error } = await supabase
             .from('user_roles')
             .select('role')
@@ -118,11 +125,9 @@ export function CampaignFormModal({
             );
             setUserRole('editor');
           } else {
-
             setUserRole(userRole?.role || 'editor');
           }
         } else {
-
           setUserRole('viewer');
         }
       } catch (error) {
@@ -345,7 +350,6 @@ export function CampaignFormModal({
           `Updating campaign ${campaign!.id} with role: ${userRole}`
         );
 
-
         const { data, error } = await supabase
           .from('campaigns_v2')
           .update(updateData)
@@ -396,6 +400,12 @@ export function CampaignFormModal({
   const handleDelete = async () => {
     if (isCreateMode) return; // Нельзя удалить несуществующую кампанию
 
+    if (!userRole || userRole !== 'super_admin') {
+      showError('У вас нет прав для удаления кампаний. Требуется роль super_admin.');
+      setShowDeleteConfirm(false);
+      return;
+    }
+
     setIsDeleting(true);
     try {
       const { error } = await supabase
@@ -403,14 +413,17 @@ export function CampaignFormModal({
         .delete()
         .eq('id', campaign!.id);
 
-      if (error) throw error;
-
+      if (error) {
+        throw error;
+      }
       showSuccess('Кампания успешно удалена!');
       logger.info(
         'DB',
         `Campaign deleted successfully: ${campaign!.campaign_name}`
       );
 
+      // Уведомляем родительский компонент об удалении
+      onCampaignDeleted?.(campaign!.id);
       onClose();
     } catch (error) {
       logger.error(
@@ -425,8 +438,12 @@ export function CampaignFormModal({
     }
   };
 
-  const handleDeleteClick = () => setShowDeleteConfirm(true);
+  const handleDeleteClick = () => {
+    setShowDeleteConfirm(true);
+  };
   const handleDeleteCancel = () => setShowDeleteConfirm(false);
+
+
 
   return (
     <>

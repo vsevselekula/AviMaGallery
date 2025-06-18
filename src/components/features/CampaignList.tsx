@@ -41,8 +41,6 @@ export function CampaignList({
   } = useCampaignFilters(campaigns);
 
   const handleCampaignClick = (campaign: Campaign) => {
-
-
     // Добавляем параметр campaign к текущему URL
     const currentUrl = new URL(window.location.href);
     currentUrl.searchParams.set('campaign', campaign.id);

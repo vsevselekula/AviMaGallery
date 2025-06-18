@@ -103,6 +103,12 @@ function DashboardContent() {
     setCampaigns((prevCampaigns) => [newCampaign, ...prevCampaigns]);
   };
 
+  const handleCampaignDeleted = (deletedCampaignId: string) => {
+    setCampaigns((prevCampaigns) => 
+      prevCampaigns.filter((campaign) => campaign.id !== deletedCampaignId)
+    );
+  };
+
   const handleCampaignModalClose = () => {
     setSelectedCampaign(null);
     // Убираем параметр campaign из URL
@@ -153,6 +159,7 @@ function DashboardContent() {
           campaign={selectedCampaign}
           onClose={handleCampaignModalClose}
           onCampaignUpdated={handleCampaignUpdated}
+          onCampaignDeleted={handleCampaignDeleted}
         />
       )}
     </div>

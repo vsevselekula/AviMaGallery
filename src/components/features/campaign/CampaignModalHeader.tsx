@@ -26,6 +26,7 @@ export function CampaignModalHeader({
   isCreateMode = false,
 }: CampaignModalHeaderProps) {
   const canEdit = userRole === 'super_admin' || userRole === 'editor';
+  const canDelete = userRole === 'super_admin';
 
   return (
     <div className="absolute top-4 right-4 flex gap-2 z-10">
@@ -40,7 +41,7 @@ export function CampaignModalHeader({
               >
                 ✏️ Редактировать
               </button>
-              {!isCreateMode && onDelete && (
+              {!isCreateMode && onDelete && canDelete && (
                 <button
                   onClick={onDelete}
                   disabled={isDeleting}
