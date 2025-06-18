@@ -178,9 +178,11 @@ export function ImageUpload({
   }, [handlePaste]);
 
   const isCompactMode = className.includes('compact-mode');
-  
+
   return (
-    <div className={`${isCompactMode ? 'space-y-2' : 'space-y-4'} ${className}`}>
+    <div
+      className={`${isCompactMode ? 'space-y-2' : 'space-y-4'} ${className}`}
+    >
       {/* Зона загрузки */}
       <div
         className={`
@@ -216,17 +218,17 @@ export function ImageUpload({
             </p>
           </div>
         ) : previewUrl ? (
-          <div className={isCompactMode ? "space-y-2" : "space-y-4"}>
+          <div className={isCompactMode ? 'space-y-2' : 'space-y-4'}>
             <div className="relative inline-block">
               <Image
                 src={previewUrl}
                 alt="Предварительный просмотр"
                 width={isCompactMode ? 150 : 300}
                 height={isCompactMode ? 96 : 192}
-                style={{ 
-                  maxHeight: isCompactMode ? '6rem' : '12rem', 
-                  width: 'auto', 
-                  height: 'auto' 
+                style={{
+                  maxHeight: isCompactMode ? '6rem' : '12rem',
+                  width: 'auto',
+                  height: 'auto',
                 }}
                 className="rounded-lg shadow-md"
               />
@@ -258,12 +260,8 @@ export function ImageUpload({
 
             {isCompactMode ? (
               <>
-                <p className="text-xs text-white/80">
-                  Нажмите для замены
-                </p>
-                <p className="text-xs text-blue-300 font-medium">
-                  💡 Ctrl+V
-                </p>
+                <p className="text-xs text-white/80">Нажмите для замены</p>
+                <p className="text-xs text-blue-300 font-medium">💡 Ctrl+V</p>
               </>
             ) : (
               <>
@@ -278,15 +276,19 @@ export function ImageUpload({
             )}
           </div>
         ) : (
-          <div className={isCompactMode ? "space-y-1" : "space-y-2"}>
-            <div className={`${isCompactMode ? 'text-2xl' : 'text-4xl'} text-gray-400`}>📷</div>
-            <p className={`${isCompactMode ? 'text-xs text-white/80' : 'text-sm text-gray-600 dark:text-gray-400'}`}>
+          <div className={isCompactMode ? 'space-y-1' : 'space-y-2'}>
+            <div
+              className={`${isCompactMode ? 'text-2xl' : 'text-4xl'} text-gray-400`}
+            >
+              📷
+            </div>
+            <p
+              className={`${isCompactMode ? 'text-xs text-white/80' : 'text-sm text-gray-600 dark:text-gray-400'}`}
+            >
               {placeholder}
             </p>
             {isCompactMode ? (
-              <p className="text-xs text-blue-300 font-medium">
-                💡 Ctrl+V
-              </p>
+              <p className="text-xs text-blue-300 font-medium">💡 Ctrl+V</p>
             ) : (
               <>
                 <p className="text-xs text-gray-500 dark:text-gray-500">
@@ -302,7 +304,7 @@ export function ImageUpload({
       </div>
 
       {/* Альтернативный ввод URL */}
-      <div className={isCompactMode ? "space-y-1" : "space-y-2"}>
+      <div className={isCompactMode ? 'space-y-1' : 'space-y-2'}>
         {!isCompactMode && (
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             Или введите URL изображения:
@@ -325,10 +327,12 @@ export function ImageUpload({
               setFileInfo(null);
             }
           }}
-          placeholder={isCompactMode ? "URL изображения" : "https://example.com/image.jpg"}
+          placeholder={
+            isCompactMode ? 'URL изображения' : 'https://example.com/image.jpg'
+          }
           className={`w-full rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-            isCompactMode 
-              ? 'px-2 py-1 text-xs bg-black/20 backdrop-blur-sm border border-white/30 text-white placeholder-white/60 hover:bg-black/30 focus:bg-black/40' 
+            isCompactMode
+              ? 'px-2 py-1 text-xs bg-black/20 backdrop-blur-sm border border-white/30 text-white placeholder-white/60 hover:bg-black/30 focus:bg-black/40'
               : 'px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white'
           }`}
         />

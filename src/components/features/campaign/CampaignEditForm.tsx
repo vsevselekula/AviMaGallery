@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Campaign } from '@/lib/types';
 import { CampaignSection } from './CampaignSection';
+import { TestDataEditor } from './TestDataEditor';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 interface CampaignType {
@@ -230,8 +231,8 @@ export function CampaignEditForm({
               value={
                 Array.isArray(editedCampaign.targets)
                   ? editedCampaign.targets.join(', ')
-                  : typeof editedCampaign.targets === 'string' 
-                    ? editedCampaign.targets 
+                  : typeof editedCampaign.targets === 'string'
+                    ? editedCampaign.targets
                     : ''
               }
               onChange={(e) => handleArrayChange('targets', e.target.value)}
@@ -249,8 +250,8 @@ export function CampaignEditForm({
               value={
                 Array.isArray(editedCampaign.channels)
                   ? editedCampaign.channels.join(', ')
-                  : typeof editedCampaign.channels === 'string' 
-                    ? editedCampaign.channels 
+                  : typeof editedCampaign.channels === 'string'
+                    ? editedCampaign.channels
                     : ''
               }
               onChange={(e) => handleArrayChange('channels', e.target.value)}
@@ -268,8 +269,8 @@ export function CampaignEditForm({
               value={
                 Array.isArray(editedCampaign.objectives)
                   ? editedCampaign.objectives.join(', ')
-                  : typeof editedCampaign.objectives === 'string' 
-                    ? editedCampaign.objectives 
+                  : typeof editedCampaign.objectives === 'string'
+                    ? editedCampaign.objectives
                     : ''
               }
               onChange={(e) => handleArrayChange('objectives', e.target.value)}
@@ -308,6 +309,29 @@ export function CampaignEditForm({
               placeholder="https://example.com/video.mp4"
             />
           </div>
+        </div>
+      </CampaignSection>
+
+      {/* Тесты */}
+      <CampaignSection 
+        title="Тесты" 
+        icon={<span>🧪</span>}
+        className="md:col-span-2"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <TestDataEditor
+            value={editedCampaign.pre_tests}
+            onChange={(value) => onInputChange('pre_tests', value)}
+            label="Пре-тесты"
+            placeholder="Введите описание пре-тестов или добавьте ссылки на отчеты"
+          />
+          
+          <TestDataEditor
+            value={editedCampaign.post_tests}
+            onChange={(value) => onInputChange('post_tests', value)}
+            label="Пост-тесты"
+            placeholder="Введите описание пост-тестов или добавьте ссылки на отчеты"
+          />
         </div>
       </CampaignSection>
     </div>

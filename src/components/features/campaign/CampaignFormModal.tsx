@@ -258,7 +258,9 @@ export function CampaignFormModal({
     setIsSaving(true);
     try {
       // Преобразуем строковые поля в массивы перед сохранением
-      const processArrayField = (field: string[] | string | undefined): string[] => {
+      const processArrayField = (
+        field: string[] | string | undefined
+      ): string[] => {
         if (Array.isArray(field)) {
           return field;
         }
@@ -266,14 +268,14 @@ export function CampaignFormModal({
           return field
             .replace(/\./g, ',') // Заменяем точки на запятые
             .split(',')
-            .map(item => item.trim())
+            .map((item) => item.trim())
             .filter(Boolean);
         }
         return [];
       };
 
       // Автоматическое определение статуса на основе дат
-      const finalCampaign = { 
+      const finalCampaign = {
         ...editedCampaign,
         targets: processArrayField(editedCampaign.targets),
         channels: processArrayField(editedCampaign.channels),

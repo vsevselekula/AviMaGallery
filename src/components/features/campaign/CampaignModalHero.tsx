@@ -48,19 +48,23 @@ export function CampaignModalHero({
             priority
           />
         ) : (
-          <div className={`w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center transition-all duration-300 ${
-            isEditing ? 'blur-md scale-105' : ''
-          }`}>
+          <div
+            className={`w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center transition-all duration-300 ${
+              isEditing ? 'blur-md scale-105' : ''
+            }`}
+          >
             <span className="text-6xl opacity-50">📱</span>
           </div>
         )}
 
         {/* Градиент */}
-        <div className={`absolute inset-0 transition-all duration-300 ${
-          isEditing 
-            ? 'bg-gradient-to-t from-black/80 to-black/30' 
-            : 'bg-gradient-to-t from-black/50 to-transparent'
-        }`} />
+        <div
+          className={`absolute inset-0 transition-all duration-300 ${
+            isEditing
+              ? 'bg-gradient-to-t from-black/80 to-black/30'
+              : 'bg-gradient-to-t from-black/50 to-transparent'
+          }`}
+        />
 
         {/* Загрузка изображения для редактирования */}
         {isEditing && (
