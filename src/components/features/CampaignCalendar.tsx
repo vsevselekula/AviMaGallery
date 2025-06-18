@@ -4,14 +4,25 @@ import { useState, useEffect, useMemo } from 'react';
 import { Campaign } from '@/lib/types';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { CampaignFormModal } from './campaign/CampaignFormModal';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, parseISO } from 'date-fns';
+import { getVerticalColorClass } from '@/lib/utils';
+import {
+  format,
+  startOfYear,
+  endOfYear,
+  eachMonthOfInterval,
+  isSameMonth,
+  parseISO,
+  isWithinInterval,
+} from 'date-fns';
 import { ru } from 'date-fns/locale';
 
 export function CampaignCalendar() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(
+    null
+  );
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const supabase = createClientComponentClient();
 
   useEffect(() => {
@@ -32,58 +43,79 @@ export function CampaignCalendar() {
     fetchCampaigns();
   }, [supabase]);
 
-  const monthStart = startOfMonth(currentDate);
-  const monthEnd = endOfMonth(currentDate);
-  const calendarDays = eachDayOfInterval({ start: monthStart, end: monthEnd });
+  // Создаем массив месяцев для текущего года
+  const yearStart = startOfYear(new Date(currentYear, 0, 1));
+  const yearEnd = endOfYear(new Date(currentYear, 0, 1));
+  const monthsOfYear = eachMonthOfInterval({ start: yearStart, end: yearEnd });
 
-  // Группируем кампании по дням
-  const campaignsByDay = useMemo(() => {
+  // Группируем кампании по месяцам
+  const campaignsByMonth = useMemo(() => {
     const grouped: { [key: string]: Campaign[] } = {};
-    
-    campaigns.forEach(campaign => {
-      if (campaign.flight_period?.start_date && campaign.flight_period?.end_date) {
+
+    // Инициализируем все месяцы года пустыми массивами
+    monthsOfYear.forEach((month) => {
+      const monthKey = format(month, 'yyyy-MM');
+      grouped[monthKey] = [];
+    });
+
+    campaigns.forEach((campaign) => {
+      if (
+        campaign.flight_period?.start_date &&
+        campaign.flight_period?.end_date
+      ) {
         const startDate = parseISO(campaign.flight_period.start_date);
         const endDate = parseISO(campaign.flight_period.end_date);
-        
-        calendarDays.forEach(day => {
-          if (day >= startDate && day <= endDate) {
-            const dayKey = format(day, 'yyyy-MM-dd');
-            if (!grouped[dayKey]) {
-              grouped[dayKey] = [];
+
+        monthsOfYear.forEach((month) => {
+          const monthStart = new Date(month.getFullYear(), month.getMonth(), 1);
+          const monthEnd = new Date(month.getFullYear(), month.getMonth() + 1, 0);
+
+          // Проверяем, пересекается ли кампания с месяцем
+          if (
+            isWithinInterval(monthStart, { start: startDate, end: endDate }) ||
+            isWithinInterval(monthEnd, { start: startDate, end: endDate }) ||
+            (startDate <= monthStart && endDate >= monthEnd)
+          ) {
+            const monthKey = format(month, 'yyyy-MM');
+            if (!grouped[monthKey].some(c => c.id === campaign.id)) {
+              grouped[monthKey].push(campaign);
             }
-            grouped[dayKey].push(campaign);
           }
         });
       }
     });
-    
+
     return grouped;
-  }, [campaigns, calendarDays]);
+  }, [campaigns, monthsOfYear]);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active':
-        return 'bg-green-500';
-      case 'planned':
-        return 'bg-blue-500';
-      case 'completed':
-        return 'bg-gray-500';
-      default:
-        return 'bg-gray-400';
-    }
+  const getVerticalBgColor = (vertical: string) => {
+    const verticalColor = getVerticalColorClass(vertical);
+    // Конвертируем HEX в стиль для использования в className через CSS переменную
+    return {
+      backgroundColor: verticalColor.backgroundColor,
+      color: vertical === 'Авито' ? '#000000' : '#FFFFFF'
+    };
   };
 
-  const navigateMonth = (direction: 'prev' | 'next') => {
-    setCurrentDate(prev => {
-      const newDate = new Date(prev);
-      if (direction === 'prev') {
-        newDate.setMonth(prev.getMonth() - 1);
-      } else {
-        newDate.setMonth(prev.getMonth() + 1);
+  const navigateYear = (direction: 'prev' | 'next') => {
+    setCurrentYear(prev => direction === 'prev' ? prev - 1 : prev + 1);
+  };
+
+  const getAvailableYears = () => {
+    if (campaigns.length === 0) return [currentYear];
+    
+    const years = new Set<number>();
+    campaigns.forEach(campaign => {
+      if (campaign.flight_period?.start_date) {
+        const year = new Date(campaign.flight_period.start_date).getFullYear();
+        years.add(year);
       }
-      return newDate;
     });
+    
+    return Array.from(years).sort();
   };
+
+  const availableYears = getAvailableYears();
 
   if (loading) {
     return (
@@ -97,80 +129,107 @@ export function CampaignCalendar() {
     <div className="space-y-6">
       {/* Заголовок календаря */}
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-white">
-          Календарь кампаний
-        </h2>
+        <h2 className="text-2xl font-bold text-white">Календарь кампаний</h2>
         <div className="flex items-center gap-4">
           <button
-            onClick={() => navigateMonth('prev')}
-            className="p-2 text-gray-400 hover:text-white transition-colors"
+            onClick={() => navigateYear('prev')}
+            disabled={currentYear <= Math.min(...availableYears)}
+            className="p-2 text-gray-400 hover:text-white transition-colors disabled:text-gray-600 disabled:cursor-not-allowed"
           >
             ←
           </button>
-          <h3 className="text-xl text-white min-w-[200px] text-center">
-            {format(currentDate, 'LLLL yyyy', { locale: ru })}
+          <h3 className="text-xl text-white min-w-[80px] text-center">
+            {currentYear}
           </h3>
           <button
-            onClick={() => navigateMonth('next')}
-            className="p-2 text-gray-400 hover:text-white transition-colors"
+            onClick={() => navigateYear('next')}
+            disabled={currentYear >= Math.max(...availableYears)}
+            className="p-2 text-gray-400 hover:text-white transition-colors disabled:text-gray-600 disabled:cursor-not-allowed"
           >
             →
           </button>
         </div>
       </div>
 
-      {/* Календарная сетка */}
-      <div className="bg-gray-800 rounded-lg p-6">
-        {/* Заголовки дней недели */}
-        <div className="grid grid-cols-7 gap-2 mb-4">
-          {['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map(day => (
-            <div key={day} className="text-center text-gray-400 font-medium py-2">
-              {day}
-            </div>
+      {/* Быстрый переключатель годов */}
+      {availableYears.length > 1 && (
+        <div className="flex justify-center gap-2 flex-wrap">
+          {availableYears.map(year => (
+            <button
+              key={year}
+              onClick={() => setCurrentYear(year)}
+              className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                year === currentYear
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              }`}
+            >
+              {year}
+            </button>
           ))}
         </div>
+      )}
 
-        {/* Дни месяца */}
-        <div className="grid grid-cols-7 gap-2">
-          {calendarDays.map(day => {
-            const dayKey = format(day, 'yyyy-MM-dd');
-            const dayCampaigns = campaignsByDay[dayKey] || [];
-            const isToday = isSameDay(day, new Date());
-            
+      {/* Календарная сетка по месяцам */}
+      <div className="bg-gray-800 rounded-lg p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {monthsOfYear.map((month) => {
+            const monthKey = format(month, 'yyyy-MM');
+            const monthCampaigns = campaignsByMonth[monthKey] || [];
+            const isCurrentMonth = isSameMonth(month, new Date());
+
             return (
               <div
-                key={dayKey}
-                className={`min-h-[100px] p-2 border border-gray-700 rounded ${
-                  !isSameMonth(day, currentDate) 
-                    ? 'bg-gray-900 text-gray-600' 
-                    : 'bg-gray-800 text-white'
-                } ${isToday ? 'ring-2 ring-blue-500' : ''}`}
+                key={monthKey}
+                className={`min-h-[250px] p-4 border border-gray-700 rounded-lg bg-gray-800 ${
+                  isCurrentMonth ? 'ring-2 ring-blue-500' : ''
+                }`}
               >
-                <div className="text-sm font-medium mb-1">
-                  {format(day, 'd')}
+                {/* Заголовок месяца */}
+                <div className={`text-center mb-3 pb-2 border-b border-gray-700 ${
+                  isCurrentMonth ? 'text-blue-400' : 'text-white'
+                }`}>
+                  <h4 className="text-lg font-semibold">
+                    {format(month, 'LLLL', { locale: ru })}
+                  </h4>
+                  <div className="text-xs text-gray-400 mt-1">
+                    {monthCampaigns.length} кампани{monthCampaigns.length === 1 ? 'я' : 
+                      monthCampaigns.length < 5 ? 'и' : 'й'}
+                  </div>
                 </div>
-                
-                {/* Кампании в этот день */}
-                <div className="space-y-1">
-                  {dayCampaigns.slice(0, 3).map(campaign => (
-                    <div
-                      key={campaign.id}
-                      onClick={() => setSelectedCampaign(campaign)}
-                      className={`text-xs p-1 rounded cursor-pointer hover:opacity-80 transition-opacity ${getStatusColor(campaign.status)} text-white`}
-                      title={campaign.campaign_name}
-                    >
-                      {campaign.campaign_name.length > 15 
-                        ? `${campaign.campaign_name.substring(0, 15)}...`
-                        : campaign.campaign_name
-                      }
+
+                {/* Кампании в месяце */}
+                <div className="space-y-2">
+                  {monthCampaigns.length === 0 ? (
+                    <div className="text-center text-gray-500 text-sm py-4">
+                      Нет кампаний
                     </div>
-                  ))}
-                  
-                  {/* Показываем количество дополнительных кампаний */}
-                  {dayCampaigns.length > 3 && (
-                    <div className="text-xs text-gray-400">
-                      +{dayCampaigns.length - 3} еще
-                    </div>
+                  ) : (
+                    monthCampaigns.map((campaign) => {
+                      const verticalStyle = getVerticalBgColor(campaign.campaign_vertical);
+                      return (
+                        <div
+                          key={campaign.id}
+                          onClick={() => setSelectedCampaign(campaign)}
+                          className="text-xs p-2 rounded cursor-pointer hover:opacity-80 transition-opacity"
+                          style={verticalStyle}
+                          title={`${campaign.campaign_name} (${campaign.campaign_vertical})`}
+                        >
+                          <div className="font-medium truncate">
+                            {campaign.campaign_name}
+                          </div>
+                          <div className="opacity-90 truncate mt-1">
+                            {campaign.campaign_vertical}
+                          </div>
+                          {campaign.flight_period && (
+                            <div className="opacity-75 text-xs mt-1">
+                              {format(new Date(campaign.flight_period.start_date), 'dd.MM', { locale: ru })} - 
+                              {format(new Date(campaign.flight_period.end_date), 'dd.MM', { locale: ru })}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })
                   )}
                 </div>
               </div>
@@ -179,20 +238,30 @@ export function CampaignCalendar() {
         </div>
       </div>
 
-      {/* Легенда */}
-      <div className="flex items-center gap-6 text-sm">
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-green-500 rounded"></div>
-          <span className="text-gray-300">Активные</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-blue-500 rounded"></div>
-          <span className="text-gray-300">Запланированные</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-gray-500 rounded"></div>
-          <span className="text-gray-300">Завершенные</span>
-        </div>
+      {/* Легенда вертикалей */}
+      <div className="flex items-center justify-center gap-4 text-sm flex-wrap">
+        {Array.from(new Set(campaigns.map(c => c.campaign_vertical))).sort().map(vertical => {
+          const verticalStyle = getVerticalBgColor(vertical);
+          return (
+            <div key={vertical} className="flex items-center gap-2">
+              <div 
+                className="w-3 h-3 rounded" 
+                style={{ backgroundColor: verticalStyle.backgroundColor }}
+              ></div>
+              <span className="text-gray-300">{vertical}</span>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Информация о текущем году */}
+      <div className="text-center text-gray-400 text-sm">
+        <p>
+          Всего кампаний в {currentYear} году: {' '}
+          <span className="text-white font-medium">
+            {Object.values(campaignsByMonth).flat().length}
+          </span>
+        </p>
       </div>
 
       {selectedCampaign && (

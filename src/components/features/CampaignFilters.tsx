@@ -23,7 +23,7 @@ interface CampaignFiltersProps {
   className?: string;
 }
 
-export function CampaignFilters({ 
+export function CampaignFilters({
   campaigns,
   searchQuery,
   selectedVerticals,
@@ -33,7 +33,7 @@ export function CampaignFilters({
   onToggleVertical,
   onToggleType,
   onClearAll,
-  className = '' 
+  className = '',
 }: CampaignFiltersProps) {
   const [verticals, setVerticals] = useState<Vertical[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,20 +49,23 @@ export function CampaignFilters({
   // Загружаем вертикали из Supabase
   useEffect(() => {
     if (!isMounted) return;
-    
+
     const fetchVerticals = async () => {
       try {
         // Используем таймаут для быстрого фоллбека если таблица недоступна
-        const timeoutPromise = new Promise((_, reject) => 
+        const timeoutPromise = new Promise((_, reject) =>
           setTimeout(() => reject(new Error('Timeout')), 1000)
         );
-        
+
         const fetchPromise = supabase
           .from('verticals')
           .select('id, name')
           .order('name');
 
-        const { data, error } = await Promise.race([fetchPromise, timeoutPromise]) as { data: Vertical[] | null; error: Error | null };
+        const { data, error } = (await Promise.race([
+          fetchPromise,
+          timeoutPromise,
+        ])) as { data: Vertical[] | null; error: Error | null };
 
         if (error) {
           throw error;
@@ -73,7 +76,7 @@ export function CampaignFilters({
         console.error('Error fetching verticals, using fallback:', error);
         // Fallback: используем данные из кампаний
         const uniqueVerticals = Array.from(
-          new Set(campaigns.map(c => c.campaign_vertical).filter(Boolean))
+          new Set(campaigns.map((c) => c.campaign_vertical).filter(Boolean))
         ).map((name, index) => ({ id: `${index}`, name }));
         setVerticals(uniqueVerticals);
       } finally {
@@ -87,7 +90,7 @@ export function CampaignFilters({
   // Получаем уникальные типы кампаний
   const campaignTypes = useMemo(() => {
     return Array.from(
-      new Set(campaigns.map(c => c.campaign_type).filter(Boolean))
+      new Set(campaigns.map((c) => c.campaign_type).filter(Boolean))
     ).sort();
   }, [campaigns]);
 
@@ -99,8 +102,18 @@ export function CampaignFilters({
         <div className="flex items-center gap-4">
           <div className="relative flex-1">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              <svg
+                className="h-4 w-4 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
               </svg>
             </div>
             <input
@@ -118,8 +131,18 @@ export function CampaignFilters({
               className="flex items-center gap-2 px-3 py-2 bg-gray-700 text-white rounded-lg text-sm whitespace-nowrap opacity-50"
             >
               Вертикали
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
               </svg>
             </button>
           </div>
@@ -129,8 +152,18 @@ export function CampaignFilters({
               className="flex items-center gap-2 px-3 py-2 bg-gray-700 text-white rounded-lg text-sm whitespace-nowrap opacity-50"
             >
               Типы
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
               </svg>
             </button>
           </div>
@@ -147,27 +180,57 @@ export function CampaignFilters({
           {/* Строка поиска */}
           <div className="relative flex-1">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              <svg
+                className="h-4 w-4 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
               </svg>
             </div>
             <div className="block w-full pl-9 pr-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-sm animate-pulse">
               <div className="h-4 bg-gray-600 rounded w-1/3"></div>
             </div>
           </div>
-          
+
           {/* Кнопки фильтров */}
           <div className="flex items-center gap-2 px-3 py-2 bg-gray-700 rounded-lg text-sm whitespace-nowrap animate-pulse">
             <div className="h-4 bg-gray-600 rounded w-16"></div>
-            <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            <svg
+              className="w-4 h-4 text-gray-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
             </svg>
           </div>
-          
+
           <div className="flex items-center gap-2 px-3 py-2 bg-gray-700 rounded-lg text-sm whitespace-nowrap animate-pulse">
             <div className="h-4 bg-gray-600 rounded w-12"></div>
-            <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            <svg
+              className="w-4 h-4 text-gray-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
             </svg>
           </div>
         </div>
@@ -182,8 +245,18 @@ export function CampaignFilters({
         {/* Строка поиска */}
         <div className="relative flex-1">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            <svg
+              className="h-4 w-4 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
             </svg>
           </div>
           <input
@@ -201,7 +274,7 @@ export function CampaignFilters({
             verticals={verticals}
             selectedVerticals={selectedVerticals}
             campaigns={campaigns}
-                         onToggleVertical={onToggleVertical}
+            onToggleVertical={onToggleVertical}
           />
         </div>
 
@@ -211,7 +284,7 @@ export function CampaignFilters({
             campaignTypes={campaignTypes}
             selectedTypes={selectedTypes}
             campaigns={campaigns}
-                         onToggleType={onToggleType}
+            onToggleType={onToggleType}
           />
         </div>
 
@@ -229,8 +302,13 @@ export function CampaignFilters({
       {/* Активные фильтры чипами */}
       {hasActiveFilters && (
         <div className="flex flex-wrap gap-2 mt-3">
-          {selectedVerticals.map(vertical => (
-            <GenericBadge key={vertical} color="blue" size="sm" className="inline-flex items-center">
+          {selectedVerticals.map((vertical) => (
+            <GenericBadge
+              key={vertical}
+              color="blue"
+              size="sm"
+              className="inline-flex items-center"
+            >
               {vertical}
               <button
                 onClick={() => onToggleVertical(vertical)}
@@ -240,8 +318,13 @@ export function CampaignFilters({
               </button>
             </GenericBadge>
           ))}
-          {selectedTypes.map(type => (
-            <GenericBadge key={type} color="green" size="sm" className="inline-flex items-center">
+          {selectedTypes.map((type) => (
+            <GenericBadge
+              key={type}
+              color="green"
+              size="sm"
+              className="inline-flex items-center"
+            >
               {type}
               <button
                 onClick={() => onToggleType(type)}
@@ -258,11 +341,11 @@ export function CampaignFilters({
 }
 
 // Компонент дропдауна для вертикалей
-function VerticalDropdown({ 
-  verticals, 
-  selectedVerticals, 
-  campaigns, 
-  onToggleVertical 
+function VerticalDropdown({
+  verticals,
+  selectedVerticals,
+  campaigns,
+  onToggleVertical,
 }: {
   verticals: Vertical[];
   selectedVerticals: string[];
@@ -283,19 +366,34 @@ function VerticalDropdown({
             {selectedVerticals.length}
           </span>
         )}
-        <svg className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        <svg
+          className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
         </svg>
       </button>
 
       {isOpen && (
         <>
-          <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
+          <div
+            className="fixed inset-0 z-10"
+            onClick={() => setIsOpen(false)}
+          />
           <div className="absolute top-full left-0 mt-1 w-64 bg-gray-700 rounded-lg shadow-xl z-20 max-h-60 overflow-y-auto">
             {verticals.map((vertical) => {
-              const count = campaigns.filter(c => c.campaign_vertical === vertical.name).length;
+              const count = campaigns.filter(
+                (c) => c.campaign_vertical === vertical.name
+              ).length;
               const isSelected = selectedVerticals.includes(vertical.name);
-              
+
               return (
                 <button
                   key={vertical.id}
@@ -317,11 +415,11 @@ function VerticalDropdown({
 }
 
 // Компонент дропдауна для типов кампаний
-function TypeDropdown({ 
-  campaignTypes, 
-  selectedTypes, 
-  campaigns, 
-  onToggleType 
+function TypeDropdown({
+  campaignTypes,
+  selectedTypes,
+  campaigns,
+  onToggleType,
 }: {
   campaignTypes: string[];
   selectedTypes: string[];
@@ -342,19 +440,34 @@ function TypeDropdown({
             {selectedTypes.length}
           </span>
         )}
-        <svg className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        <svg
+          className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
         </svg>
       </button>
 
       {isOpen && (
         <>
-          <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
+          <div
+            className="fixed inset-0 z-10"
+            onClick={() => setIsOpen(false)}
+          />
           <div className="absolute top-full left-0 mt-1 w-64 bg-gray-700 rounded-lg shadow-xl z-20 max-h-60 overflow-y-auto">
             {campaignTypes.map((type) => {
-              const count = campaigns.filter(c => c.campaign_type === type).length;
+              const count = campaigns.filter(
+                (c) => c.campaign_type === type
+              ).length;
               const isSelected = selectedTypes.includes(type);
-              
+
               return (
                 <button
                   key={type}
@@ -371,6 +484,6 @@ function TypeDropdown({
           </div>
         </>
       )}
-         </div>
-   );
- } 
+    </div>
+  );
+}

@@ -57,7 +57,11 @@ export function CampaignModalHeader({
                 disabled={isSaving}
                 className="bg-green-600/90 hover:bg-green-500 text-white px-4 py-2 rounded-full transition-colors backdrop-blur-sm border border-green-500 text-sm font-medium disabled:opacity-50"
               >
-                {isSaving ? '⏳ Сохранение...' : isCreateMode ? '✅ Создать' : '💾 Сохранить'}
+                {isSaving
+                  ? '⏳ Сохранение...'
+                  : isCreateMode
+                    ? '✅ Создать'
+                    : '💾 Сохранить'}
               </button>
               <button
                 onClick={onCancel}
@@ -87,4 +91,4 @@ export function CampaignModalHeader({
       </button>
     </div>
   );
-} 
+}

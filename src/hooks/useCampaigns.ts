@@ -7,7 +7,9 @@ interface UseCampaignsReturn {
   loading: boolean;
   error: string | null;
   refetch: () => Promise<void>;
-  createCampaign: (campaign: Omit<Campaign, 'id' | 'created_at' | 'updated_at'>) => Promise<Campaign | null>;
+  createCampaign: (
+    campaign: Omit<Campaign, 'id' | 'created_at' | 'updated_at'>
+  ) => Promise<Campaign | null>;
   updateCampaign: (id: string, updates: Partial<Campaign>) => Promise<boolean>;
   deleteCampaign: (id: string) => Promise<boolean>;
 }
@@ -16,7 +18,7 @@ export function useCampaigns(): UseCampaignsReturn {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   const supabase = createClientComponentClient();
 
   // Загрузка кампаний
@@ -36,7 +38,8 @@ export function useCampaigns(): UseCampaignsReturn {
 
       setCampaigns(data || []);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Ошибка загрузки кампаний';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Ошибка загрузки кампаний';
       setError(errorMessage);
       console.error('Error fetching campaigns:', err);
     } finally {
@@ -45,110 +48,119 @@ export function useCampaigns(): UseCampaignsReturn {
   }, [supabase]);
 
   // Создание новой кампании
-  const createCampaign = useCallback(async (
-    campaignData: Omit<Campaign, 'id' | 'created_at' | 'updated_at'>
-  ): Promise<Campaign | null> => {
-    try {
-      setError(null);
+  const createCampaign = useCallback(
+    async (
+      campaignData: Omit<Campaign, 'id' | 'created_at' | 'updated_at'>
+    ): Promise<Campaign | null> => {
+      try {
+        setError(null);
 
-      // Автоматически определяем статус по датам
-      const getStatusFromDates = (startDate: string, endDate: string) => {
-        const now = new Date();
-        const start = new Date(startDate);
-        const end = new Date(endDate);
+        // Автоматически определяем статус по датам
+        const getStatusFromDates = (startDate: string, endDate: string) => {
+          const now = new Date();
+          const start = new Date(startDate);
+          const end = new Date(endDate);
 
-        if (now < start) return 'planned';
-        if (now > end) return 'completed';
-        return 'active';
-      };
+          if (now < start) return 'planned';
+          if (now > end) return 'completed';
+          return 'active';
+        };
 
-      const status = getStatusFromDates(
-        campaignData.flight_period.start_date,
-        campaignData.flight_period.end_date
-      );
+        const status = getStatusFromDates(
+          campaignData.flight_period.start_date,
+          campaignData.flight_period.end_date
+        );
 
-      const { data, error: createError } = await supabase
-        .from('campaigns')
-        .insert([{ ...campaignData, status }])
-        .select()
-        .single();
+        const { data, error: createError } = await supabase
+          .from('campaigns')
+          .insert([{ ...campaignData, status }])
+          .select()
+          .single();
 
-      if (createError) {
-        throw new Error(createError.message);
+        if (createError) {
+          throw new Error(createError.message);
+        }
+
+        // Обновляем локальное состояние
+        setCampaigns((prev) => [data, ...prev]);
+
+        return data;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Ошибка создания кампании';
+        setError(errorMessage);
+        console.error('Error creating campaign:', err);
+        return null;
       }
-
-      // Обновляем локальное состояние
-      setCampaigns(prev => [data, ...prev]);
-      
-      return data;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Ошибка создания кампании';
-      setError(errorMessage);
-      console.error('Error creating campaign:', err);
-      return null;
-    }
-  }, [supabase]);
+    },
+    [supabase]
+  );
 
   // Обновление кампании
-  const updateCampaign = useCallback(async (
-    id: string, 
-    updates: Partial<Campaign>
-  ): Promise<boolean> => {
-    try {
-      setError(null);
+  const updateCampaign = useCallback(
+    async (id: string, updates: Partial<Campaign>): Promise<boolean> => {
+      try {
+        setError(null);
 
-      const { data, error: updateError } = await supabase
-        .from('campaigns')
-        .update({ ...updates, updated_at: new Date().toISOString() })
-        .eq('id', id)
-        .select()
-        .single();
+        const { data, error: updateError } = await supabase
+          .from('campaigns')
+          .update({ ...updates, updated_at: new Date().toISOString() })
+          .eq('id', id)
+          .select()
+          .single();
 
-      if (updateError) {
-        throw new Error(updateError.message);
+        if (updateError) {
+          throw new Error(updateError.message);
+        }
+
+        // Обновляем локальное состояние
+        setCampaigns((prev) =>
+          prev.map((campaign) =>
+            campaign.id === id ? { ...campaign, ...data } : campaign
+          )
+        );
+
+        return true;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Ошибка обновления кампании';
+        setError(errorMessage);
+        console.error('Error updating campaign:', err);
+        return false;
       }
-
-      // Обновляем локальное состояние
-      setCampaigns(prev => 
-        prev.map(campaign => 
-          campaign.id === id ? { ...campaign, ...data } : campaign
-        )
-      );
-
-      return true;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Ошибка обновления кампании';
-      setError(errorMessage);
-      console.error('Error updating campaign:', err);
-      return false;
-    }
-  }, [supabase]);
+    },
+    [supabase]
+  );
 
   // Удаление кампании
-  const deleteCampaign = useCallback(async (id: string): Promise<boolean> => {
-    try {
-      setError(null);
+  const deleteCampaign = useCallback(
+    async (id: string): Promise<boolean> => {
+      try {
+        setError(null);
 
-      const { error: deleteError } = await supabase
-        .from('campaigns')
-        .delete()
-        .eq('id', id);
+        const { error: deleteError } = await supabase
+          .from('campaigns')
+          .delete()
+          .eq('id', id);
 
-      if (deleteError) {
-        throw new Error(deleteError.message);
+        if (deleteError) {
+          throw new Error(deleteError.message);
+        }
+
+        // Обновляем локальное состояние
+        setCampaigns((prev) => prev.filter((campaign) => campaign.id !== id));
+
+        return true;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Ошибка удаления кампании';
+        setError(errorMessage);
+        console.error('Error deleting campaign:', err);
+        return false;
       }
-
-      // Обновляем локальное состояние
-      setCampaigns(prev => prev.filter(campaign => campaign.id !== id));
-
-      return true;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Ошибка удаления кампании';
-      setError(errorMessage);
-      console.error('Error deleting campaign:', err);
-      return false;
-    }
-  }, [supabase]);
+    },
+    [supabase]
+  );
 
   // Загружаем кампании при монтировании
   useEffect(() => {
@@ -164,4 +176,4 @@ export function useCampaigns(): UseCampaignsReturn {
     updateCampaign,
     deleteCampaign,
   };
-} 
+}

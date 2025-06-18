@@ -1,7 +1,13 @@
 import { cn } from '@/lib/utils';
 import { ReactNode } from 'react';
 
-export type BadgeVariant = 'default' | 'secondary' | 'success' | 'warning' | 'error' | 'info';
+export type BadgeVariant =
+  | 'default'
+  | 'secondary'
+  | 'success'
+  | 'warning'
+  | 'error'
+  | 'info';
 export type BadgeSize = 'sm' | 'md' | 'lg';
 
 interface BadgeProps {
@@ -47,4 +53,4 @@ export function Badge({
       {children}
     </span>
   );
-} 
+}

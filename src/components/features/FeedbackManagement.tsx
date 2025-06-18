@@ -53,10 +53,16 @@ export default function FeedbackManagement() {
     filterFeedback,
   } = useFeedback();
 
-  const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(null);
+  const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(
+    null
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [filterStatus, setFilterStatus] = useState<FeedbackStatus | 'all'>('all');
-  const [filterCategory, setFilterCategory] = useState<FeedbackCategory | 'all'>('all');
+  const [filterStatus, setFilterStatus] = useState<FeedbackStatus | 'all'>(
+    'all'
+  );
+  const [filterCategory, setFilterCategory] = useState<
+    FeedbackCategory | 'all'
+  >('all');
 
   const filteredFeedback = filterFeedback(filterStatus, filterCategory);
   const statusCounts = getStatusCounts();
@@ -121,7 +127,9 @@ export default function FeedbackManagement() {
           </label>
           <select
             value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value as FeedbackStatus | 'all')}
+            onChange={(e) =>
+              setFilterStatus(e.target.value as FeedbackStatus | 'all')
+            }
             className="px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="all">Все статусы</option>
@@ -139,7 +147,9 @@ export default function FeedbackManagement() {
           </label>
           <select
             value={filterCategory}
-            onChange={(e) => setFilterCategory(e.target.value as FeedbackCategory | 'all')}
+            onChange={(e) =>
+              setFilterCategory(e.target.value as FeedbackCategory | 'all')
+            }
             className="px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="all">Все категории</option>

@@ -75,7 +75,7 @@ export function CampaignCard({
           {campaign.campaign_name}
         </h3>
         <div className="mt-2">
-          <CampaignBadgeGroup 
+          <CampaignBadgeGroup
             vertical={campaign.campaign_vertical}
             type={campaign.campaign_type}
             size="sm"

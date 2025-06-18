@@ -14,7 +14,10 @@ interface UseFeedbackReturn {
     in_progress: number;
     completed: number;
   };
-  filterFeedback: (status: FeedbackStatus | 'all', category: FeedbackCategory | 'all') => Feedback[];
+  filterFeedback: (
+    status: FeedbackStatus | 'all',
+    category: FeedbackCategory | 'all'
+  ) => Feedback[];
 }
 
 export function useFeedback(): UseFeedbackReturn {
@@ -26,12 +29,12 @@ export function useFeedback(): UseFeedbackReturn {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await fetch('/api/feedback');
       if (!response.ok) {
         throw new Error('Ошибка при загрузке заявок');
       }
-      
+
       const data = await response.json();
       setFeedback(data);
     } catch (err) {
@@ -41,30 +44,31 @@ export function useFeedback(): UseFeedbackReturn {
     }
   }, []);
 
-  const updateFeedbackStatus = useCallback(async (id: string, status: FeedbackStatus) => {
-    try {
-      const response = await fetch(`/api/feedback/${id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status }),
-      });
+  const updateFeedbackStatus = useCallback(
+    async (id: string, status: FeedbackStatus) => {
+      try {
+        const response = await fetch(`/api/feedback/${id}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ status }),
+        });
 
-      if (!response.ok) {
-        throw new Error('Ошибка при обновлении статуса');
+        if (!response.ok) {
+          throw new Error('Ошибка при обновлении статуса');
+        }
+
+        // Обновляем локальное состояние
+        setFeedback((prev) =>
+          prev.map((item) => (item.id === id ? { ...item, status } : item))
+        );
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Произошла ошибка');
       }
-
-      // Обновляем локальное состояние
-      setFeedback(prev => 
-        prev.map(item => 
-          item.id === id ? { ...item, status } : item
-        )
-      );
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Произошла ошибка');
-    }
-  }, []);
+    },
+    []
+  );
 
   const updateFeedbackNotes = useCallback(async (id: string, notes: string) => {
     try {
@@ -81,8 +85,8 @@ export function useFeedback(): UseFeedbackReturn {
       }
 
       // Обновляем локальное состояние
-      setFeedback(prev => 
-        prev.map(item => 
+      setFeedback((prev) =>
+        prev.map((item) =>
           item.id === id ? { ...item, admin_notes: notes } : item
         )
       );
@@ -94,22 +98,23 @@ export function useFeedback(): UseFeedbackReturn {
   const getStatusCounts = useCallback(() => {
     return {
       all: feedback.length,
-      new: feedback.filter(item => item.status === 'new').length,
-      in_progress: feedback.filter(item => item.status === 'in_progress').length,
-      completed: feedback.filter(item => item.status === 'completed').length,
+      new: feedback.filter((item) => item.status === 'new').length,
+      in_progress: feedback.filter((item) => item.status === 'in_progress')
+        .length,
+      completed: feedback.filter((item) => item.status === 'completed').length,
     };
   }, [feedback]);
 
-  const filterFeedback = useCallback((
-    status: FeedbackStatus | 'all', 
-    category: FeedbackCategory | 'all'
-  ) => {
-    return feedback.filter(item => {
-      const statusMatch = status === 'all' || item.status === status;
-      const categoryMatch = category === 'all' || item.category === category;
-      return statusMatch && categoryMatch;
-    });
-  }, [feedback]);
+  const filterFeedback = useCallback(
+    (status: FeedbackStatus | 'all', category: FeedbackCategory | 'all') => {
+      return feedback.filter((item) => {
+        const statusMatch = status === 'all' || item.status === status;
+        const categoryMatch = category === 'all' || item.category === category;
+        return statusMatch && categoryMatch;
+      });
+    },
+    [feedback]
+  );
 
   // Загружаем данные при монтировании
   useEffect(() => {
@@ -126,4 +131,4 @@ export function useFeedback(): UseFeedbackReturn {
     getStatusCounts,
     filterFeedback,
   };
-} 
+}

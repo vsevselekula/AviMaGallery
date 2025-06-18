@@ -24,4 +24,4 @@ export function CampaignSection({
       {children}
     </section>
   );
-} 
+}

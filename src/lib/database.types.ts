@@ -120,7 +120,7 @@ export interface Database {
           created_at: string | null;
         };
         Insert: {
-          id?: string;  
+          id?: string;
           user_id: string;
           role: string;
           created_at?: string | null;

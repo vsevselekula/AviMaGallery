@@ -17,7 +17,7 @@ const renderLinks = (
     | undefined
 ) => {
   if (!links) return <span className="text-gray-400">Нет данных</span>;
-  
+
   if (Array.isArray(links)) {
     return (
       <ul className="list-disc ml-6">
@@ -59,7 +59,7 @@ const renderLinks = (
       </ul>
     );
   }
-  
+
   if (typeof links === 'object' && links !== null) {
     return (
       <ul className="list-disc ml-6">
@@ -84,7 +84,7 @@ const renderLinks = (
       </ul>
     );
   }
-  
+
   return <span>{String(links)}</span>;
 };
 
@@ -104,44 +104,50 @@ const renderTestData = (testData: unknown): React.ReactNode => {
         {testData.map((test, index) => {
           if (typeof test === 'object' && test !== null) {
             const testObj = test as Record<string, unknown>;
-            
+
             // Проверяем, является ли это простым объектом с названием и ссылкой
             const keys = Object.keys(testObj);
-            
+
             // Проверяем различные паттерны простых ссылок
-            const hasUrl = keys.some(key => 
-              key.toLowerCase().includes('url') || 
-              key.toLowerCase().includes('link') || 
-              key.toLowerCase().includes('href') ||
-              key.toLowerCase().includes('ссылка')
+            const hasUrl = keys.some(
+              (key) =>
+                key.toLowerCase().includes('url') ||
+                key.toLowerCase().includes('link') ||
+                key.toLowerCase().includes('href') ||
+                key.toLowerCase().includes('ссылка')
             );
-            
-            const hasLabel = keys.some(key => 
-              key.toLowerCase().includes('label') || 
-              key.toLowerCase().includes('name') || 
-              key.toLowerCase().includes('title') ||
-              key.toLowerCase().includes('название') ||
-              key.toLowerCase().includes('содержание')
+
+            const hasLabel = keys.some(
+              (key) =>
+                key.toLowerCase().includes('label') ||
+                key.toLowerCase().includes('name') ||
+                key.toLowerCase().includes('title') ||
+                key.toLowerCase().includes('название') ||
+                key.toLowerCase().includes('содержание')
             );
-            
+
             // Также проверяем, если есть только одно поле с URL
-            const singleUrlField = keys.length === 1 && keys.some(key => {
-              const value = testObj[key];
-              return typeof value === 'string' && (
-                value.startsWith('http') || 
-                value.includes('drive.google.com') ||
-                value.includes('cf.avito.ru')
-              );
-            });
-            
-            const isSimpleLink = (keys.length <= 3 && hasUrl && hasLabel) || singleUrlField;
-            
+            const singleUrlField =
+              keys.length === 1 &&
+              keys.some((key) => {
+                const value = testObj[key];
+                return (
+                  typeof value === 'string' &&
+                  (value.startsWith('http') ||
+                    value.includes('drive.google.com') ||
+                    value.includes('cf.avito.ru'))
+                );
+              });
+
+            const isSimpleLink =
+              (keys.length <= 3 && hasUrl && hasLabel) || singleUrlField;
+
             if (isSimpleLink) {
               if (singleUrlField) {
                 // Если это одно поле с URL - используем ключ как название
                 const key = keys[0];
                 const url = testObj[key] as string;
-                
+
                 return (
                   <div key={index} className="bg-gray-700 rounded-lg p-3">
                     <a
@@ -156,23 +162,25 @@ const renderTestData = (testData: unknown): React.ReactNode => {
                 );
               } else {
                 // Находим ключи для URL и названия
-                const urlKey = keys.find(key => 
-                  key.toLowerCase().includes('url') || 
-                  key.toLowerCase().includes('link') || 
-                  key.toLowerCase().includes('href') ||
-                  key.toLowerCase().includes('ссылка')
+                const urlKey = keys.find(
+                  (key) =>
+                    key.toLowerCase().includes('url') ||
+                    key.toLowerCase().includes('link') ||
+                    key.toLowerCase().includes('href') ||
+                    key.toLowerCase().includes('ссылка')
                 );
-                const labelKey = keys.find(key => 
-                  key.toLowerCase().includes('label') || 
-                  key.toLowerCase().includes('name') || 
-                  key.toLowerCase().includes('title') ||
-                  key.toLowerCase().includes('название') ||
-                  key.toLowerCase().includes('содержание')
+                const labelKey = keys.find(
+                  (key) =>
+                    key.toLowerCase().includes('label') ||
+                    key.toLowerCase().includes('name') ||
+                    key.toLowerCase().includes('title') ||
+                    key.toLowerCase().includes('название') ||
+                    key.toLowerCase().includes('содержание')
                 );
-                
+
                 const url = urlKey ? testObj[urlKey] : null;
                 const label = labelKey ? testObj[labelKey] : null;
-                
+
                 if (typeof url === 'string' && typeof label === 'string') {
                   return (
                     <div key={index} className="bg-gray-700 rounded-lg p-3">
@@ -189,73 +197,94 @@ const renderTestData = (testData: unknown): React.ReactNode => {
                 }
               }
             }
-            
+
             // Если это сложный объект с reports и summary - используем полную карточку
             if (testObj.reports || testObj.summary) {
               return (
-                <div key={index} className="bg-gray-700 rounded-lg p-4 border-l-4 border-blue-500">
+                <div
+                  key={index}
+                  className="bg-gray-700 rounded-lg p-4 border-l-4 border-blue-500"
+                >
                   <div className="flex items-center gap-2 mb-3">
                     <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded-full font-medium">
                       Тест {index + 1}
                     </span>
                   </div>
-                  
+
                   {(() => {
-                    if (!testObj.reports || !Array.isArray(testObj.reports) || testObj.reports.length === 0) {
+                    if (
+                      !testObj.reports ||
+                      !Array.isArray(testObj.reports) ||
+                      testObj.reports.length === 0
+                    ) {
                       return null;
                     }
-                    
+
                     return (
                       <div className="mb-3">
-                        <h6 className="text-blue-300 text-sm font-semibold mb-2">📊 Отчеты:</h6>
+                        <h6 className="text-blue-300 text-sm font-semibold mb-2">
+                          📊 Отчеты:
+                        </h6>
                         <div className="space-y-1">
-                          {testObj.reports.map((report, reportIndex: number) => {
-                            const reportObj = report as Record<string, unknown>;
-                            return (
-                              <div key={reportIndex}>
-                                {typeof reportObj.url === 'string' && typeof reportObj.label === 'string' ? (
-                                  <a
-                                    href={reportObj.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-blue-400 hover:text-blue-300 underline text-sm transition-colors"
-                                  >
-                                    🔗 {reportObj.label}
-                                  </a>
-                                ) : (
-                                  <span className="text-gray-300 text-sm">{JSON.stringify(report)}</span>
-                                )}
-                              </div>
-                            );
-                          })}
+                          {testObj.reports.map(
+                            (report, reportIndex: number) => {
+                              const reportObj = report as Record<
+                                string,
+                                unknown
+                              >;
+                              return (
+                                <div key={reportIndex}>
+                                  {typeof reportObj.url === 'string' &&
+                                  typeof reportObj.label === 'string' ? (
+                                    <a
+                                      href={reportObj.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-blue-400 hover:text-blue-300 underline text-sm transition-colors"
+                                    >
+                                      🔗 {reportObj.label}
+                                    </a>
+                                  ) : (
+                                    <span className="text-gray-300 text-sm">
+                                      {JSON.stringify(report)}
+                                    </span>
+                                  )}
+                                </div>
+                              );
+                            }
+                          )}
                         </div>
                       </div>
                     );
                   })()}
-                  
+
                   {(() => {
                     if (!testObj.summary) return null;
-                    
+
                     return (
                       <div>
-                        <h6 className="text-green-300 text-sm font-semibold mb-2">📝 Результаты:</h6>
+                        <h6 className="text-green-300 text-sm font-semibold mb-2">
+                          📝 Результаты:
+                        </h6>
                         <div className="text-white text-sm leading-relaxed bg-gray-800 rounded p-3">
                           {String(testObj.summary)}
                         </div>
                       </div>
                     );
                   })()}
-                  
+
                   {Object.entries(testObj).map(([key, value]) => {
                     if (key === 'reports' || key === 'summary') return null;
-                    
+
                     return (
                       <div key={key} className="mt-3">
                         <h6 className="text-yellow-300 text-sm font-semibold mb-1">
                           {key.charAt(0).toUpperCase() + key.slice(1)}:
                         </h6>
                         <div className="text-white text-sm">
-                          {typeof value === 'string' ? value : JSON.stringify(value)}
+                          {typeof value === 'string'
+                            ? value
+                            : JSON.stringify(value)}
                         </div>
                       </div>
                     );
@@ -263,7 +292,7 @@ const renderTestData = (testData: unknown): React.ReactNode => {
                 </div>
               );
             }
-            
+
             // Для других объектов - простое отображение
             return (
               <div key={index} className="bg-gray-700 rounded-lg p-3">
@@ -278,7 +307,7 @@ const renderTestData = (testData: unknown): React.ReactNode => {
               </div>
             );
           }
-          
+
           return (
             <div key={index} className="bg-gray-700 rounded-lg p-3">
               <div className="text-white text-sm">{String(test)}</div>
@@ -293,27 +322,40 @@ const renderTestData = (testData: unknown): React.ReactNode => {
   if (typeof testData === 'object' && testData !== null) {
     try {
       const data = testData as Record<string, unknown>;
-      
+
       return (
         <div className="space-y-3">
           {Object.entries(data).map(([key, value]) => (
             <div key={key} className="bg-gray-700 rounded-lg p-3">
               <h5 className="text-sm font-semibold text-blue-300 mb-2">
-                {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                {key
+                  .replace(/([A-Z])/g, ' $1')
+                  .replace(/^./, (str) => str.toUpperCase())}
               </h5>
-              
+
               {typeof value === 'string' ? (
-                <div className="text-white text-sm leading-relaxed">{value}</div>
+                <div className="text-white text-sm leading-relaxed">
+                  {value}
+                </div>
               ) : typeof value === 'object' && value !== null ? (
                 <div className="space-y-1">
-                  {Object.entries(value as Record<string, unknown>).map(([subKey, subValue]) => (
-                    <div key={subKey} className="flex justify-between items-start gap-2">
-                      <span className="text-gray-300 text-sm flex-shrink-0">{subKey}:</span>
-                      <span className="text-white text-sm font-medium text-right">
-                        {typeof subValue === 'string' ? subValue : String(subValue)}
-                      </span>
-                    </div>
-                  ))}
+                  {Object.entries(value as Record<string, unknown>).map(
+                    ([subKey, subValue]) => (
+                      <div
+                        key={subKey}
+                        className="flex justify-between items-start gap-2"
+                      >
+                        <span className="text-gray-300 text-sm flex-shrink-0">
+                          {subKey}:
+                        </span>
+                        <span className="text-white text-sm font-medium text-right">
+                          {typeof subValue === 'string'
+                            ? subValue
+                            : String(subValue)}
+                        </span>
+                      </div>
+                    )
+                  )}
                 </div>
               ) : (
                 <div className="text-white text-sm">{String(value)}</div>
@@ -324,7 +366,11 @@ const renderTestData = (testData: unknown): React.ReactNode => {
       );
     } catch {
       // Если не удалось распарсить - показываем как есть
-      return <div className="text-white text-sm whitespace-pre-wrap">{JSON.stringify(testData, null, 2)}</div>;
+      return (
+        <div className="text-white text-sm whitespace-pre-wrap">
+          {JSON.stringify(testData, null, 2)}
+        </div>
+      );
     }
   }
 
@@ -338,12 +384,16 @@ export function CampaignModalContent({ campaign }: CampaignModalContentProps) {
       <CampaignSection title="Периоды и аудитория" icon={<span>📅</span>}>
         <div className="space-y-4">
           <div>
-            <h4 className="text-sm font-medium text-gray-300 mb-2">География</h4>
+            <h4 className="text-sm font-medium text-gray-300 mb-2">
+              География
+            </h4>
             <p className="text-white">{campaign.geo || 'Не указана'}</p>
           </div>
-          
+
           <div>
-            <h4 className="text-sm font-medium text-gray-300 mb-2">Аудитория</h4>
+            <h4 className="text-sm font-medium text-gray-300 mb-2">
+              Аудитория
+            </h4>
             <p className="text-white">{campaign.audience || 'Не указана'}</p>
           </div>
         </div>
@@ -355,7 +405,9 @@ export function CampaignModalContent({ campaign }: CampaignModalContentProps) {
           {Array.isArray(campaign.targets) && campaign.targets.length > 0 ? (
             <div className="flex flex-wrap gap-2">
               {campaign.targets.map((target, i) => (
-                <CampaignTag key={i} color="purple">{target}</CampaignTag>
+                <CampaignTag key={i} color="purple">
+                  {target}
+                </CampaignTag>
               ))}
             </div>
           ) : (
@@ -369,10 +421,13 @@ export function CampaignModalContent({ campaign }: CampaignModalContentProps) {
         <div className="space-y-4">
           <div>
             <h4 className="text-sm font-medium text-gray-300 mb-2">Каналы</h4>
-            {Array.isArray(campaign.channels) && campaign.channels.length > 0 ? (
+            {Array.isArray(campaign.channels) &&
+            campaign.channels.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {campaign.channels.map((channel, i) => (
-                  <CampaignTag key={i} color="blue">{channel}</CampaignTag>
+                  <CampaignTag key={i} color="blue">
+                    {channel}
+                  </CampaignTag>
                 ))}
               </div>
             ) : (
@@ -388,18 +443,26 @@ export function CampaignModalContent({ campaign }: CampaignModalContentProps) {
       </CampaignSection>
 
       {/* Тесты */}
-      <CampaignSection title="Тесты" icon={<span>🧪</span>} className="md:col-span-2">
+      <CampaignSection
+        title="Тесты"
+        icon={<span>🧪</span>}
+        className="md:col-span-2"
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <h4 className="text-sm font-medium text-gray-300 mb-2">Пре-тесты</h4>
+            <h4 className="text-sm font-medium text-gray-300 mb-2">
+              Пре-тесты
+            </h4>
             {renderTestData(campaign.pre_tests)}
           </div>
           <div>
-            <h4 className="text-sm font-medium text-gray-300 mb-2">Пост-тесты</h4>
+            <h4 className="text-sm font-medium text-gray-300 mb-2">
+              Пост-тесты
+            </h4>
             {renderTestData(campaign.post_tests)}
           </div>
         </div>
       </CampaignSection>
     </div>
   );
-} 
+}

@@ -46,8 +46,8 @@ export function useReactions(campaignIds: string[]) {
 
   // Загружаем реакции для указанных кампаний
   const fetchReactions = useCallback(async () => {
-    const currentCampaignIds = stableCampaignIds.split(',').filter(id => id);
-    
+    const currentCampaignIds = stableCampaignIds.split(',').filter((id) => id);
+
     if (currentCampaignIds.length === 0) {
       setLoading(false);
       return;
@@ -68,10 +68,11 @@ export function useReactions(campaignIds: string[]) {
 
       if (error) {
         // Убираем избыточные логи
-        if (error.code !== '42P01') { // Не логируем ошибку отсутствия таблицы
+        if (error.code !== '42P01') {
+          // Не логируем ошибку отсутствия таблицы
           console.error('Error fetching reactions:', error.message);
         }
-        
+
         // Если таблица не существует или есть проблемы с RLS, просто устанавливаем пустые данные
         setReactionCounts({});
         setUserReactions({});

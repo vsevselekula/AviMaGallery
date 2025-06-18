@@ -5,7 +5,10 @@ import { ru } from 'date-fns/locale';
 import { Campaign } from '@/lib/types';
 import { VideoPlayer } from '@/components/ui/VideoPlayer';
 import { ImageUpload } from '@/components/ui/ImageUpload';
-import { VerticalBadge, CampaignTypeBadge } from '@/components/ui/CampaignBadges';
+import {
+  VerticalBadge,
+  CampaignTypeBadge,
+} from '@/components/ui/CampaignBadges';
 
 interface CampaignModalHeroProps {
   campaign: Campaign;
@@ -22,8 +25,6 @@ export function CampaignModalHero({
   onImageUpdate,
   onInputChange,
 }: CampaignModalHeroProps) {
-
-
   return (
     <div className="mt-12 mb-6 -mx-8">
       <div className="relative h-64 md:h-80 overflow-hidden rounded-t-2xl">
@@ -51,7 +52,7 @@ export function CampaignModalHero({
         {/* Градиент */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
 
-                 {/* Загрузка изображения для редактирования */}
+        {/* Загрузка изображения для редактирования */}
         {isEditing && (
           <div className="absolute top-6 left-6">
             <ImageUpload
@@ -84,17 +85,28 @@ export function CampaignModalHero({
           ) : (
             <div>
               <div className="flex gap-2 flex-wrap items-center mb-3">
-                <VerticalBadge vertical={campaign.campaign_vertical} size="sm" />
+                <VerticalBadge
+                  vertical={campaign.campaign_vertical}
+                  size="sm"
+                />
                 <CampaignTypeBadge type={campaign.campaign_type} size="sm" />
                 {campaign.flight_period && (
                   <span className="px-3 py-1 rounded-full text-xs font-semibold bg-gray-700 text-white">
-                    {format(new Date(campaign.flight_period.start_date), 'dd MMM', {
-                      locale: ru,
-                    })}{' '}
+                    {format(
+                      new Date(campaign.flight_period.start_date),
+                      'dd MMM',
+                      {
+                        locale: ru,
+                      }
+                    )}{' '}
                     -{' '}
-                    {format(new Date(campaign.flight_period.end_date), 'dd MMM yyyy', {
-                      locale: ru,
-                    })}
+                    {format(
+                      new Date(campaign.flight_period.end_date),
+                      'dd MMM yyyy',
+                      {
+                        locale: ru,
+                      }
+                    )}
                   </span>
                 )}
               </div>
@@ -102,7 +114,9 @@ export function CampaignModalHero({
                 {campaign.campaign_name}
               </h1>
               {campaign.slogan && (
-                <p className="text-lg text-white/90 font-medium">{campaign.slogan}</p>
+                <p className="text-lg text-white/90 font-medium">
+                  {campaign.slogan}
+                </p>
               )}
             </div>
           )}
@@ -110,4 +124,4 @@ export function CampaignModalHero({
       </div>
     </div>
   );
-} 
+}

@@ -25,4 +25,4 @@ export function CampaignModalReactions({
       </div>
     </div>
   );
-} 
+}

@@ -14,12 +14,21 @@ export function CampaignEditForm({
   onInputChange,
 }: CampaignEditFormProps) {
   const handleArrayChange = (field: keyof Campaign, value: string) => {
-    const items = value.split(',').map(item => item.trim()).filter(Boolean);
+    const items = value
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean);
     onInputChange(field, items);
   };
 
-  const handleFlightPeriodChange = (field: 'start_date' | 'end_date', value: string) => {
-    const currentPeriod = editedCampaign.flight_period || { start_date: '', end_date: '' };
+  const handleFlightPeriodChange = (
+    field: 'start_date' | 'end_date',
+    value: string
+  ) => {
+    const currentPeriod = editedCampaign.flight_period || {
+      start_date: '',
+      end_date: '',
+    };
     onInputChange('flight_period', {
       ...currentPeriod,
       [field]: value,
@@ -47,7 +56,7 @@ export function CampaignEditForm({
               placeholder="Описание кампании"
             />
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -71,7 +80,9 @@ export function CampaignEditForm({
               </label>
               <select
                 value={editedCampaign.campaign_vertical}
-                onChange={(e) => onInputChange('campaign_vertical', e.target.value)}
+                onChange={(e) =>
+                  onInputChange('campaign_vertical', e.target.value)
+                }
                 className="w-full p-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
               >
                 {availableVerticals.map((vertical) => (
@@ -108,11 +119,13 @@ export function CampaignEditForm({
             <input
               type="date"
               value={editedCampaign.flight_period?.start_date || ''}
-              onChange={(e) => handleFlightPeriodChange('start_date', e.target.value)}
+              onChange={(e) =>
+                handleFlightPeriodChange('start_date', e.target.value)
+              }
               className="w-full p-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
               Дата окончания
@@ -120,11 +133,13 @@ export function CampaignEditForm({
             <input
               type="date"
               value={editedCampaign.flight_period?.end_date || ''}
-              onChange={(e) => handleFlightPeriodChange('end_date', e.target.value)}
+              onChange={(e) =>
+                handleFlightPeriodChange('end_date', e.target.value)
+              }
               className="w-full p-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
               География
@@ -137,7 +152,7 @@ export function CampaignEditForm({
               placeholder="Регион проведения"
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
               Аудитория
@@ -162,33 +177,45 @@ export function CampaignEditForm({
             </label>
             <input
               type="text"
-              value={Array.isArray(editedCampaign.targets) ? editedCampaign.targets.join(', ') : ''}
+              value={
+                Array.isArray(editedCampaign.targets)
+                  ? editedCampaign.targets.join(', ')
+                  : ''
+              }
               onChange={(e) => handleArrayChange('targets', e.target.value)}
               className="w-full p-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
               placeholder="Таргет 1, Таргет 2, Таргет 3"
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
               Каналы (через запятую)
             </label>
             <input
               type="text"
-              value={Array.isArray(editedCampaign.channels) ? editedCampaign.channels.join(', ') : ''}
+              value={
+                Array.isArray(editedCampaign.channels)
+                  ? editedCampaign.channels.join(', ')
+                  : ''
+              }
               onChange={(e) => handleArrayChange('channels', e.target.value)}
               className="w-full p-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
               placeholder="ТВ, Радио, Интернет"
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
               Цели (через запятую)
             </label>
             <input
               type="text"
-              value={Array.isArray(editedCampaign.objectives) ? editedCampaign.objectives.join(', ') : ''}
+              value={
+                Array.isArray(editedCampaign.objectives)
+                  ? editedCampaign.objectives.join(', ')
+                  : ''
+              }
               onChange={(e) => handleArrayChange('objectives', e.target.value)}
               className="w-full p-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
               placeholder="Узнаваемость, Продажи, Лояльность"
@@ -212,7 +239,7 @@ export function CampaignEditForm({
               placeholder="https://example.com/image.jpg"
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
               URL видео
@@ -229,4 +256,4 @@ export function CampaignEditForm({
       </CampaignSection>
     </div>
   );
-} 
+}

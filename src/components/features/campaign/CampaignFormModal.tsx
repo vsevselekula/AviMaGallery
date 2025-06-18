@@ -57,11 +57,13 @@ export function CampaignFormModal({
 }: CampaignFormModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const isCreateMode = !campaign;
-  
+
   // Состояние
   const [isEditing, setIsEditing] = useState(isCreateMode); // В режиме создания сразу редактируем
   const [editedCampaign, setEditedCampaign] = useState<Campaign>(
-    campaign ? { ...campaign, video_url: campaign.video_url || null } : createEmptyCampaign()
+    campaign
+      ? { ...campaign, video_url: campaign.video_url || null }
+      : createEmptyCampaign()
   );
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -70,12 +72,16 @@ export function CampaignFormModal({
   const [availableVerticals, setAvailableVerticals] = useState<string[]>([]);
 
   const supabase = createClientComponentClient();
-  const { notification, showSuccess, showError, hideNotification } = useNotification();
+  const { notification, showSuccess, showError, hideNotification } =
+    useNotification();
 
   // Обработчик клика вне модального окна
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+      if (
+        modalRef.current &&
+        !modalRef.current.contains(event.target as Node)
+      ) {
         onClose();
       }
     };
@@ -90,18 +96,24 @@ export function CampaignFormModal({
   useEffect(() => {
     const fetchUserRole = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
         if (user) {
           logger.info('AUTH', `Fetching role for user: ${user.id}`);
-          
+
           const { data: userRole, error } = await supabase
             .from('user_roles')
             .select('role')
             .eq('user_id', user.id)
             .single();
-          
+
           if (error) {
-            logger.warn('AUTH', `User role not found: ${error.code}`, error.message);
+            logger.warn(
+              'AUTH',
+              `User role not found: ${error.code}`,
+              error.message
+            );
             setUserRole('editor');
           } else {
             logger.info('AUTH', `User role found: ${userRole.role}`);
@@ -132,7 +144,7 @@ export function CampaignFormModal({
         if (error) throw error;
 
         const uniqueVerticals = Array.from(
-          new Set(data?.map(item => item.campaign_vertical).filter(Boolean))
+          new Set(data?.map((item) => item.campaign_vertical).filter(Boolean))
         );
         setAvailableVerticals(uniqueVerticals);
       } catch (error) {
@@ -156,7 +168,7 @@ export function CampaignFormModal({
 
   // Обработчики
   const handleEdit = () => setIsEditing(true);
-  
+
   const handleCancel = () => {
     if (isCreateMode) {
       onClose(); // В режиме создания отменяем весь процесс
@@ -170,7 +182,7 @@ export function CampaignFormModal({
   };
 
   const handleInputChange = (field: keyof Campaign, value: unknown) => {
-    setEditedCampaign(prev => ({
+    setEditedCampaign((prev) => ({
       ...prev,
       [field]: value,
     }));
@@ -213,7 +225,10 @@ export function CampaignFormModal({
   };
 
   // Автоматическое определение статуса
-  const getStatusFromDates = (startDate: string, endDate: string): 'active' | 'completed' | 'planned' => {
+  const getStatusFromDates = (
+    startDate: string,
+    endDate: string
+  ): 'active' | 'completed' | 'planned' => {
     const now = new Date();
     const start = new Date(startDate);
     const end = new Date(endDate);
@@ -241,8 +256,11 @@ export function CampaignFormModal({
     try {
       // Автоматическое определение статуса на основе дат
       const finalCampaign = { ...editedCampaign };
-      
-      if (editedCampaign.flight_period?.start_date && editedCampaign.flight_period?.end_date) {
+
+      if (
+        editedCampaign.flight_period?.start_date &&
+        editedCampaign.flight_period?.end_date
+      ) {
         finalCampaign.status = getStatusFromDates(
           editedCampaign.flight_period.start_date,
           editedCampaign.flight_period.end_date
@@ -254,7 +272,11 @@ export function CampaignFormModal({
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { id, created_at, updated_at, ...insertData } = finalCampaign;
 
-        logger.info('DB', 'Creating campaign with data:', JSON.stringify(insertData, null, 2));
+        logger.info(
+          'DB',
+          'Creating campaign with data:',
+          JSON.stringify(insertData, null, 2)
+        );
 
         const { data, error } = await supabase
           .from('campaigns_v2')
@@ -263,24 +285,38 @@ export function CampaignFormModal({
           .single();
 
         if (error) {
-          logger.error('DB', `Supabase error: ${error.message}`, JSON.stringify({
-            code: error.code,
-            details: error.details,
-            hint: error.hint
-          }, null, 2));
+          logger.error(
+            'DB',
+            `Supabase error: ${error.message}`,
+            JSON.stringify(
+              {
+                code: error.code,
+                details: error.details,
+                hint: error.hint,
+              },
+              null,
+              2
+            )
+          );
           throw error;
         }
 
         onCampaignCreated?.(data);
         showSuccess('Кампания успешно создана!');
-        logger.info('DB', `Campaign created successfully: ${data.campaign_name}`);
+        logger.info(
+          'DB',
+          `Campaign created successfully: ${data.campaign_name}`
+        );
         onClose();
       } else {
         // Обновление существующей кампании
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { created_at, updated_at, ...updateData } = finalCampaign;
 
-        logger.info('DB', `Updating campaign ${campaign!.id} with role: ${userRole}`);
+        logger.info(
+          'DB',
+          `Updating campaign ${campaign!.id} with role: ${userRole}`
+        );
         logger.info('DB', `Update data:`, JSON.stringify(updateData, null, 2));
 
         const { data, error } = await supabase
@@ -291,11 +327,19 @@ export function CampaignFormModal({
           .single();
 
         if (error) {
-          logger.error('DB', `Supabase error: ${error.message}`, JSON.stringify({
-            code: error.code,
-            details: error.details,
-            hint: error.hint
-          }, null, 2));
+          logger.error(
+            'DB',
+            `Supabase error: ${error.message}`,
+            JSON.stringify(
+              {
+                code: error.code,
+                details: error.details,
+                hint: error.hint,
+              },
+              null,
+              2
+            )
+          );
           throw error;
         }
 
@@ -303,11 +347,20 @@ export function CampaignFormModal({
         setIsEditing(false);
         onCampaignUpdated?.(data);
         showSuccess('Кампания успешно обновлена!');
-        logger.info('DB', `Campaign updated successfully: ${data.campaign_name}`);
+        logger.info(
+          'DB',
+          `Campaign updated successfully: ${data.campaign_name}`
+        );
       }
     } catch (error) {
-      logger.error('DB', `Failed to ${isCreateMode ? 'create' : 'update'} campaign`, String(error));
-      showError(`Ошибка при ${isCreateMode ? 'создании' : 'сохранении'} кампании`);
+      logger.error(
+        'DB',
+        `Failed to ${isCreateMode ? 'create' : 'update'} campaign`,
+        String(error)
+      );
+      showError(
+        `Ошибка при ${isCreateMode ? 'создании' : 'сохранении'} кампании`
+      );
     } finally {
       setIsSaving(false);
     }
@@ -326,11 +379,18 @@ export function CampaignFormModal({
       if (error) throw error;
 
       showSuccess('Кампания успешно удалена!');
-      logger.info('DB', `Campaign deleted successfully: ${campaign!.campaign_name}`);
-      
+      logger.info(
+        'DB',
+        `Campaign deleted successfully: ${campaign!.campaign_name}`
+      );
+
       onClose();
     } catch (error) {
-      logger.error('DB', `Failed to delete campaign ${campaign!.id}`, String(error));
+      logger.error(
+        'DB',
+        `Failed to delete campaign ${campaign!.id}`,
+        String(error)
+      );
       showError('Ошибка при удалении кампании');
     } finally {
       setIsDeleting(false);
@@ -373,7 +433,9 @@ export function CampaignFormModal({
           />
 
           {/* Блок реакций - только для существующих кампаний */}
-          {!isCreateMode && <CampaignModalReactions campaignId={campaign!.id} />}
+          {!isCreateMode && (
+            <CampaignModalReactions campaignId={campaign!.id} />
+          )}
 
           {/* Основной контент или форма редактирования */}
           {isEditing ? (
@@ -407,4 +469,4 @@ export function CampaignFormModal({
       )}
     </>
   );
-} 
+}

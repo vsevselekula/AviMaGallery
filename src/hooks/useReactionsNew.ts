@@ -18,7 +18,7 @@ export function useReactions(campaignIds: string[]) {
 
   // Регистрируем кампании для отслеживания
   useEffect(() => {
-    campaignIds.forEach(campaignId => {
+    campaignIds.forEach((campaignId) => {
       addCampaign(campaignId);
     });
 
@@ -33,4 +33,4 @@ export function useReactions(campaignIds: string[]) {
     toggleReaction,
     refetch,
   };
-} 
+}

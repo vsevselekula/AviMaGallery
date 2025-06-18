@@ -1,6 +1,13 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+} from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import {
   ReactionType,
@@ -13,13 +20,18 @@ interface ReactionsContextType {
   userReactions: UserReactionState;
   reactionCounts: CampaignReactionCounts;
   loading: boolean;
-  toggleReaction: (campaignId: string, reactionType: ReactionType) => Promise<boolean>;
+  toggleReaction: (
+    campaignId: string,
+    reactionType: ReactionType
+  ) => Promise<boolean>;
   addCampaign: (campaignId: string) => void;
   removeCampaign: (campaignId: string) => void;
   refetch: () => Promise<void>;
 }
 
-const ReactionsContext = createContext<ReactionsContextType | undefined>(undefined);
+const ReactionsContext = createContext<ReactionsContextType | undefined>(
+  undefined
+);
 
 interface ReactionsProviderProps {
   children: React.ReactNode;
@@ -27,17 +39,23 @@ interface ReactionsProviderProps {
 
 export function ReactionsProvider({ children }: ReactionsProviderProps) {
   const [userReactions, setUserReactions] = useState<UserReactionState>({});
-  const [reactionCounts, setReactionCounts] = useState<CampaignReactionCounts>({});
+  const [reactionCounts, setReactionCounts] = useState<CampaignReactionCounts>(
+    {}
+  );
   const [loading, setLoading] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [trackedCampaigns, setTrackedCampaigns] = useState<Set<string>>(new Set());
+  const [trackedCampaigns, setTrackedCampaigns] = useState<Set<string>>(
+    new Set()
+  );
 
   const supabase = createClientComponentClient();
 
   // Получаем текущего пользователя
   useEffect(() => {
     const getCurrentUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       setCurrentUserId(user?.id || null);
     };
     getCurrentUser();
@@ -46,7 +64,7 @@ export function ReactionsProvider({ children }: ReactionsProviderProps) {
   // Загружаем реакции для отслеживаемых кампаний
   const fetchReactions = useCallback(async () => {
     const campaignIds = Array.from(trackedCampaigns);
-    
+
     if (campaignIds.length === 0 || !currentUserId) {
       return;
     }
@@ -84,27 +102,32 @@ export function ReactionsProvider({ children }: ReactionsProviderProps) {
       const newUserReactions: UserReactionState = {};
 
       // Инициализируем пустые объекты для всех кампаний
-      campaignIds.forEach(campaignId => {
+      campaignIds.forEach((campaignId) => {
         newCounts[campaignId] = {};
         newUserReactions[campaignId] = null;
       });
 
-                    // Заполняем счетчики из summary
-        summary?.forEach((item: { campaign_id: string; reaction_type: ReactionType; count: number }) => {
-         if (!newCounts[item.campaign_id]) {
-           newCounts[item.campaign_id] = {};
-         }
+      // Заполняем счетчики из summary
+      summary?.forEach(
+        (item: {
+          campaign_id: string;
+          reaction_type: ReactionType;
+          count: number;
+        }) => {
+          if (!newCounts[item.campaign_id]) {
+            newCounts[item.campaign_id] = {};
+          }
           newCounts[item.campaign_id][item.reaction_type] = item.count;
-        });
+        }
+      );
 
       // Заполняем пользовательские реакции
-      userReactionsData?.forEach(item => {
+      userReactionsData?.forEach((item) => {
         newUserReactions[item.campaign_id] = item.reaction_type;
       });
 
       setReactionCounts(newCounts);
       setUserReactions(newUserReactions);
-
     } catch (error) {
       console.error('Error in fetchReactions:', error);
     } finally {
@@ -113,49 +136,51 @@ export function ReactionsProvider({ children }: ReactionsProviderProps) {
   }, [trackedCampaigns, currentUserId, supabase]);
 
   // Фолбэк функция для загрузки из основной таблицы
-  const fetchReactionsFromMainTable = useCallback(async (campaignIds: string[]) => {
-    try {
-      const { data: reactions, error } = await supabase
-        .from('campaign_reactions')
-        .select('*')
-        .in('campaign_id', campaignIds);
+  const fetchReactionsFromMainTable = useCallback(
+    async (campaignIds: string[]) => {
+      try {
+        const { data: reactions, error } = await supabase
+          .from('campaign_reactions')
+          .select('*')
+          .in('campaign_id', campaignIds);
 
-      if (error) {
-        console.error('Error fetching reactions from main table:', error);
-        return;
+        if (error) {
+          console.error('Error fetching reactions from main table:', error);
+          return;
+        }
+
+        // Группируем реакции по кампаниям
+        const newCounts: CampaignReactionCounts = {};
+        const newUserReactions: UserReactionState = {};
+
+        campaignIds.forEach((campaignId) => {
+          newCounts[campaignId] = {};
+          newUserReactions[campaignId] = null;
+        });
+
+        reactions?.forEach((reaction: CampaignReaction) => {
+          const { campaign_id, reaction_type, user_id } = reaction;
+
+          // Считаем общее количество реакций
+          if (!newCounts[campaign_id][reaction_type]) {
+            newCounts[campaign_id][reaction_type] = 0;
+          }
+          newCounts[campaign_id][reaction_type]!++;
+
+          // Запоминаем реакцию текущего пользователя
+          if (user_id === currentUserId) {
+            newUserReactions[campaign_id] = reaction_type;
+          }
+        });
+
+        setReactionCounts(newCounts);
+        setUserReactions(newUserReactions);
+      } catch (error) {
+        console.error('Error in fetchReactionsFromMainTable:', error);
       }
-
-      // Группируем реакции по кампаниям
-      const newCounts: CampaignReactionCounts = {};
-      const newUserReactions: UserReactionState = {};
-
-      campaignIds.forEach(campaignId => {
-        newCounts[campaignId] = {};
-        newUserReactions[campaignId] = null;
-      });
-
-      reactions?.forEach((reaction: CampaignReaction) => {
-        const { campaign_id, reaction_type, user_id } = reaction;
-
-        // Считаем общее количество реакций
-        if (!newCounts[campaign_id][reaction_type]) {
-          newCounts[campaign_id][reaction_type] = 0;
-        }
-        newCounts[campaign_id][reaction_type]!++;
-
-        // Запоминаем реакцию текущего пользователя
-        if (user_id === currentUserId) {
-          newUserReactions[campaign_id] = reaction_type;
-        }
-      });
-
-      setReactionCounts(newCounts);
-      setUserReactions(newUserReactions);
-
-    } catch (error) {
-      console.error('Error in fetchReactionsFromMainTable:', error);
-    }
-  }, [currentUserId, supabase]);
+    },
+    [currentUserId, supabase]
+  );
 
   // Загружаем реакции при изменении отслеживаемых кампаний
   useEffect(() => {
@@ -169,7 +194,7 @@ export function ReactionsProvider({ children }: ReactionsProviderProps) {
     if (trackedCampaigns.size === 0) return;
 
     // Realtime подписка временно отключена
-    
+
     // TODO: Включить после исправления базовой логики
     // const channel = supabase
     //   .channel('campaign_reactions_changes')
@@ -206,12 +231,12 @@ export function ReactionsProvider({ children }: ReactionsProviderProps) {
       const isRemoving = currentReaction === reactionType;
 
       // 1. ОПТИМИСТИЧЕСКОЕ ОБНОВЛЕНИЕ UI
-      setUserReactions(prev => ({
+      setUserReactions((prev) => ({
         ...prev,
         [campaignId]: isRemoving ? null : reactionType,
       }));
 
-      setReactionCounts(prev => {
+      setReactionCounts((prev) => {
         const newCounts = { ...prev };
 
         if (!newCounts[campaignId]) {
@@ -235,7 +260,7 @@ export function ReactionsProvider({ children }: ReactionsProviderProps) {
               delete newCounts[campaignId][currentReaction];
             }
           }
-          
+
           // Добавляем новую реакцию
           if (!newCounts[campaignId][reactionType]) {
             newCounts[campaignId][reactionType] = 0;
@@ -261,18 +286,16 @@ export function ReactionsProvider({ children }: ReactionsProviderProps) {
           if (error) throw error;
         } else {
           // Добавляем/обновляем реакцию
-          const { error } = await supabase
-            .from('campaign_reactions')
-            .upsert(
-              {
-                campaign_id: campaignId,
-                user_id: currentUserId,
-                reaction_type: reactionType,
-              },
-              {
-                onConflict: 'campaign_id,user_id',
-              }
-            );
+          const { error } = await supabase.from('campaign_reactions').upsert(
+            {
+              campaign_id: campaignId,
+              user_id: currentUserId,
+              reaction_type: reactionType,
+            },
+            {
+              onConflict: 'campaign_id,user_id',
+            }
+          );
 
           if (error) throw error;
         }
@@ -281,20 +304,19 @@ export function ReactionsProvider({ children }: ReactionsProviderProps) {
         setTimeout(() => {
           fetchReactions();
         }, 500);
-        
-        return true;
 
+        return true;
       } catch (error) {
         console.error('❌ Ошибка синхронизации с сервером:', error);
 
         // 3. ОТКАТ ИЗМЕНЕНИЙ ПРИ ОШИБКЕ
-        setUserReactions(prev => ({
+        setUserReactions((prev) => ({
           ...prev,
           [campaignId]: currentReaction,
         }));
 
         // Восстанавливаем счетчики
-        setReactionCounts(prev => {
+        setReactionCounts((prev) => {
           const newCounts = { ...prev };
 
           if (!newCounts[campaignId]) {
@@ -331,26 +353,37 @@ export function ReactionsProvider({ children }: ReactionsProviderProps) {
 
   // Функции для управления отслеживаемыми кампаниями
   const addCampaign = useCallback((campaignId: string) => {
-    setTrackedCampaigns(prev => new Set(Array.from(prev).concat(campaignId)));
+    setTrackedCampaigns((prev) => new Set(Array.from(prev).concat(campaignId)));
   }, []);
 
   const removeCampaign = useCallback((campaignId: string) => {
-    setTrackedCampaigns(prev => {
+    setTrackedCampaigns((prev) => {
       const newSet = new Set(prev);
       newSet.delete(campaignId);
       return newSet;
     });
   }, []);
 
-  const contextValue = useMemo(() => ({
-    userReactions,
-    reactionCounts,
-    loading,
-    toggleReaction,
-    addCampaign,
-    removeCampaign,
-    refetch: fetchReactions,
-  }), [userReactions, reactionCounts, loading, toggleReaction, addCampaign, removeCampaign, fetchReactions]);
+  const contextValue = useMemo(
+    () => ({
+      userReactions,
+      reactionCounts,
+      loading,
+      toggleReaction,
+      addCampaign,
+      removeCampaign,
+      refetch: fetchReactions,
+    }),
+    [
+      userReactions,
+      reactionCounts,
+      loading,
+      toggleReaction,
+      addCampaign,
+      removeCampaign,
+      fetchReactions,
+    ]
+  );
 
   return (
     <ReactionsContext.Provider value={contextValue}>
@@ -362,7 +395,9 @@ export function ReactionsProvider({ children }: ReactionsProviderProps) {
 export function useReactionsContext() {
   const context = useContext(ReactionsContext);
   if (context === undefined) {
-    throw new Error('useReactionsContext must be used within a ReactionsProvider');
+    throw new Error(
+      'useReactionsContext must be used within a ReactionsProvider'
+    );
   }
   return context;
-} 
+}

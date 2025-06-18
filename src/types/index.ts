@@ -11,4 +11,4 @@ export type {
   UserRole,
   UserRoleData,
   UserData,
-} from '../lib/types'; 
+} from '../lib/types';

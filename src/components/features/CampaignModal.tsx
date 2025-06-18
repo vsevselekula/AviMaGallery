@@ -5,7 +5,11 @@ import React, { useRef, useEffect } from 'react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { isValidImageUrl } from '@/lib/imageUtils';
-import { VerticalBadge, GenericBadge, StatusBadge } from '@/components/ui/CampaignBadges';
+import {
+  VerticalBadge,
+  GenericBadge,
+  StatusBadge,
+} from '@/components/ui/CampaignBadges';
 import Image from 'next/image';
 
 interface CampaignModalProps {
@@ -20,7 +24,10 @@ export function CampaignModal({ campaign, onClose }: CampaignModalProps) {
   // Обработчик клика вне модального окна
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+      if (
+        modalRef.current &&
+        !modalRef.current.contains(event.target as Node)
+      ) {
         onClose();
       }
     };
@@ -45,7 +52,6 @@ export function CampaignModal({ campaign, onClose }: CampaignModalProps) {
     };
   }, [onClose]);
 
-
   const hasImage = isValidImageUrl(campaign.image_url);
 
   const formatDate = (dateString: string) => {
@@ -55,8 +61,6 @@ export function CampaignModal({ campaign, onClose }: CampaignModalProps) {
       return dateString;
     }
   };
-
-
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -70,8 +74,11 @@ export function CampaignModal({ campaign, onClose }: CampaignModalProps) {
             <h2 className="text-2xl font-bold text-white">
               {campaign.campaign_name}
             </h2>
-            <StatusBadge 
-              status={campaign.status as 'active' | 'completed' | 'planned' || 'planned'}
+            <StatusBadge
+              status={
+                (campaign.status as 'active' | 'completed' | 'planned') ||
+                'planned'
+              }
               size="sm"
             />
           </div>
@@ -127,7 +134,9 @@ export function CampaignModal({ campaign, onClose }: CampaignModalProps) {
                 <label className="block text-sm font-medium text-gray-300 mb-1">
                   Аудитория
                 </label>
-                <p className="text-white">{campaign.audience || 'Не указано'}</p>
+                <p className="text-white">
+                  {campaign.audience || 'Не указано'}
+                </p>
               </div>
             </div>
 
@@ -138,7 +147,8 @@ export function CampaignModal({ campaign, onClose }: CampaignModalProps) {
                   Период проведения
                 </label>
                 <p className="text-white">
-                  {campaign.flight_period?.start_date && campaign.flight_period?.end_date
+                  {campaign.flight_period?.start_date &&
+                  campaign.flight_period?.end_date
                     ? `${formatDate(campaign.flight_period.start_date)} - ${formatDate(campaign.flight_period.end_date)}`
                     : 'Не указано'}
                 </p>
@@ -290,4 +300,4 @@ export function CampaignModal({ campaign, onClose }: CampaignModalProps) {
       </div>
     </div>
   );
-} 
+}

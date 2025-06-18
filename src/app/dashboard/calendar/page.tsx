@@ -9,7 +9,7 @@ export default function CalendarPage() {
         <h1 className="text-2xl font-bold text-white mb-2">
           Календарь кампаний
         </h1>
-        <p className="text-gray-400">Обзор кампаний по месяцам</p>
+        <p className="text-gray-400">Обзор кампаний по месяцам и годам</p>
       </div>
       <CampaignCalendar />
     </main>

@@ -19,17 +19,20 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 async function enableRealtime() {
   try {
     console.log('📋 Для включения Realtime выполните в Supabase SQL Editor:');
-    console.log('=' .repeat(60));
-    console.log('ALTER publication supabase_realtime ADD TABLE campaign_reactions;');
-    console.log('=' .repeat(60));
+    console.log('='.repeat(60));
+    console.log(
+      'ALTER publication supabase_realtime ADD TABLE campaign_reactions;'
+    );
+    console.log('='.repeat(60));
     console.log('');
     console.log('✅ После выполнения SQL команды Realtime будет активен!');
-    console.log('🔔 Реакции будут обновляться в реальном времени между пользователями');
-    
+    console.log(
+      '🔔 Реакции будут обновляться в реальном времени между пользователями'
+    );
   } catch (error) {
     console.error('❌ Ошибка:', error);
   }
 }
 
 // Запускаем включение Realtime
-enableRealtime(); 
+enableRealtime();

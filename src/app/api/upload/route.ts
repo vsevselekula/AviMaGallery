@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
 
     // Загружаем файл в Supabase Storage
     const { error: uploadError } = await supabase.storage
-      .from('feedback-attachments')
+      .from('campaign-images')
       .upload(filePath, buffer, {
         contentType: file.type,
         duplex: 'half',
@@ -53,13 +53,18 @@ export async function POST(request: NextRequest) {
 
     if (uploadError) {
       console.error('Upload error:', uploadError);
-      return NextResponse.json({ error: 'Upload failed' }, { status: 500 });
+      return NextResponse.json({ 
+        error: 'Upload failed', 
+        details: uploadError.message,
+        bucket: 'campaign-images',
+        path: filePath
+      }, { status: 500 });
     }
 
     // Получаем публичный URL
     const {
       data: { publicUrl },
-    } = supabase.storage.from('feedback-attachments').getPublicUrl(filePath);
+    } = supabase.storage.from('campaign-images').getPublicUrl(filePath);
 
     return NextResponse.json({
       url: publicUrl,

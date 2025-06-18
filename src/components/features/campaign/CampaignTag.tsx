@@ -18,4 +18,4 @@ export function CampaignTag({
       {children}
     </span>
   );
-} 
+}

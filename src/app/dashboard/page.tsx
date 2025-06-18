@@ -13,13 +13,15 @@ function DashboardContent() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
+  const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(
+    null
+  );
   const [userRole, setUserRole] = useState<string | null>(null);
-  
+
   const searchParams = useSearchParams();
   const router = useRouter();
   const supabase = createClientComponentClient();
-  
+
   const campaignId = searchParams.get('campaign');
 
   useEffect(() => {
@@ -76,7 +78,7 @@ function DashboardContent() {
     }
 
     // Ищем кампанию в уже загруженных
-    const campaign = campaigns.find(c => c.id === campaignId);
+    const campaign = campaigns.find((c) => c.id === campaignId);
     if (campaign) {
       setSelectedCampaign(campaign);
     } else if (campaigns.length > 0) {
@@ -122,7 +124,7 @@ function DashboardContent() {
 
   return (
     <div className="flex-1">
-              <HeroBanner campaigns={campaigns} />
+      <HeroBanner campaigns={campaigns} />
       <div className="px-8 mt-8">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-white">Все кампании</h2>
@@ -136,10 +138,7 @@ function DashboardContent() {
             </button>
           )}
         </div>
-        <CampaignList
-          campaigns={campaigns}
-          title=""
-        />
+        <CampaignList campaigns={campaigns} title="" />
       </div>
 
       {showCreateModal && (
@@ -162,9 +161,13 @@ function DashboardContent() {
 
 export default function DashboardPage() {
   return (
-    <Suspense fallback={<div className="flex items-center justify-center min-h-screen w-full">
-      <LoadingSpinner />
-    </div>}>
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-screen w-full">
+          <LoadingSpinner />
+        </div>
+      }
+    >
       <DashboardContent />
     </Suspense>
   );

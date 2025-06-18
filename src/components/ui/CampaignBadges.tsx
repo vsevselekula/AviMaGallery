@@ -20,9 +20,13 @@ interface StatusBadgeProps {
 }
 
 // Бейдж вертикали с правильными цветами
-export function VerticalBadge({ vertical, size = 'md', className }: VerticalBadgeProps) {
+export function VerticalBadge({
+  vertical,
+  size = 'md',
+  className,
+}: VerticalBadgeProps) {
   const verticalStyle = getVerticalColorClass(vertical);
-  
+
   return (
     <Badge
       size={size}
@@ -37,7 +41,11 @@ export function VerticalBadge({ vertical, size = 'md', className }: VerticalBadg
 }
 
 // Бейдж типа кампании
-export function CampaignTypeBadge({ type, size = 'md', className }: CampaignTypeBadgeProps) {
+export function CampaignTypeBadge({
+  type,
+  size = 'md',
+  className,
+}: CampaignTypeBadgeProps) {
   return (
     <Badge
       variant="secondary"
@@ -50,7 +58,11 @@ export function CampaignTypeBadge({ type, size = 'md', className }: CampaignType
 }
 
 // Бейдж статуса кампании
-export function StatusBadge({ status, size = 'md', className }: StatusBadgeProps) {
+export function StatusBadge({
+  status,
+  size = 'md',
+  className,
+}: StatusBadgeProps) {
   const getStatusConfig = (status: string) => {
     switch (status) {
       case 'active':
@@ -67,23 +79,19 @@ export function StatusBadge({ status, size = 'md', className }: StatusBadgeProps
   const config = getStatusConfig(status);
 
   return (
-    <Badge
-      variant={config.variant}
-      size={size}
-      className={className}
-    >
+    <Badge variant={config.variant} size={size} className={className}>
       {config.text}
     </Badge>
   );
 }
 
 // Бейдж для целей/каналов/задач
-export function GenericBadge({ 
-  children, 
-  color = 'blue', 
-  size = 'md', 
-  className 
-}: { 
+export function GenericBadge({
+  children,
+  color = 'blue',
+  size = 'md',
+  className,
+}: {
   children: React.ReactNode;
   color?: 'blue' | 'green' | 'purple' | 'yellow' | 'red';
   size?: BadgeSize;
@@ -98,22 +106,19 @@ export function GenericBadge({
   };
 
   return (
-    <Badge
-      size={size}
-      className={`${colorClasses[color]} ${className || ''}`}
-    >
+    <Badge size={size} className={`${colorClasses[color]} ${className || ''}`}>
       {children}
     </Badge>
   );
 }
 
 // Группа бейджей для кампании
-export function CampaignBadgeGroup({ 
-  vertical, 
-  type, 
-  size = 'md', 
+export function CampaignBadgeGroup({
+  vertical,
+  type,
+  size = 'md',
   className,
-  showType = true 
+  showType = true,
 }: {
   vertical: string;
   type: string;
@@ -127,4 +132,4 @@ export function CampaignBadgeGroup({
       {showType && <CampaignTypeBadge type={type} size={size} />}
     </div>
   );
-} 
+}

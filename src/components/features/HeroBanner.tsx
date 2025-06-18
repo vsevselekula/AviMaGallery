@@ -93,7 +93,7 @@ export function HeroBanner({ campaigns, className }: HeroBannerProps) {
               </div>
             )}
             <div className="mb-4">
-              <CampaignBadgeGroup 
+              <CampaignBadgeGroup
                 vertical={heroCampaign.campaign_vertical}
                 type={heroCampaign.campaign_type}
                 className="flex-wrap max-w-sm"

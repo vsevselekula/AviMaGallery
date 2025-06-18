@@ -25,7 +25,7 @@ export function CampaignList({
   const pathname = usePathname();
 
   // Получаем реакции для всех кампаний - мемоизируем для предотвращения пересоздания
-  const campaignIds = useMemo(() => campaigns.map(c => c.id), [campaigns]);
+  const campaignIds = useMemo(() => campaigns.map((c) => c.id), [campaigns]);
   const { reactionCounts } = useReactions(campaignIds);
 
   // Используем кастомный хук для фильтрации
@@ -42,8 +42,11 @@ export function CampaignList({
   } = useCampaignFilters(campaigns);
 
   const handleCampaignClick = (campaign: Campaign) => {
-    console.log('🔍 CampaignList click:', { pathname, campaignId: campaign.id });
-    
+    console.log('🔍 CampaignList click:', {
+      pathname,
+      campaignId: campaign.id,
+    });
+
     // Добавляем параметр campaign к текущему URL
     const currentUrl = new URL(window.location.href);
     currentUrl.searchParams.set('campaign', campaign.id);
@@ -79,9 +82,7 @@ export function CampaignList({
       {/* Сетка кампаний */}
       {filteredCampaigns.length === 0 ? (
         <div className="text-center py-12">
-          <div className="text-gray-400 text-lg">
-            Кампании не найдены
-          </div>
+          <div className="text-gray-400 text-lg">Кампании не найдены</div>
           <p className="text-gray-500 text-sm mt-2">
             Попробуйте изменить параметры поиска или фильтры
           </p>
@@ -89,7 +90,10 @@ export function CampaignList({
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredCampaigns.map((campaign) => (
-            <div key={campaign.id} onClick={() => handleCampaignClick(campaign)}>
+            <div
+              key={campaign.id}
+              onClick={() => handleCampaignClick(campaign)}
+            >
               <CampaignCard
                 campaign={campaign}
                 reactionCounts={reactionCounts[campaign.id] || {}}

@@ -1,6 +1,13 @@
 'use client';
 
-import { useState, useMemo, useEffect, useCallback, useRef, Suspense } from 'react';
+import {
+  useState,
+  useMemo,
+  useEffect,
+  useCallback,
+  useRef,
+  Suspense,
+} from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Campaign } from '@/lib/types';
@@ -41,13 +48,15 @@ function AnalyticsContent() {
   const [selectedChannelCampaigns, setSelectedChannelCampaigns] = useState<
     Campaign[]
   >([]);
-  const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
-  
+  const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(
+    null
+  );
+
   const supabase = createClientComponentClient();
   const router = useRouter();
   const searchParams = useSearchParams();
   const chartRef = useRef(null);
-  
+
   const campaignId = searchParams.get('campaign');
 
   // Функция для обработки клика по столбцу канала
@@ -93,7 +102,7 @@ function AnalyticsContent() {
     }
 
     // Ищем кампанию в уже загруженных
-    const campaign = campaigns.find(c => c.id === campaignId);
+    const campaign = campaigns.find((c) => c.id === campaignId);
     if (campaign) {
       setSelectedCampaign(campaign);
     } else if (campaigns.length > 0) {
@@ -115,9 +124,7 @@ function AnalyticsContent() {
   const handleCampaignUpdated = (updatedCampaign: Campaign) => {
     // Обновляем кампанию в списке
     setCampaigns((prev) =>
-      prev.map((c) =>
-        c.id === updatedCampaign.id ? updatedCampaign : c
-      )
+      prev.map((c) => (c.id === updatedCampaign.id ? updatedCampaign : c))
     );
     setSelectedCampaign(updatedCampaign);
   };
@@ -697,8 +704,6 @@ function AnalyticsContent() {
         </div>
       )}
 
-      
-
       {/* Модальное окно детального просмотра кампании */}
       {selectedCampaign && (
         <CampaignFormModal
@@ -713,9 +718,13 @@ function AnalyticsContent() {
 
 export default function Analytics() {
   return (
-    <Suspense fallback={<div className="flex items-center justify-center min-h-screen w-full">
-      <LoadingSpinner />
-    </div>}>
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-screen w-full">
+          <LoadingSpinner />
+        </div>
+      }
+    >
       <AnalyticsContent />
     </Suspense>
   );
