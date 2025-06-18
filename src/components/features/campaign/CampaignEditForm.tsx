@@ -1,6 +1,15 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Campaign } from '@/lib/types';
 import { CampaignSection } from './CampaignSection';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+
+interface CampaignType {
+  id: string;
+  name: string;
+  description?: string;
+  is_active: boolean;
+  sort_order: number;
+}
 
 interface CampaignEditFormProps {
   editedCampaign: Campaign;
@@ -13,12 +22,46 @@ export function CampaignEditForm({
   availableVerticals,
   onInputChange,
 }: CampaignEditFormProps) {
+  const [campaignTypes, setCampaignTypes] = useState<CampaignType[]>([]);
+  const supabase = createClientComponentClient();
+
+  // Загружаем типы кампаний из базы данных
+  useEffect(() => {
+    const fetchCampaignTypes = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('campaign_types')
+          .select('*')
+          .eq('is_active', true)
+          .order('sort_order');
+
+        if (error) {
+          console.error('Error fetching campaign types:', error);
+          // Fallback к статичным значениям
+          setCampaignTypes([
+            { id: '1', name: 'T1', is_active: true, sort_order: 1 },
+            { id: '2', name: 'T2', is_active: true, sort_order: 2 },
+          ]);
+        } else {
+          setCampaignTypes(data || []);
+        }
+      } catch (error) {
+        console.error('Error fetching campaign types:', error);
+        // Fallback к статичным значениям
+        setCampaignTypes([
+          { id: '1', name: 'T1', is_active: true, sort_order: 1 },
+          { id: '2', name: 'T2', is_active: true, sort_order: 2 },
+        ]);
+      }
+    };
+
+    fetchCampaignTypes();
+  }, [supabase]);
+
   const handleArrayChange = (field: keyof Campaign, value: string) => {
-    const items = value
-      .split(',')
-      .map((item) => item.trim())
-      .filter(Boolean);
-    onInputChange(field, items);
+    // Просто сохраняем строку как есть, без преобразования в массив
+    // Преобразование в массив будет происходить при сохранении
+    onInputChange(field, value);
   };
 
   const handleFlightPeriodChange = (
@@ -63,15 +106,19 @@ export function CampaignEditForm({
                 Тип кампании
               </label>
               <select
-                value={editedCampaign.campaign_type}
+                value={editedCampaign.campaign_type || ''}
                 onChange={(e) => onInputChange('campaign_type', e.target.value)}
                 className="w-full p-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
               >
-                <option value="T1">T1</option>
-                <option value="T2">T2</option>
-                <option value="T3">T3</option>
-                <option value="Брендинг">Брендинг</option>
-                <option value="Performance">Performance</option>
+                <option value="" disabled>
+                  Выберите тип кампании
+                </option>
+                {campaignTypes.map((type) => (
+                  <option key={type.id} value={type.name}>
+                    {type.name}
+                    {type.description && ` - ${type.description}`}
+                  </option>
+                ))}
               </select>
             </div>
             <div>
@@ -79,12 +126,15 @@ export function CampaignEditForm({
                 Вертикаль
               </label>
               <select
-                value={editedCampaign.campaign_vertical}
+                value={editedCampaign.campaign_vertical || ''}
                 onChange={(e) =>
                   onInputChange('campaign_vertical', e.target.value)
                 }
                 className="w-full p-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
               >
+                <option value="" disabled>
+                  Выберите вертикаль
+                </option>
                 {availableVerticals.map((vertical) => (
                   <option key={vertical} value={vertical}>
                     {vertical}
@@ -173,14 +223,16 @@ export function CampaignEditForm({
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
-              Таргеты (через запятую)
+              Таргеты (через запятую или точку)
             </label>
             <input
               type="text"
               value={
                 Array.isArray(editedCampaign.targets)
                   ? editedCampaign.targets.join(', ')
-                  : ''
+                  : typeof editedCampaign.targets === 'string' 
+                    ? editedCampaign.targets 
+                    : ''
               }
               onChange={(e) => handleArrayChange('targets', e.target.value)}
               className="w-full p-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
@@ -190,14 +242,16 @@ export function CampaignEditForm({
 
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
-              Каналы (через запятую)
+              Каналы (через запятую или точку)
             </label>
             <input
               type="text"
               value={
                 Array.isArray(editedCampaign.channels)
                   ? editedCampaign.channels.join(', ')
-                  : ''
+                  : typeof editedCampaign.channels === 'string' 
+                    ? editedCampaign.channels 
+                    : ''
               }
               onChange={(e) => handleArrayChange('channels', e.target.value)}
               className="w-full p-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
@@ -207,14 +261,16 @@ export function CampaignEditForm({
 
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
-              Цели (через запятую)
+              Цели (через запятую или точку)
             </label>
             <input
               type="text"
               value={
                 Array.isArray(editedCampaign.objectives)
                   ? editedCampaign.objectives.join(', ')
-                  : ''
+                  : typeof editedCampaign.objectives === 'string' 
+                    ? editedCampaign.objectives 
+                    : ''
               }
               onChange={(e) => handleArrayChange('objectives', e.target.value)}
               className="w-full p-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"

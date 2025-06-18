@@ -26,14 +26,14 @@ interface CampaignFormModalProps {
 const createEmptyCampaign = (): Campaign => ({
   id: '',
   campaign_name: '',
-  campaign_type: '',
+  campaign_type: '', // Будет установлено пользователем
   key_message: '',
   flight_period: {
     start_date: '',
     end_date: '',
   },
   status: 'planned',
-  campaign_vertical: '',
+  campaign_vertical: '', // Будет установлено пользователем
   geo: '',
   audience: '',
   objectives: [],
@@ -161,6 +161,9 @@ export function CampaignFormModal({
       setEditedCampaign({
         ...campaign,
         video_url: campaign.video_url || null,
+        // Убеждаемся что значения дропдаунов не пустые
+        campaign_type: campaign.campaign_type || '',
+        campaign_vertical: campaign.campaign_vertical || '',
       });
       setIsEditing(false);
     }
@@ -194,23 +197,23 @@ export function CampaignFormModal({
 
   // Валидация формы
   const validateForm = () => {
-    if (!editedCampaign.campaign_name.trim()) {
+    if (!editedCampaign.campaign_name?.trim()) {
       showError('Название кампании обязательно');
       return false;
     }
-    if (!editedCampaign.campaign_type.trim()) {
+    if (!editedCampaign.campaign_type?.trim()) {
       showError('Тип кампании обязателен');
       return false;
     }
-    if (!editedCampaign.campaign_vertical.trim()) {
+    if (!editedCampaign.campaign_vertical?.trim()) {
       showError('Вертикаль кампании обязательна');
       return false;
     }
-    if (!editedCampaign.flight_period?.start_date) {
+    if (!editedCampaign.flight_period?.start_date?.trim()) {
       showError('Дата начала обязательна');
       return false;
     }
-    if (!editedCampaign.flight_period?.end_date) {
+    if (!editedCampaign.flight_period?.end_date?.trim()) {
       showError('Дата окончания обязательна');
       return false;
     }
@@ -254,8 +257,28 @@ export function CampaignFormModal({
 
     setIsSaving(true);
     try {
+      // Преобразуем строковые поля в массивы перед сохранением
+      const processArrayField = (field: string[] | string | undefined): string[] => {
+        if (Array.isArray(field)) {
+          return field;
+        }
+        if (typeof field === 'string' && field.trim()) {
+          return field
+            .replace(/\./g, ',') // Заменяем точки на запятые
+            .split(',')
+            .map(item => item.trim())
+            .filter(Boolean);
+        }
+        return [];
+      };
+
       // Автоматическое определение статуса на основе дат
-      const finalCampaign = { ...editedCampaign };
+      const finalCampaign = { 
+        ...editedCampaign,
+        targets: processArrayField(editedCampaign.targets),
+        channels: processArrayField(editedCampaign.channels),
+        objectives: processArrayField(editedCampaign.objectives),
+      };
 
       if (
         editedCampaign.flight_period?.start_date &&

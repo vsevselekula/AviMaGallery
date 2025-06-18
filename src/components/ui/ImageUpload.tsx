@@ -177,16 +177,21 @@ export function ImageUpload({
     };
   }, [handlePaste]);
 
+  const isCompactMode = className.includes('compact-mode');
+  
   return (
-    <div className={`space-y-4 ${className}`}>
+    <div className={`${isCompactMode ? 'space-y-2' : 'space-y-4'} ${className}`}>
       {/* Зона загрузки */}
       <div
         className={`
-          relative border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-all
+          relative border-2 border-dashed rounded-lg text-center cursor-pointer transition-all
+          ${isCompactMode ? 'p-3' : 'p-6'}
           ${
             isDragging
               ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/20'
-              : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
+              : isCompactMode
+                ? 'border-white/30 bg-black/20 backdrop-blur-sm hover:border-white/50 hover:bg-black/30'
+                : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
           }
           ${isProcessing ? 'pointer-events-none opacity-50' : ''}
         `}
@@ -211,14 +216,18 @@ export function ImageUpload({
             </p>
           </div>
         ) : previewUrl ? (
-          <div className="space-y-4">
+          <div className={isCompactMode ? "space-y-2" : "space-y-4"}>
             <div className="relative inline-block">
               <Image
                 src={previewUrl}
                 alt="Предварительный просмотр"
-                width={300}
-                height={192}
-                style={{ maxHeight: '12rem', width: 'auto', height: 'auto' }}
+                width={isCompactMode ? 150 : 300}
+                height={isCompactMode ? 96 : 192}
+                style={{ 
+                  maxHeight: isCompactMode ? '6rem' : '12rem', 
+                  width: 'auto', 
+                  height: 'auto' 
+                }}
                 className="rounded-lg shadow-md"
               />
               <button
@@ -232,7 +241,7 @@ export function ImageUpload({
               </button>
             </div>
 
-            {fileInfo && (
+            {fileInfo && !isCompactMode && (
               <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
                 <div>
                   Размеры: {fileInfo.dimensions.width} ×{' '}
@@ -247,35 +256,58 @@ export function ImageUpload({
               </div>
             )}
 
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Нажмите для замены изображения
-            </p>
-            <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">
-              💡 Совет: можно вставить новое изображение из буфера обмена
-              (Ctrl+V)
-            </p>
+            {isCompactMode ? (
+              <>
+                <p className="text-xs text-white/80">
+                  Нажмите для замены
+                </p>
+                <p className="text-xs text-blue-300 font-medium">
+                  💡 Ctrl+V
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Нажмите для замены изображения
+                </p>
+                <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                  💡 Совет: можно вставить новое изображение из буфера обмена
+                  (Ctrl+V)
+                </p>
+              </>
+            )}
           </div>
         ) : (
-          <div className="space-y-2">
-            <div className="text-4xl text-gray-400">📷</div>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+          <div className={isCompactMode ? "space-y-1" : "space-y-2"}>
+            <div className={`${isCompactMode ? 'text-2xl' : 'text-4xl'} text-gray-400`}>📷</div>
+            <p className={`${isCompactMode ? 'text-xs text-white/80' : 'text-sm text-gray-600 dark:text-gray-400'}`}>
               {placeholder}
             </p>
-            <p className="text-xs text-gray-500 dark:text-gray-500">
-              Поддерживаются: JPG, PNG, WebP (до {maxSizeMB} МБ)
-            </p>
-            <p className="text-xs text-green-600 dark:text-green-400">
-              🔒 Изображения сохраняются в защищенном хранилище
-            </p>
+            {isCompactMode ? (
+              <p className="text-xs text-blue-300 font-medium">
+                💡 Ctrl+V
+              </p>
+            ) : (
+              <>
+                <p className="text-xs text-gray-500 dark:text-gray-500">
+                  Поддерживаются: JPG, PNG, WebP (до {maxSizeMB} МБ)
+                </p>
+                <p className="text-xs text-green-600 dark:text-green-400">
+                  🔒 Изображения сохраняются в защищенном хранилище
+                </p>
+              </>
+            )}
           </div>
         )}
       </div>
 
       {/* Альтернативный ввод URL */}
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-          Или введите URL изображения:
-        </label>
+      <div className={isCompactMode ? "space-y-1" : "space-y-2"}>
+        {!isCompactMode && (
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Или введите URL изображения:
+          </label>
+        )}
         <input
           type="url"
           value={value || ''}
@@ -293,8 +325,12 @@ export function ImageUpload({
               setFileInfo(null);
             }
           }}
-          placeholder="https://example.com/image.jpg"
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+          placeholder={isCompactMode ? "URL изображения" : "https://example.com/image.jpg"}
+          className={`w-full rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+            isCompactMode 
+              ? 'px-2 py-1 text-xs bg-black/20 backdrop-blur-sm border border-white/30 text-white placeholder-white/60 hover:bg-black/30 focus:bg-black/40' 
+              : 'px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white'
+          }`}
         />
       </div>
     </div>

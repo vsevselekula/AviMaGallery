@@ -33,32 +33,44 @@ export function CampaignModalHero({
           <VideoPlayer
             videoUrl={campaign.video_url}
             posterUrl={campaign.image_url}
-            className="w-full h-full object-cover"
+            className={`w-full h-full object-cover transition-all duration-300 ${
+              isEditing ? 'blur-md scale-105' : ''
+            }`}
           />
         ) : campaign.image_url ? (
           <Image
             src={campaign.image_url}
             alt={campaign.campaign_name}
             fill
-            className="object-cover"
+            className={`object-cover transition-all duration-300 ${
+              isEditing ? 'blur-md scale-105' : ''
+            }`}
             priority
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
+          <div className={`w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center transition-all duration-300 ${
+            isEditing ? 'blur-md scale-105' : ''
+          }`}>
             <span className="text-6xl opacity-50">📱</span>
           </div>
         )}
 
         {/* Градиент */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+        <div className={`absolute inset-0 transition-all duration-300 ${
+          isEditing 
+            ? 'bg-gradient-to-t from-black/80 to-black/30' 
+            : 'bg-gradient-to-t from-black/50 to-transparent'
+        }`} />
 
         {/* Загрузка изображения для редактирования */}
         {isEditing && (
-          <div className="absolute top-6 left-6">
+          <div className="absolute top-4 left-4 max-w-xs">
             <ImageUpload
               value={editedCampaign.image_url}
               onChange={onImageUpdate}
               campaignId={campaign.id}
+              className="compact-mode"
+              placeholder="Загрузить изображение"
             />
           </div>
         )}

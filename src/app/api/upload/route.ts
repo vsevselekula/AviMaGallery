@@ -53,12 +53,15 @@ export async function POST(request: NextRequest) {
 
     if (uploadError) {
       console.error('Upload error:', uploadError);
-      return NextResponse.json({ 
-        error: 'Upload failed', 
-        details: uploadError.message,
-        bucket: 'campaign-images',
-        path: filePath
-      }, { status: 500 });
+      return NextResponse.json(
+        {
+          error: 'Upload failed',
+          details: uploadError.message,
+          bucket: 'campaign-images',
+          path: filePath,
+        },
+        { status: 500 }
+      );
     }
 
     // Получаем публичный URL
