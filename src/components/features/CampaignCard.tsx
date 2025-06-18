@@ -1,8 +1,9 @@
 import Image from 'next/image';
 import { Campaign } from '@/lib/types';
-import { cn, getVerticalColorClass } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { isValidImageUrl } from '@/lib/imageUtils';
 import { CampaignReactionsDisplay } from '@/components/ui/CampaignReactions';
+import { CampaignBadgeGroup } from '@/components/ui/CampaignBadges';
 import { ReactionType } from '@/types/reactions';
 
 interface CampaignCardProps {
@@ -73,20 +74,12 @@ export function CampaignCard({
         <h3 className="text-lg font-semibold text-white">
           {campaign.campaign_name}
         </h3>
-        <div className="flex items-center gap-2 mt-2">
-          <span
-            className={`px-3 py-1 rounded-full text-sm font-medium ${
-              campaign.campaign_vertical === 'Авито'
-                ? 'text-black'
-                : 'text-white'
-            }`}
-            style={getVerticalColorClass(campaign.campaign_vertical)}
-          >
-            {campaign.campaign_vertical}
-          </span>
-          <span className="px-3 py-1 rounded-full text-sm font-medium border border-white text-white bg-transparent">
-            {campaign.campaign_type}
-          </span>
+        <div className="mt-2">
+          <CampaignBadgeGroup 
+            vertical={campaign.campaign_vertical}
+            type={campaign.campaign_type}
+            size="sm"
+          />
         </div>
         <p className="text-sm text-gray-300 mt-2 line-clamp-2">
           {campaign.key_message}

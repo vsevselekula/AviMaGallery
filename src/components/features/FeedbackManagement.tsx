@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import {
   Feedback,
@@ -12,7 +12,7 @@ import {
 } from '@/types/feedback';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { Button } from '@/components/ui/Button';
-import { toast } from 'react-hot-toast';
+import { useFeedback } from '@/hooks/useFeedback';
 
 // Функция для рендеринга вложений
 const renderAttachment = (attachment: string | AttachmentData) => {
@@ -42,119 +42,23 @@ const renderAttachment = (attachment: string | AttachmentData) => {
 };
 
 export default function FeedbackManagement() {
-  const [feedback, setFeedback] = useState<Feedback[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(
-    null
-  );
+  const {
+    feedback,
+    loading,
+    error,
+    fetchFeedback,
+    updateFeedbackStatus,
+    updateFeedbackNotes,
+    getStatusCounts,
+    filterFeedback,
+  } = useFeedback();
+
+  const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [filterStatus, setFilterStatus] = useState<FeedbackStatus | 'all'>(
-    'all'
-  );
-  const [filterCategory, setFilterCategory] = useState<
-    FeedbackCategory | 'all'
-  >('all');
+  const [filterStatus, setFilterStatus] = useState<FeedbackStatus | 'all'>('all');
+  const [filterCategory, setFilterCategory] = useState<FeedbackCategory | 'all'>('all');
 
-  useEffect(() => {
-    fetchFeedback();
-  }, []);
-
-  const fetchFeedback = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch('/api/feedback');
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Ошибка загрузки заявок');
-      }
-
-      const data: Feedback[] = await response.json();
-      setFeedback(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Произошла ошибка');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleStatusChange = async (
-    feedbackId: string,
-    newStatus: FeedbackStatus
-  ) => {
-    try {
-      const response = await fetch(`/api/feedback/${feedbackId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: newStatus }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update status');
-      }
-
-      // Обновляем локальное состояние
-      setFeedback((prev) =>
-        prev.map((item) =>
-          item.id === feedbackId ? { ...item, status: newStatus } : item
-        )
-      );
-
-      toast.success('Статус обновлен');
-    } catch (error) {
-      console.error('Error updating status:', error);
-      toast.error('Ошибка при обновлении статуса');
-    }
-  };
-
-  const handleNotesChange = async (feedbackId: string, notes: string) => {
-    try {
-      const response = await fetch(`/api/feedback/${feedbackId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ admin_notes: notes }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update notes');
-      }
-
-      // Обновляем локальное состояние
-      setFeedback((prev) =>
-        prev.map((item) =>
-          item.id === feedbackId ? { ...item, admin_notes: notes } : item
-        )
-      );
-
-      toast.success('Заметки сохранены');
-    } catch (error) {
-      console.error('Error updating notes:', error);
-      toast.error('Ошибка при сохранении заметок');
-    }
-  };
-
-  const filteredFeedback = feedback.filter((item) => {
-    const statusMatch = filterStatus === 'all' || item.status === filterStatus;
-    const categoryMatch =
-      filterCategory === 'all' || item.category === filterCategory;
-    return statusMatch && categoryMatch;
-  });
-
-  const getStatusCounts = () => {
-    return {
-      all: feedback.length,
-      new: feedback.filter((f) => f.status === 'new').length,
-      in_progress: feedback.filter((f) => f.status === 'in_progress').length,
-      completed: feedback.filter((f) => f.status === 'completed').length,
-    };
-  };
-
+  const filteredFeedback = filterFeedback(filterStatus, filterCategory);
   const statusCounts = getStatusCounts();
 
   if (loading) {
@@ -205,22 +109,20 @@ export default function FeedbackManagement() {
           <div className="text-2xl font-bold text-green-200">
             {statusCounts.completed}
           </div>
-          <div className="text-sm text-green-300">Выполнено</div>
+          <div className="text-sm text-green-300">Завершенных</div>
         </div>
       </div>
 
       {/* Фильтры */}
-      <div className="flex gap-4 items-center">
+      <div className="flex gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-1">
             Статус
           </label>
           <select
             value={filterStatus}
-            onChange={(e) =>
-              setFilterStatus(e.target.value as FeedbackStatus | 'all')
-            }
-            className="px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            onChange={(e) => setFilterStatus(e.target.value as FeedbackStatus | 'all')}
+            className="px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="all">Все статусы</option>
             {Object.entries(FEEDBACK_STATUSES).map(([key, config]) => (
@@ -237,10 +139,8 @@ export default function FeedbackManagement() {
           </label>
           <select
             value={filterCategory}
-            onChange={(e) =>
-              setFilterCategory(e.target.value as FeedbackCategory | 'all')
-            }
-            className="px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            onChange={(e) => setFilterCategory(e.target.value as FeedbackCategory | 'all')}
+            className="px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="all">Все категории</option>
             {Object.entries(FEEDBACK_CATEGORIES).map(([key, config]) => (
@@ -252,11 +152,11 @@ export default function FeedbackManagement() {
         </div>
       </div>
 
-      {/* Список заявок */}
-      <div className="bg-gray-700 rounded-lg shadow border border-gray-600 overflow-hidden">
+      {/* Таблица заявок */}
+      <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-600">
-            <thead className="bg-gray-600">
+          <table className="min-w-full divide-y divide-gray-700">
+            <thead className="bg-gray-700">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                   Заявка
@@ -278,27 +178,22 @@ export default function FeedbackManagement() {
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-gray-700 divide-y divide-gray-600">
+            <tbody className="bg-gray-800 divide-y divide-gray-700">
               {filteredFeedback.map((item) => (
-                <tr key={item.id} className="hover:bg-gray-600">
+                <tr key={item.id} className="hover:bg-gray-700">
                   <td className="px-6 py-4">
-                    <div>
-                      <div className="text-sm font-medium text-white flex items-center gap-2">
-                        {item.title}
-                        {item.attachments && item.attachments.length > 0 && (
-                          <span className="text-xs bg-blue-900 text-blue-200 px-1.5 py-0.5 rounded">
-                            📎 {item.attachments.length}
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-sm text-gray-300 truncate max-w-xs">
-                        {item.description}
-                      </div>
+                    <div className="text-sm font-medium text-white">
+                      {item.title}
+                    </div>
+                    <div className="text-sm text-gray-400 truncate max-w-xs">
+                      {item.description}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-white">{item.user_name}</div>
                     <div className="text-sm text-gray-300">
+                      {item.user_name}
+                    </div>
+                    <div className="text-sm text-gray-500">
                       {item.user_email}
                     </div>
                   </td>
@@ -357,8 +252,8 @@ export default function FeedbackManagement() {
             setIsModalOpen(false);
             setSelectedFeedback(null);
           }}
-          onUpdate={handleStatusChange}
-          onNotesChange={handleNotesChange}
+          onUpdate={updateFeedbackStatus}
+          onNotesChange={updateFeedbackNotes}
         />
       )}
     </div>

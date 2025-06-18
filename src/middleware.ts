@@ -35,7 +35,9 @@ export async function middleware(req: NextRequest) {
 
   // Если пользователь аутентифицирован и пытается получить доступ к страницам аутентификации
   if (session && req.nextUrl.pathname.startsWith('/auth')) {
-    logger.auth.info('Redirecting authenticated user from auth pages to dashboard');
+    logger.auth.info(
+      'Redirecting authenticated user from auth pages to dashboard'
+    );
     const redirectUrl = req.nextUrl.clone();
     redirectUrl.pathname = '/dashboard';
     return NextResponse.redirect(redirectUrl);

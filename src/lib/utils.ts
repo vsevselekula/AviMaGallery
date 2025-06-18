@@ -22,3 +22,14 @@ export const getVerticalColorClass = (vertical: string) => {
       return { backgroundColor: '#6B7280' }; // bg-gray-500
   }
 };
+
+export function getCampaignUrl(campaignId: string): string {
+  return `/dashboard?campaign=${campaignId}`;
+}
+
+export function getCampaignShareUrl(campaignId: string): string {
+  if (typeof window !== 'undefined') {
+    return `${window.location.origin}/dashboard?campaign=${campaignId}`;
+  }
+  return `/dashboard?campaign=${campaignId}`;
+}

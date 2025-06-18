@@ -1,26 +1,12 @@
 'use client';
 
 import { Campaign } from '@/lib/types';
-import React, { useState } from 'react';
-// import { Vertical } from '@/lib/types';
-// import verticalsData from '@/data/verticals.json';
-// import { ImageUpload } from './ImageUpload';
-import Image from 'next/image';
-// import { cn } from '@/lib/utils';
+import React, { useRef, useEffect } from 'react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import { getVerticalColorClass } from '@/lib/utils';
-import { useEffect, useRef } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-// import { ImageUpload } from './ImageUpload';
-import { VideoPlayer } from '@/components/ui/VideoPlayer';
-import { Notification } from '@/components/ui/Notification';
-import { ImageUpload } from '@/components/ui/ImageUpload';
-import { useNotification } from '@/hooks/useNotification';
-import { CampaignReactions } from '@/components/ui/CampaignReactions';
-import { useReactions } from '@/hooks/useReactions';
-// import React from 'react';
-// import { cn } from '@/lib/utils';
+import { isValidImageUrl } from '@/lib/imageUtils';
+import { VerticalBadge, GenericBadge, StatusBadge } from '@/components/ui/CampaignBadges';
+import Image from 'next/image';
 
 interface CampaignModalProps {
   campaign: Campaign;
@@ -28,217 +14,13 @@ interface CampaignModalProps {
   onCampaignUpdated?: (updatedCampaign: Campaign) => void;
 }
 
-// Helper для тегов - вынесен за пределы компонента
-const Tag = ({
-  children,
-  color = 'gray',
-}: {
-  children: React.ReactNode;
-  color?: string;
-}) => (
-  <span
-    className={`inline-block px-3 py-1 rounded-full text-xs font-semibold bg-${color}-700 text-white mr-2 mb-1`}
-  >
-    {children}
-  </span>
-);
-
-// Helper для секций - вынесен за пределы компонента
-const Section = ({
-  title,
-  icon,
-  children,
-  className = '',
-}: {
-  title: string;
-  icon?: React.ReactNode;
-  children: React.ReactNode;
-  className?: string;
-}) => (
-  <section
-    className={`bg-gray-800 rounded-xl p-6 flex flex-col gap-2 shadow ${className}`}
-  >
-    <h3 className="font-semibold text-lg flex items-center gap-2 mb-2">
-      {icon}
-      {title}
-    </h3>
-    {children}
-  </section>
-);
-
-// Helper для ссылок - вынесен за пределы компонента
-const renderLinks = (
-  links:
-    | { label?: string; url?: string }[]
-    | Record<string, string>
-    | string
-    | null
-    | undefined
-) => {
-  if (!links) return <span className="text-gray-400">Нет данных</span>;
-  if (Array.isArray(links)) {
-    return (
-      <ul className="list-disc ml-6">
-        {links.map((l, i) => (
-          <li key={i}>
-            {typeof l === 'object' &&
-            l !== null &&
-            'label' in l &&
-            'url' in l &&
-            l.label &&
-            l.url ? (
-              <a
-                href={l.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-400 underline"
-              >
-                {l.label}
-              </a>
-            ) : typeof l === 'object' && l !== null && 'url' in l && l.url ? (
-              <a
-                href={l.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-400 underline"
-              >
-                {l.url}
-              </a>
-            ) : typeof l === 'object' &&
-              l !== null &&
-              'label' in l &&
-              l.label ? (
-              l.label
-            ) : (
-              String(l)
-            )}
-          </li>
-        ))}
-      </ul>
-    );
-  }
-  if (typeof links === 'object' && links !== null) {
-    return (
-      <ul className="list-disc ml-6">
-        {Object.entries(links).map(([k, v]) => (
-          <li key={k}>
-            {typeof v === 'string' && v.startsWith('http') ? (
-              <a
-                href={v}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-400 underline"
-              >
-                {k}
-              </a>
-            ) : typeof v === 'string' ? (
-              `${k}: ${v}`
-            ) : (
-              `${k}: ${JSON.stringify(v)}`
-            )}
-          </li>
-        ))}
-      </ul>
-    );
-  }
-  return <span>{String(links)}</span>;
-};
-
-export function CampaignModal({
-  campaign,
-  onClose,
-  onCampaignUpdated,
-}: CampaignModalProps) {
+export function CampaignModal({ campaign, onClose }: CampaignModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedCampaign, setEditedCampaign] = useState<Campaign>({
-    ...campaign,
-    video_url: campaign.video_url || null,
-  });
-  const [userRole, setUserRole] = useState<string | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [linksText, setLinksText] = useState('');
-  const [channelsText, setChannelsText] = useState('');
-  const [targetsText, setTargetsText] = useState('');
-  const [testsText, setTestsText] = useState('');
-  const [availableVerticals, setAvailableVerticals] = useState<string[]>([]);
 
-  const supabase = createClientComponentClient();
-
-  // Добавляем хук для нотификаций
-  const { notification, showSuccess, showError, hideNotification } =
-    useNotification();
-
-  // Добавляем хук для реакций
-  const { userReactions, reactionCounts, toggleReaction } = useReactions([
-    campaign.id,
-  ]);
-
-  useEffect(() => {
-    setEditedCampaign({
-      ...campaign,
-      video_url: campaign.video_url || null,
-    });
-
-    // Инициализация текстовых полей для массивов
-    if (Array.isArray(campaign.links)) {
-      setLinksText(
-        campaign.links.map((link) => `${link.label} - ${link.url}`).join('\n')
-      );
-    } else {
-      setLinksText('');
-    }
-
-    if (Array.isArray(campaign.channels)) {
-      setChannelsText(campaign.channels.join('\n'));
-    } else {
-      setChannelsText('');
-    }
-
-    if (Array.isArray(campaign.targets)) {
-      setTargetsText(campaign.targets.join('\n'));
-    } else {
-      setTargetsText('');
-    }
-
-    // Инициализация текста для тестов
-    if (Array.isArray(campaign.pre_tests)) {
-      setTestsText(
-        campaign.pre_tests
-          .map((test) => {
-            if (
-              typeof test === 'object' &&
-              test &&
-              'label' in test &&
-              'url' in test
-            ) {
-              return `${test.label} - ${test.url}`;
-            }
-            return String(test);
-          })
-          .join('\n')
-      );
-    } else if (campaign.pre_tests && typeof campaign.pre_tests === 'object') {
-      setTestsText(
-        Object.entries(campaign.pre_tests)
-          .map(([label, value]) => `${label} - ${value}`)
-          .join('\n')
-      );
-    } else if (typeof campaign.pre_tests === 'string') {
-      setTestsText(campaign.pre_tests);
-    } else {
-      setTestsText('');
-    }
-  }, [campaign]);
-
+  // Обработчик клика вне модального окна
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        modalRef.current &&
-        !modalRef.current.contains(event.target as Node)
-      ) {
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
         onClose();
       }
     };
@@ -249,1068 +31,263 @@ export function CampaignModal({
     };
   }, [onClose]);
 
+  // Обработчик ESC
   useEffect(() => {
-    const fetchUserRole = async () => {
-      const {
-        data: { user: supabaseUser },
-      } = await supabase.auth.getUser();
-      if (supabaseUser) {
-        const { data: roleData } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', supabaseUser.id)
-          .single();
-        if (roleData) {
-          setUserRole(roleData.role);
-        }
-      }
-    };
-
-    const fetchVerticals = async () => {
-      // Сначала пробуем загрузить из таблицы verticals
-      const { data: verticals, error: verticalsError } = await supabase
-        .from('verticals')
-        .select('name')
-        .order('name');
-
-      if (verticalsError) {
-        console.error('Error fetching from verticals table:', verticalsError);
-
-        // Если не получилось, берем уникальные вертикали из кампаний
-        const { data: campaigns, error: campaignsError } = await supabase
-          .from('campaigns_v2')
-          .select('campaign_vertical')
-          .not('campaign_vertical', 'is', null);
-
-        if (campaignsError) {
-          console.error(
-            'Error fetching campaigns for verticals:',
-            campaignsError
-          );
-        } else {
-          const uniqueVerticals = Array.from(
-            new Set(campaigns?.map((c) => c.campaign_vertical).filter(Boolean))
-          ).sort();
-          setAvailableVerticals(uniqueVerticals);
-        }
-      } else {
-        const verticalNames = verticals?.map((v) => v.name) || [];
-        setAvailableVerticals(verticalNames);
-      }
-    };
-
-    fetchUserRole();
-    fetchVerticals();
-  }, [supabase]);
-
-  const handleInputChange = (
-    field: keyof Campaign,
-    value:
-      | string
-      | string[]
-      | { label: string; url: string }[]
-      | 'active'
-      | 'completed'
-      | 'planned'
-      | 'google_drive'
-      | 'yandex_disk'
-      | null
-  ) => {
-    setEditedCampaign((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
-  const handleDateChange = (
-    field: 'start_date' | 'end_date',
-    value: string
-  ) => {
-    setEditedCampaign((prev) => ({
-      ...prev,
-      flight_period: {
-        ...prev.flight_period,
-        [field]: value,
-      },
-    }));
-  };
-
-  const handleArrayTextChange = (
-    field: string,
-    text: string,
-    setter: (text: string) => void
-  ) => {
-    setter(text);
-    const lines = text.split('\n').filter((line) => line.trim() !== '');
-
-    if (field === 'links' || field === 'attachments') {
-      const items = lines.map((line) => {
-        const parts = line.split(' - ');
-        return {
-          label: parts[0] || '',
-          url: parts[1] || parts[0] || '',
-        };
-      });
-      handleInputChange(field as keyof Campaign, items);
-    } else {
-      handleInputChange(field as keyof Campaign, lines);
-    }
-  };
-
-  const handleSave = async () => {
-    if (!userRole || (userRole !== 'super_admin' && userRole !== 'editor')) {
-      showError('У вас нет прав для редактирования кампаний');
-      return;
-    }
-
-    setIsSaving(true);
-    try {
-      // Проверяем подключение к Supabase
-      const { error: testError } = await supabase
-        .from('campaigns_v2')
-        .select('id')
-        .eq('id', campaign.id)
-        .single();
-
-      if (testError) {
-        console.error('Supabase connection test failed:', testError);
-        showError(`Ошибка подключения к базе данных: ${testError.message}`);
-        return;
-      }
-
-      // Автоматически рассчитываем статус по датам
-      const getStatusFromDates = (
-        startDate: string,
-        endDate: string
-      ): 'active' | 'completed' | 'planned' => {
-        const now = new Date();
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-
-        if (now < start) {
-          return 'planned';
-        } else if (now > end) {
-          return 'completed';
-        } else {
-          return 'active';
-        }
-      };
-
-      const calculatedStatus =
-        editedCampaign.flight_period?.start_date &&
-        editedCampaign.flight_period?.end_date
-          ? getStatusFromDates(
-              editedCampaign.flight_period.start_date,
-              editedCampaign.flight_period.end_date
-            )
-          : editedCampaign.status;
-
-      const { data, error } = await supabase
-        .from('campaigns_v2')
-        .update({
-          campaign_name: editedCampaign.campaign_name,
-          campaign_type: editedCampaign.campaign_type,
-          key_message: editedCampaign.key_message,
-          campaign_vertical: editedCampaign.campaign_vertical,
-          flight_period: editedCampaign.flight_period,
-          geo: editedCampaign.geo,
-          audience: editedCampaign.audience,
-          objectives: editedCampaign.objectives,
-          channels: editedCampaign.channels,
-          links: editedCampaign.links,
-          status: calculatedStatus,
-          image_url: editedCampaign.image_url,
-          video_url: editedCampaign.video_url,
-          type: editedCampaign.type,
-          slogan: editedCampaign.slogan,
-          description: editedCampaign.description,
-          targets: editedCampaign.targets,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', campaign.id)
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Supabase error details:', {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code,
-        });
-        showError(`Ошибка при сохранении кампании: ${error.message}`);
-        return;
-      }
-
-      if (data) {
-        // Обновляем локальное состояние кампании
-        const updatedCampaign = data as Campaign;
-
-        // Вызываем callback для обновления родительского компонента
-        if (onCampaignUpdated) {
-          onCampaignUpdated(updatedCampaign);
-        }
-
-        // Обновляем локальное состояние модального окна
-        setEditedCampaign(updatedCampaign);
-
-        // Обновляем текстовые поля для массивов
-        if (Array.isArray(updatedCampaign.links)) {
-          setLinksText(
-            updatedCampaign.links
-              .map((link) => `${link.label} - ${link.url}`)
-              .join('\n')
-          );
-        }
-
-        if (Array.isArray(updatedCampaign.channels)) {
-          setChannelsText(updatedCampaign.channels.join('\n'));
-        }
-
-        if (Array.isArray(updatedCampaign.targets)) {
-          setTargetsText(updatedCampaign.targets.join('\n'));
-        }
-
-        setIsEditing(false);
-        showSuccess('Кампания успешно обновлена!');
-      }
-    } catch (error) {
-      console.error('Network or unexpected error:', error);
-      if (error instanceof Error) {
-        if (
-          error.message.includes('Failed to fetch') ||
-          error.message.includes('ERR_CONNECTION_CLOSED')
-        ) {
-          showError(
-            'Ошибка подключения к серверу. Проверьте интернет-соединение и попробуйте снова.'
-          );
-        } else {
-          showError(`Неожиданная ошибка: ${error.message}`);
-        }
-      } else {
-        showError('Произошла неизвестная ошибка при сохранении кампании');
-      }
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleDelete = async () => {
-    if (userRole !== 'super_admin') {
-      showError('Только супер-админ может удалять кампании');
-      return;
-    }
-
-    // Проверим текущего пользователя
-    await supabase.auth.getUser();
-
-    setIsDeleting(true);
-
-    try {
-      // Сначала проверим, существует ли кампания
-      const { data: existingCampaign, error: selectError } = await supabase
-        .from('campaigns_v2')
-        .select('id, campaign_name')
-        .eq('id', campaign.id)
-        .single();
-
-      if (selectError) {
-        console.error('Error checking existing campaign:', selectError);
-        showError(`Ошибка при проверке кампании: ${selectError.message}`);
-        return;
-      }
-
-      if (!existingCampaign) {
-        showError('Кампания не найдена в базе данных');
-        return;
-      }
-
-      // Удаляем кампанию напрямую (теперь RLS политики разрешают это для super_admin)
-      const { error, data } = await supabase
-        .from('campaigns_v2')
-        .delete()
-        .eq('id', campaign.id)
-        .select();
-
-      if (error) {
-        console.error('Error deleting campaign:', error);
-        showError(`Ошибка при удалении кампании: ${error.message}`);
-        return;
-      }
-
-      if (!data || data.length === 0) {
-        console.error('No records deleted - possible RLS policy issue');
-        showError(
-          'Не удалось удалить кампанию. Возможно, недостаточно прав доступа.'
-        );
-        return;
-      }
-
-      showSuccess('Кампания успешно удалена!');
-
-      // Закрываем модальное окно через небольшую задержку и перезагружаем страницу
-      setTimeout(() => {
+    const handleEsc = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
         onClose();
-        // Перезагружаем страницу чтобы обновить список кампаний
-        window.location.reload();
-      }, 1500);
-    } catch (error) {
-      console.error('Error deleting campaign:', error);
-      showError('Ошибка при удалении кампании');
-    } finally {
-      setIsDeleting(false);
-      setShowDeleteConfirm(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleEsc);
+    return () => {
+      document.removeEventListener('keydown', handleEsc);
+    };
+  }, [onClose]);
+
+
+  const hasImage = isValidImageUrl(campaign.image_url);
+
+  const formatDate = (dateString: string) => {
+    try {
+      return format(new Date(dateString), 'dd.MM.yyyy', { locale: ru });
+    } catch {
+      return dateString;
     }
   };
 
-  const isSuperAdmin = userRole === 'super_admin';
-  const isAdmin = userRole === 'super_admin' || userRole === 'editor';
+
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm !mt-0">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div
         ref={modalRef}
-        className="bg-gray-900 rounded-2xl shadow-2xl max-w-5xl w-full p-8 relative overflow-y-auto max-h-[90vh]"
-        onClick={(e) => {
-          // Предотвращаем закрытие модального окна при клике по содержимому
-          e.stopPropagation();
-        }}
+        className="bg-gray-900 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
       >
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl"
-        >
-          ×
-        </button>
-
-        {/* Кнопки управления для админов */}
-        {isAdmin && (
-          <div className="absolute top-4 left-4 flex gap-2">
-            {!isEditing ? (
-              <>
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
-                >
-                  ✏️ Редактировать
-                </button>
-                {isSuperAdmin && (
-                  <button
-                    onClick={() => {
-                      setShowDeleteConfirm(true);
-                    }}
-                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors"
-                  >
-                    🗑️ Удалить
-                  </button>
-                )}
-              </>
-            ) : (
-              <div className="flex gap-2">
-                <button
-                  onClick={handleSave}
-                  disabled={isSaving}
-                  className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors"
-                >
-                  {isSaving ? '💾 Сохранение...' : '💾 Сохранить'}
-                </button>
-                <button
-                  onClick={() => {
-                    setIsEditing(false);
-                    setEditedCampaign({
-                      ...campaign,
-                      video_url: campaign.video_url || null,
-                    });
-                  }}
-                  className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg text-sm font-medium transition-colors"
-                >
-                  ❌ Отмена
-                </button>
-                {isSuperAdmin && (
-                  <button
-                    onClick={() => {
-                      setShowDeleteConfirm(true);
-                    }}
-                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors"
-                  >
-                    🗑️ Удалить
-                  </button>
-                )}
-              </div>
-            )}
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-700">
+          <div className="flex items-center gap-3">
+            <h2 className="text-2xl font-bold text-white">
+              {campaign.campaign_name}
+            </h2>
+            <StatusBadge 
+              status={campaign.status as 'active' | 'completed' | 'planned' || 'planned'}
+              size="sm"
+            />
           </div>
-        )}
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-white transition-colors text-2xl"
+          >
+            ×
+          </button>
+        </div>
 
-        {/* Hero изображение кампании */}
-        {isEditing ? (
-          <div className="mt-12 mb-6">
-            <div className="bg-gray-800 rounded-xl p-6">
-              <h3 className="font-semibold text-lg flex items-center gap-2 mb-4">
-                <span>🖼️</span>
-                Изображение кампании
-              </h3>
-              <ImageUpload
-                value={editedCampaign.image_url || ''}
-                onChange={(imageUrl) =>
-                  handleInputChange('image_url', imageUrl)
-                }
-                onError={(error) => showError(error)}
-                campaignId={campaign.id}
-                maxSizeMB={10}
-                placeholder="Перетащите изображение кампании или нажмите Ctrl+V"
-              />
-
-              <div className="mt-6">
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  <span>🎬</span> URL видео (опционально)
-                </label>
-                <input
-                  type="url"
-                  value={editedCampaign.video_url || ''}
-                  onChange={(e) =>
-                    handleInputChange('video_url', e.target.value)
-                  }
-                  placeholder="https://example.com/video.mp4"
-                  className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <p className="text-xs text-gray-400 mt-1">
-                  Видео будет отображаться поверх изображения в hero-секции
-                </p>
-              </div>
-            </div>
-          </div>
-        ) : editedCampaign.image_url ? (
-          <div className="mt-12 mb-6 -mx-8">
-            <div className="relative h-64 md:h-80 overflow-hidden rounded-t-2xl">
+        {/* Content */}
+        <div className="p-6">
+          {/* Hero Section */}
+          {hasImage && (
+            <div className="relative w-full h-64 mb-6 rounded-lg overflow-hidden">
               <Image
-                src={editedCampaign.image_url}
-                alt={editedCampaign.campaign_name}
+                src={campaign.image_url!}
+                alt={campaign.campaign_name}
                 fill
                 style={{ objectFit: 'cover' }}
-                sizes="(max-width: 768px) 100vw, 1200px"
-                priority
+                className="rounded-lg"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+            </div>
+          )}
 
-              {/* Видеоплеер поверх изображения */}
-              {editedCampaign.video_url && (
-                <div className="absolute top-6 left-6">
-                  <VideoPlayer
-                    videoUrl={editedCampaign.video_url}
-                    posterUrl={editedCampaign.image_url}
-                    className="w-64 h-36"
-                  />
-                </div>
-              )}
+          {/* Campaign Info */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            {/* Basic Info */}
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Вертикаль
+                </label>
+                <VerticalBadge vertical={campaign.campaign_vertical} />
+              </div>
 
-              <div className="absolute bottom-4 left-8 right-8">
-                <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">
-                  {editedCampaign.campaign_name}
-                </h1>
-                <div className="flex gap-2 flex-wrap items-center mb-3">
-                  <span
-                    className={`px-3 py-1 rounded-full text-sm font-medium backdrop-blur-sm ${
-                      editedCampaign.campaign_vertical === 'Авито'
-                        ? 'text-black'
-                        : 'text-white'
-                    }`}
-                    style={getVerticalColorClass(
-                      editedCampaign.campaign_vertical
-                    )}
-                  >
-                    {editedCampaign.campaign_vertical}
-                  </span>
-                  <span className="px-3 py-1 rounded-full text-sm font-medium border border-white text-white bg-black/30 backdrop-blur-sm">
-                    {editedCampaign.campaign_type}
-                  </span>
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Тип кампании
+                </label>
+                <p className="text-white">{campaign.campaign_type}</p>
+              </div>
 
-                {/* Реакции */}
-                <CampaignReactions
-                  campaignId={campaign.id}
-                  userReaction={userReactions[campaign.id] || null}
-                  reactionCounts={reactionCounts[campaign.id] || {}}
-                  onToggleReaction={toggleReaction}
-                  disabled={false}
-                  size="md"
-                />
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  География
+                </label>
+                <p className="text-white">{campaign.geo || 'Не указано'}</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Аудитория
+                </label>
+                <p className="text-white">{campaign.audience || 'Не указано'}</p>
               </div>
             </div>
-          </div>
-        ) : null}
 
-        {/* Заголовок и бейджи для кампаний без изображения */}
-        {!isEditing && !editedCampaign.image_url && (
-          <div className="mt-12 mb-6">
-            <div className="text-center">
-              <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                {editedCampaign.campaign_name}
-              </h1>
-              <div className="flex gap-2 flex-wrap items-center justify-center mb-4">
-                <span
-                  className={`px-3 py-1 rounded-full text-sm font-medium ${
-                    editedCampaign.campaign_vertical === 'Авито'
-                      ? 'text-black'
-                      : 'text-white'
-                  }`}
-                  style={getVerticalColorClass(
-                    editedCampaign.campaign_vertical
-                  )}
-                >
-                  {editedCampaign.campaign_vertical}
-                </span>
-                <span className="px-3 py-1 rounded-full text-sm font-medium border border-gray-600 text-white bg-gray-700">
-                  {editedCampaign.campaign_type}
-                </span>
+            {/* Dates and Status */}
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Период проведения
+                </label>
+                <p className="text-white">
+                  {campaign.flight_period?.start_date && campaign.flight_period?.end_date
+                    ? `${formatDate(campaign.flight_period.start_date)} - ${formatDate(campaign.flight_period.end_date)}`
+                    : 'Не указано'}
+                </p>
               </div>
 
-              {/* Реакции */}
-              <div className="flex justify-center">
-                <CampaignReactions
-                  campaignId={campaign.id}
-                  userReaction={userReactions[campaign.id] || null}
-                  reactionCounts={reactionCounts[campaign.id] || {}}
-                  onToggleReaction={toggleReaction}
-                  disabled={false}
-                  size="md"
-                />
-              </div>
+              {campaign.slogan && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    Слоган
+                  </label>
+                  <p className="text-white">{campaign.slogan}</p>
+                </div>
+              )}
+
+              {campaign.type && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    Тип
+                  </label>
+                  <p className="text-white">{campaign.type}</p>
+                </div>
+              )}
             </div>
           </div>
-        )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Основная информация — на всю ширину */}
-          <div className="bg-gray-800 rounded-xl p-6 md:col-span-2">
-            {isEditing ? (
-              <div className="space-y-4">
-                {/* Название кампании */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Название кампании *
-                  </label>
-                  <input
-                    type="text"
-                    value={editedCampaign.campaign_name || ''}
-                    onChange={(e) =>
-                      handleInputChange('campaign_name', e.target.value)
-                    }
-                    className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Введите название кампании"
-                  />
-                </div>
-
-                {/* Тип кампании и вертикаль */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Тип кампании *
-                    </label>
-                    <select
-                      value={editedCampaign.campaign_type || ''}
-                      onChange={(e) =>
-                        handleInputChange('campaign_type', e.target.value)
-                      }
-                      className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="">Выберите тип кампании</option>
-                      <option value="T1">T1</option>
-                      <option value="T2">T2</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Вертикаль *
-                    </label>
-                    <select
-                      value={editedCampaign.campaign_vertical || ''}
-                      onChange={(e) =>
-                        handleInputChange('campaign_vertical', e.target.value)
-                      }
-                      className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="">Выберите вертикаль</option>
-                      {availableVerticals.map((vertical) => (
-                        <option key={vertical} value={vertical}>
-                          {vertical}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Дата начала
-                    </label>
-                    <input
-                      type="date"
-                      value={
-                        editedCampaign.flight_period?.start_date?.split(
-                          'T'
-                        )[0] || ''
-                      }
-                      onChange={(e) =>
-                        handleDateChange('start_date', e.target.value)
-                      }
-                      className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Дата окончания
-                    </label>
-                    <input
-                      type="date"
-                      value={
-                        editedCampaign.flight_period?.end_date?.split('T')[0] ||
-                        ''
-                      }
-                      onChange={(e) =>
-                        handleDateChange('end_date', e.target.value)
-                      }
-                      className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Ключевое сообщение
-                  </label>
-                  <textarea
-                    value={editedCampaign.key_message || ''}
-                    onChange={(e) =>
-                      handleInputChange('key_message', e.target.value)
-                    }
-                    rows={3}
-                    className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Описание
-                  </label>
-                  <textarea
-                    value={editedCampaign.description || ''}
-                    onChange={(e) =>
-                      handleInputChange('description', e.target.value)
-                    }
-                    rows={2}
-                    className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Тип
-                    </label>
-                    <input
-                      type="text"
-                      value={editedCampaign.type || ''}
-                      onChange={(e) =>
-                        handleInputChange('type', e.target.value)
-                      }
-                      className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Дополнительный тип (опционально)"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Слоган
-                    </label>
-                    <input
-                      type="text"
-                      value={editedCampaign.slogan || ''}
-                      onChange={(e) =>
-                        handleInputChange('slogan', e.target.value)
-                      }
-                      className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Слоган кампании (опционально)"
-                    />
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <>
-                {editedCampaign.flight_period?.start_date &&
-                  editedCampaign.flight_period?.end_date && (
-                    <div className="text-sm text-gray-300 mb-2">
-                      В эфире с{' '}
-                      {format(
-                        new Date(editedCampaign.flight_period.start_date),
-                        'dd.MM.yyyy',
-                        { locale: ru }
-                      )}{' '}
-                      по{' '}
-                      {format(
-                        new Date(editedCampaign.flight_period.end_date),
-                        'dd.MM.yyyy',
-                        { locale: ru }
-                      )}
-                    </div>
-                  )}
-                {editedCampaign.description && (
-                  <p className="text-gray-200 mb-1">
-                    {editedCampaign.description}
-                  </p>
-                )}
-                {editedCampaign.key_message && (
-                  <p className="text-gray-400 italic mb-1">
-                    {editedCampaign.key_message}
-                  </p>
-                )}
-                {editedCampaign.type && (
-                  <div className="mt-2">
-                    <span className="text-sm text-gray-300">Тип: </span>
-                    <Tag color="indigo">{editedCampaign.type}</Tag>
-                  </div>
-                )}
-                {editedCampaign.slogan && (
-                  <div className="mt-2">
-                    <span className="text-sm text-gray-300">Слоган: </span>
-                    <Tag color="purple">{editedCampaign.slogan}</Tag>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-
-          {/* Новый ряд: периоды, цели, каналы */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:col-span-2">
-            <Section title="Периоды и аудитория" icon={<span>📅</span>}>
-              {isEditing ? (
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Гео
-                    </label>
-                    <input
-                      type="text"
-                      value={editedCampaign.geo || ''}
-                      onChange={(e) => handleInputChange('geo', e.target.value)}
-                      className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Аудитория
-                    </label>
-                    <textarea
-                      value={editedCampaign.audience || ''}
-                      onChange={(e) =>
-                        handleInputChange('audience', e.target.value)
-                      }
-                      rows={3}
-                      className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <div className="mt-2">
-                    <b>Гео:</b>{' '}
-                    {editedCampaign.geo || (
-                      <span className="text-gray-500">Нет данных</span>
-                    )}
-                  </div>
-                  <div>
-                    <b>Аудитория:</b>{' '}
-                    {editedCampaign.audience || (
-                      <span className="text-gray-500">Нет данных</span>
-                    )}
-                  </div>
-                </>
-              )}
-            </Section>
-            <Section title="Цели и задачи" icon={<span>🎯</span>}>
-              {isEditing ? (
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Цели (каждая с новой строки)
-                    </label>
-                    <textarea
-                      value={targetsText}
-                      onChange={(e) =>
-                        handleArrayTextChange(
-                          'targets',
-                          e.target.value,
-                          setTargetsText
-                        )
-                      }
-                      rows={4}
-                      placeholder="Цель 1&#10;Цель 2&#10;Цель 3"
-                      className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
-              ) : (
-                <div className="mb-2 text-base font-normal text-white">
-                  {Array.isArray(editedCampaign.targets) &&
-                  editedCampaign.targets.length > 0 ? (
-                    editedCampaign.targets.length === 1 ? (
-                      editedCampaign.targets[0]
-                    ) : (
-                      editedCampaign.targets.map((t, i) => (
-                        <p key={i} className="mb-2 last:mb-0">
-                          {t}
-                        </p>
-                      ))
-                    )
-                  ) : (
-                    <span className="text-gray-500">Нет данных</span>
-                  )}
-                </div>
-              )}
-            </Section>
-            <Section title="Каналы и медиа" icon={<span>📡</span>}>
-              {isEditing ? (
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Каналы (каждый с новой строки)
-                    </label>
-                    <textarea
-                      value={channelsText}
-                      onChange={(e) =>
-                        handleArrayTextChange(
-                          'channels',
-                          e.target.value,
-                          setChannelsText
-                        )
-                      }
-                      rows={4}
-                      placeholder="ТВ&#10;Радио&#10;Интернет&#10;OOH"
-                      className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {(editedCampaign.channels ?? []).length > 0 ? (
-                      (editedCampaign.channels ?? []).map((c, i) => (
-                        <Tag key={i} color="blue">
-                          {c}
-                        </Tag>
-                      ))
-                    ) : (
-                      <span className="text-gray-500">Нет данных</span>
-                    )}
-                  </div>
-                </>
-              )}
-            </Section>
-          </div>
-
-          {/* Ссылки и тесты в один ряд */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:col-span-2">
-            <Section
-              title="Ссылки"
-              icon={<span>🔗</span>}
-              className="md:col-span-1"
-            >
-              {isEditing ? (
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Ссылки (формат: Название - URL)
-                    </label>
-                    <textarea
-                      value={linksText}
-                      onChange={(e) =>
-                        handleArrayTextChange(
-                          'links',
-                          e.target.value,
-                          setLinksText
-                        )
-                      }
-                      rows={4}
-                      placeholder="Сайт - https://example.com&#10;Лендинг - https://landing.com"
-                      className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
-              ) : (
-                renderLinks(editedCampaign.links)
-              )}
-            </Section>
-            <Section
-              title="Тесты"
-              icon={<span>🧪</span>}
-              className="md:col-span-2"
-            >
-              {isEditing ? (
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Тесты (формат: Название - URL)
-                    </label>
-                    <textarea
-                      value={testsText}
-                      onChange={(e) =>
-                        handleArrayTextChange(
-                          'pre_tests',
-                          e.target.value,
-                          setTestsText
-                        )
-                      }
-                      rows={4}
-                      placeholder="Пре-тест - https://example.com/pretest&#10;Пост-тест - https://example.com/posttest"
-                      className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
-              ) : (
-                <>
-                  {Array.isArray(editedCampaign.pre_tests) &&
-                  editedCampaign.pre_tests.length > 0 ? (
-                    <ul className="list-disc ml-6">
-                      {editedCampaign.pre_tests.map(
-                        (item: unknown, i: number) => {
-                          if (
-                            item &&
-                            typeof item === 'object' &&
-                            'label' in item &&
-                            'url' in item
-                          ) {
-                            const testItem = item as {
-                              label: string;
-                              url: string;
-                            };
-                            return (
-                              <li key={i}>
-                                <a
-                                  href={testItem.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-blue-400 underline"
-                                >
-                                  {testItem.label}
-                                </a>
-                              </li>
-                            );
-                          } else if (typeof item === 'string') {
-                            return <li key={i}>{item}</li>;
-                          }
-                          return null;
-                        }
-                      )}
-                    </ul>
-                  ) : editedCampaign.pre_tests &&
-                    typeof editedCampaign.pre_tests === 'object' &&
-                    !Array.isArray(editedCampaign.pre_tests) ? (
-                    <ul className="list-disc ml-6">
-                      {Object.entries(editedCampaign.pre_tests).map(
-                        ([label, value]: [string, unknown], i) => (
-                          <li key={i}>
-                            {typeof value === 'string' &&
-                            value.startsWith('http') ? (
-                              <a
-                                href={value}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-400 underline"
-                              >
-                                {label}
-                              </a>
-                            ) : (
-                              <span>
-                                {label}: {String(value)}
-                              </span>
-                            )}
-                          </li>
-                        )
-                      )}
-                    </ul>
-                  ) : typeof editedCampaign.pre_tests === 'string' ? (
-                    <div>{editedCampaign.pre_tests}</div>
-                  ) : !editedCampaign.pre_tests ? (
-                    <span className="text-gray-500">Нет данных</span>
-                  ) : null}
-                </>
-              )}
-            </Section>
-          </div>
-        </div>
-
-        {/* Компонент нотификаций */}
-        <Notification
-          message={notification.message}
-          type={notification.type}
-          isVisible={notification.isVisible}
-          onClose={hideNotification}
-        />
-      </div>
-
-      {/* Модальное окно подтверждения удаления - вынесено за пределы основного модального окна */}
-      {showDeleteConfirm && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-90 backdrop-blur-sm"
-          style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
-          onClick={(e) => {
-            // Закрываем только если клик по backdrop, а не по содержимому
-            if (e.target === e.currentTarget) {
-              setShowDeleteConfirm(false);
-            }
-          }}
-        >
-          <div
-            className="bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-6 mx-4 relative"
-            style={{ zIndex: 101 }}
-            onClick={(e) => {
-              e.stopPropagation(); // Предотвращаем закрытие при клике по содержимому
-            }}
-          >
-            <div className="text-center">
-              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
-                <span className="text-2xl">⚠️</span>
-              </div>
-              <h3 className="text-lg font-medium text-white mb-2">
-                Удалить кампанию?
-              </h3>
-              <p className="text-sm text-gray-300 mb-6">
-                Вы уверены, что хотите удалить кампанию "
-                {campaign.campaign_name}"? Это действие нельзя отменить.
+          {/* Key Message */}
+          {campaign.key_message && (
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Ключевое сообщение
+              </label>
+              <p className="text-white bg-gray-800 p-4 rounded-lg">
+                {campaign.key_message}
               </p>
-              <div className="flex gap-3 justify-center">
-                <button
-                  type="button"
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setShowDeleteConfirm(false);
-                  }}
-                  disabled={isDeleting}
-                  className="px-4 py-2 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-500 text-white rounded-lg text-sm font-medium transition-colors cursor-pointer"
-                  style={{ pointerEvents: 'auto' }}
-                >
-                  Отмена
-                </button>
-                <button
-                  type="button"
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    if (!isDeleting) {
-                      handleDelete();
-                    }
-                  }}
-                  disabled={isDeleting}
-                  className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white rounded-lg text-sm font-medium transition-colors cursor-pointer"
-                  style={{ pointerEvents: 'auto' }}
-                >
-                  {isDeleting ? '🔄 Удаление...' : '🗑️ Удалить'}
-                </button>
+            </div>
+          )}
+
+          {/* Description */}
+          {campaign.description && (
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Описание
+              </label>
+              <p className="text-white bg-gray-800 p-4 rounded-lg">
+                {campaign.description}
+              </p>
+            </div>
+          )}
+
+          {/* Objectives */}
+          {campaign.objectives && campaign.objectives.length > 0 && (
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Цели
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {campaign.objectives.map((objective, index) => (
+                  <GenericBadge key={index} color="blue">
+                    {objective}
+                  </GenericBadge>
+                ))}
               </div>
             </div>
-          </div>
+          )}
+
+          {/* Channels */}
+          {campaign.channels && campaign.channels.length > 0 && (
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Каналы
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {campaign.channels.map((channel, index) => (
+                  <GenericBadge key={index} color="green">
+                    {channel}
+                  </GenericBadge>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Targets */}
+          {campaign.targets && campaign.targets.length > 0 && (
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Цели
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {campaign.targets.map((target, index) => (
+                  <GenericBadge key={index} color="purple">
+                    {target}
+                  </GenericBadge>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Links */}
+          {campaign.links && campaign.links.length > 0 && (
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Ссылки
+              </label>
+              <div className="space-y-2">
+                {campaign.links.map((link, index) => (
+                  <a
+                    key={index}
+                    href={typeof link === 'string' ? link : link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block text-blue-400 hover:text-blue-300 underline"
+                  >
+                    {typeof link === 'string' ? link : link.label || link.url}
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Video */}
+          {campaign.video_url && (
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Видео
+              </label>
+              <div className="bg-gray-800 p-4 rounded-lg">
+                <video
+                  controls
+                  className="w-full max-h-96 rounded"
+                  preload="metadata"
+                >
+                  <source src={campaign.video_url} type="video/mp4" />
+                  Ваш браузер не поддерживает воспроизведение видео.
+                </video>
+              </div>
+            </div>
+          )}
         </div>
-      )}
+
+        {/* Footer */}
+        <div className="flex justify-end gap-3 p-6 border-t border-gray-700">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-gray-300 hover:text-white transition-colors"
+          >
+            Закрыть
+          </button>
+        </div>
+      </div>
     </div>
   );
-}
+} 

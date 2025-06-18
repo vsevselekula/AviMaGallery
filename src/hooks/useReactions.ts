@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import {
   ReactionType,
@@ -16,6 +16,11 @@ export function useReactions(campaignIds: string[]) {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   const supabase = createClientComponentClient();
+
+  // Стабилизируем campaignIds с помощью useMemo
+  const stableCampaignIds = useMemo(() => {
+    return campaignIds.sort().join(',');
+  }, [campaignIds]);
 
   // Принудительно сбрасываем loading через 3 секунды, если что-то пошло не так
   useEffect(() => {
@@ -41,7 +46,9 @@ export function useReactions(campaignIds: string[]) {
 
   // Загружаем реакции для указанных кампаний
   const fetchReactions = useCallback(async () => {
-    if (campaignIds.length === 0) {
+    const currentCampaignIds = stableCampaignIds.split(',').filter(id => id);
+    
+    if (currentCampaignIds.length === 0) {
       setLoading(false);
       return;
     }
@@ -49,26 +56,37 @@ export function useReactions(campaignIds: string[]) {
     try {
       setLoading(true);
 
+      // Убираем избыточные консольные логи
+      // console.log('Fetching reactions for campaigns:', campaignIds);
+      // console.log('Current user ID:', currentUserId);
+
       // Получаем все реакции для указанных кампаний
       const { data: reactions, error } = await supabase
         .from('campaign_reactions')
         .select('*')
-        .in('campaign_id', campaignIds);
+        .in('campaign_id', currentCampaignIds);
 
       if (error) {
-        console.error('Error fetching reactions:', error);
-        // Если таблица не существует, просто устанавливаем пустые данные
+        // Убираем избыточные логи
+        if (error.code !== '42P01') { // Не логируем ошибку отсутствия таблицы
+          console.error('Error fetching reactions:', error.message);
+        }
+        
+        // Если таблица не существует или есть проблемы с RLS, просто устанавливаем пустые данные
         setReactionCounts({});
         setUserReactions({});
         setLoading(false);
         return;
       }
 
+      // Убираем избыточные логи
+      // console.log('Reactions fetched successfully:', reactions);
+
       // Группируем реакции по кампаниям
       const counts: CampaignReactionCounts = {};
       const userReactionState: UserReactionState = {};
 
-      campaignIds.forEach((campaignId) => {
+      currentCampaignIds.forEach((campaignId) => {
         counts[campaignId] = {};
         userReactionState[campaignId] = null;
       });
@@ -95,42 +113,20 @@ export function useReactions(campaignIds: string[]) {
     } finally {
       setLoading(false);
     }
-  }, [campaignIds, currentUserId, supabase]);
+  }, [stableCampaignIds, currentUserId, supabase]);
 
   // Загружаем реакции при изменении кампаний или пользователя
   useEffect(() => {
-    if (currentUserId !== null) {
+    // Добавляем защиту от избыточных вызовов
+    if (currentUserId !== null && stableCampaignIds) {
       fetchReactions();
     } else {
       setLoading(false);
     }
-  }, [fetchReactions, currentUserId]);
+  }, [fetchReactions, stableCampaignIds, currentUserId]);
 
-  // Подписываемся на изменения в таблице реакций для обновления в реальном времени
-  useEffect(() => {
-    if (campaignIds.length === 0) return;
-
-    const channel = supabase
-      .channel('campaign_reactions_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'campaign_reactions',
-          filter: `campaign_id=in.(${campaignIds.join(',')})`,
-        },
-        () => {
-          // Обновляем реакции при любых изменениях
-          fetchReactions();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [campaignIds, fetchReactions, supabase]);
+  // УБИРАЕМ WebSocket подписки для предотвращения спама
+  // Реакции будут обновляться только при действиях пользователя
 
   // Добавить или изменить реакцию
   const addReaction = useCallback(

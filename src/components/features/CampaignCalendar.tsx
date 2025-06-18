@@ -1,38 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Campaign } from '@/lib/types';
-import {
-  format,
-  getYear,
-  eachMonthOfInterval,
-  startOfYear,
-  endOfYear,
-  isSameMonth,
-  isSameYear,
-} from 'date-fns';
-import { ru } from 'date-fns/locale';
-import { getVerticalColorClass } from '@/lib/utils';
-import { useMemo } from 'react';
-import { CampaignModal } from './CampaignModal';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { CampaignFormModal } from './campaign/CampaignFormModal';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, parseISO } from 'date-fns';
+import { ru } from 'date-fns/locale';
 
 export function CampaignCalendar() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedYear, setSelectedYear] = useState<number | 'all'>(() => {
-    const currentYear = new Date().getFullYear();
-    return currentYear;
-  });
-  const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(
-    null
-  );
+  const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
+  const [currentDate, setCurrentDate] = useState(new Date());
   const supabase = createClientComponentClient();
 
   useEffect(() => {
     const fetchCampaigns = async () => {
-      setLoading(true);
       const { data, error } = await supabase
         .from('campaigns_v2')
         .select('*')
@@ -40,177 +23,180 @@ export function CampaignCalendar() {
 
       if (error) {
         console.error('Error fetching campaigns:', error);
-        setLoading(false);
       } else {
         setCampaigns(data as Campaign[]);
-        setLoading(false);
       }
+      setLoading(false);
     };
 
     fetchCampaigns();
   }, [supabase]);
 
-  // const handleCampaignUpdated = (updatedCampaign: Campaign) => {
-  //   setCampaigns((prevCampaigns) =>
-  //     prevCampaigns.map((campaign) =>
-  //       campaign.id === updatedCampaign.id ? updatedCampaign : campaign
-  //     )
-  //   );
-  //   setSelectedCampaign(null);
-  // };
+  const monthStart = startOfMonth(currentDate);
+  const monthEnd = endOfMonth(currentDate);
+  const calendarDays = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
-  const availableYears = useMemo(() => {
-    const years = Array.from(
-      new Set(
-        campaigns.map((c) => getYear(new Date(c.flight_period.start_date)))
-      )
-    ).sort((a, b) => b - a);
-    return years;
-  }, [campaigns]);
-
-  const months = useMemo(() => {
-    if (selectedYear === 'all') {
-      const allMonths = eachMonthOfInterval({
-        start: new Date(
-          Math.min(
-            ...campaigns.map((c) =>
-              new Date(c.flight_period.start_date).getFullYear()
-            )
-          ) || new Date().getFullYear(),
-          0,
-          1
-        ),
-        end: new Date(
-          Math.max(
-            ...campaigns.map((c) =>
-              new Date(c.flight_period.end_date).getFullYear()
-            )
-          ) || new Date().getFullYear(),
-          11,
-          31
-        ),
-      });
-      return allMonths
-        .filter(
-          (month, index, self) =>
-            index ===
-            self.findIndex(
-              (m) => format(m, 'yyyy-MM') === format(month, 'yyyy-MM')
-            )
-        )
-        .sort((a, b) => a.getTime() - b.getTime());
-    }
-    return eachMonthOfInterval({
-      start: startOfYear(new Date(selectedYear, 0)),
-      end: endOfYear(new Date(selectedYear, 0)),
-    });
-  }, [selectedYear, campaigns]);
-
-  const filteredCampaigns = useMemo(() => {
-    return campaigns.filter((campaign) => {
-      const campaignStartDate = new Date(campaign.flight_period.start_date);
-      const campaignEndDate = new Date(campaign.flight_period.end_date);
-
-      if (selectedYear === 'all') {
-        return true;
+  // Группируем кампании по дням
+  const campaignsByDay = useMemo(() => {
+    const grouped: { [key: string]: Campaign[] } = {};
+    
+    campaigns.forEach(campaign => {
+      if (campaign.flight_period?.start_date && campaign.flight_period?.end_date) {
+        const startDate = parseISO(campaign.flight_period.start_date);
+        const endDate = parseISO(campaign.flight_period.end_date);
+        
+        calendarDays.forEach(day => {
+          if (day >= startDate && day <= endDate) {
+            const dayKey = format(day, 'yyyy-MM-dd');
+            if (!grouped[dayKey]) {
+              grouped[dayKey] = [];
+            }
+            grouped[dayKey].push(campaign);
+          }
+        });
       }
-
-      return (
-        isSameYear(campaignStartDate, new Date(selectedYear, 0)) ||
-        isSameYear(campaignEndDate, new Date(selectedYear, 0))
-      );
     });
-  }, [campaigns, selectedYear]);
+    
+    return grouped;
+  }, [campaigns, calendarDays]);
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'active':
+        return 'bg-green-500';
+      case 'planned':
+        return 'bg-blue-500';
+      case 'completed':
+        return 'bg-gray-500';
+      default:
+        return 'bg-gray-400';
+    }
+  };
+
+  const navigateMonth = (direction: 'prev' | 'next') => {
+    setCurrentDate(prev => {
+      const newDate = new Date(prev);
+      if (direction === 'prev') {
+        newDate.setMonth(prev.getMonth() - 1);
+      } else {
+        newDate.setMonth(prev.getMonth() + 1);
+      }
+      return newDate;
+    });
+  };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen w-full">
-        <LoadingSpinner />
+      <div className="flex items-center justify-center h-64">
+        <div className="text-white">Загрузка календаря...</div>
       </div>
     );
   }
 
   return (
-    <div className="p-4">
-      <div className="mb-4">
-        <select
-          value={selectedYear}
-          onChange={(e) =>
-            setSelectedYear(
-              e.target.value === 'all' ? 'all' : parseInt(e.target.value)
-            )
-          }
-          className="p-2 border rounded bg-gray-700 text-white"
-        >
-          <option value="all">Все годы</option>
-          {availableYears.map((year) => (
-            <option key={year} value={year}>
-              {year}
-            </option>
-          ))}
-        </select>
+    <div className="space-y-6">
+      {/* Заголовок календаря */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-white">
+          Календарь кампаний
+        </h2>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => navigateMonth('prev')}
+            className="p-2 text-gray-400 hover:text-white transition-colors"
+          >
+            ←
+          </button>
+          <h3 className="text-xl text-white min-w-[200px] text-center">
+            {format(currentDate, 'LLLL yyyy', { locale: ru })}
+          </h3>
+          <button
+            onClick={() => navigateMonth('next')}
+            className="p-2 text-gray-400 hover:text-white transition-colors"
+          >
+            →
+          </button>
+        </div>
       </div>
 
-      <div className="flex flex-col gap-4">
-        {months.map((month) => {
-          const monthCampaigns = filteredCampaigns.filter((campaign) => {
-            const campaignStartDate = new Date(
-              campaign.flight_period.start_date
-            );
-            return isSameMonth(campaignStartDate, month);
-          });
-
-          return (
-            <div
-              key={month.toISOString()}
-              className="p-4 bg-gray-800 rounded-lg shadow-lg"
-            >
-              <h3 className="font-bold mb-4 text-white">
-                {format(month, 'LLLL', { locale: ru })}
-              </h3>
-              {monthCampaigns.map((campaign) => (
-                <div
-                  key={campaign.id}
-                  onClick={() => setSelectedCampaign(campaign)}
-                  className="p-3 mb-1 rounded cursor-pointer bg-gray-800 hover:bg-gray-700 shadow-md transition-all duration-200 ease-in-out"
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <div className="font-medium text-white">
-                      {campaign.campaign_name}
-                    </div>
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                        campaign.campaign_vertical === 'Авито'
-                          ? 'text-black'
-                          : 'text-white'
-                      }`}
-                      style={getVerticalColorClass(campaign.campaign_vertical)}
-                    >
-                      {campaign.campaign_vertical}
-                    </span>
-                  </div>
-                  <div className="text-sm text-gray-400">
-                    {format(
-                      new Date(campaign.flight_period.start_date),
-                      'd MMM',
-                      { locale: ru }
-                    )}{' '}
-                    -{' '}
-                    {format(
-                      new Date(campaign.flight_period.end_date),
-                      'd MMM',
-                      { locale: ru }
-                    )}
-                  </div>
-                </div>
-              ))}
+      {/* Календарная сетка */}
+      <div className="bg-gray-800 rounded-lg p-6">
+        {/* Заголовки дней недели */}
+        <div className="grid grid-cols-7 gap-2 mb-4">
+          {['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map(day => (
+            <div key={day} className="text-center text-gray-400 font-medium py-2">
+              {day}
             </div>
-          );
-        })}
+          ))}
+        </div>
+
+        {/* Дни месяца */}
+        <div className="grid grid-cols-7 gap-2">
+          {calendarDays.map(day => {
+            const dayKey = format(day, 'yyyy-MM-dd');
+            const dayCampaigns = campaignsByDay[dayKey] || [];
+            const isToday = isSameDay(day, new Date());
+            
+            return (
+              <div
+                key={dayKey}
+                className={`min-h-[100px] p-2 border border-gray-700 rounded ${
+                  !isSameMonth(day, currentDate) 
+                    ? 'bg-gray-900 text-gray-600' 
+                    : 'bg-gray-800 text-white'
+                } ${isToday ? 'ring-2 ring-blue-500' : ''}`}
+              >
+                <div className="text-sm font-medium mb-1">
+                  {format(day, 'd')}
+                </div>
+                
+                {/* Кампании в этот день */}
+                <div className="space-y-1">
+                  {dayCampaigns.slice(0, 3).map(campaign => (
+                    <div
+                      key={campaign.id}
+                      onClick={() => setSelectedCampaign(campaign)}
+                      className={`text-xs p-1 rounded cursor-pointer hover:opacity-80 transition-opacity ${getStatusColor(campaign.status)} text-white`}
+                      title={campaign.campaign_name}
+                    >
+                      {campaign.campaign_name.length > 15 
+                        ? `${campaign.campaign_name.substring(0, 15)}...`
+                        : campaign.campaign_name
+                      }
+                    </div>
+                  ))}
+                  
+                  {/* Показываем количество дополнительных кампаний */}
+                  {dayCampaigns.length > 3 && (
+                    <div className="text-xs text-gray-400">
+                      +{dayCampaigns.length - 3} еще
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Легенда */}
+      <div className="flex items-center gap-6 text-sm">
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 bg-green-500 rounded"></div>
+          <span className="text-gray-300">Активные</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 bg-blue-500 rounded"></div>
+          <span className="text-gray-300">Запланированные</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 bg-gray-500 rounded"></div>
+          <span className="text-gray-300">Завершенные</span>
+        </div>
       </div>
 
       {selectedCampaign && (
-        <CampaignModal
+        <CampaignFormModal
           campaign={selectedCampaign}
           onClose={() => setSelectedCampaign(null)}
         />

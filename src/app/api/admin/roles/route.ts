@@ -36,7 +36,10 @@ export async function PUT(request: Request) {
     logger.api.info('Received role update request', { userId, role });
 
     if (!userId || !role) {
-      logger.api.error('Missing userId or role in PUT request', { userId, role });
+      logger.api.error('Missing userId or role in PUT request', {
+        userId,
+        role,
+      });
       return NextResponse.json(
         { error: 'User ID and role are required' },
         { status: 400 }

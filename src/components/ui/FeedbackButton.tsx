@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import FeedbackModal from '@/components/features/FeedbackModalSimple';
+import FeedbackModal from '@/components/features/FeedbackModal';
 
 export default function FeedbackButton() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -75,7 +75,7 @@ export default function FeedbackButton() {
         </div>
       )}
 
-      {/* Модальное окно */}
+      {/* Модальное окно - используем новый универсальный компонент */}
       <FeedbackModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

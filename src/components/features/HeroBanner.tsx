@@ -1,23 +1,22 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Campaign } from '@/lib/types';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import { getVerticalColorClass } from '@/lib/utils';
-import { CampaignModal } from './CampaignModal';
+import { CampaignBadgeGroup } from '@/components/ui/CampaignBadges';
 import Image from 'next/image';
 import { isValidImageUrl } from '@/lib/imageUtils';
 
 interface HeroBannerProps {
   campaigns: Campaign[];
   className?: string;
-  // const { onCampaignUpdated } = props;
 }
 
 export function HeroBanner({ campaigns, className }: HeroBannerProps) {
-  const [currentCampaign, setCurrentCampaign] = useState<Campaign | null>(null);
   const [slideIndex, setSlideIndex] = useState(0);
+  const router = useRouter();
 
   const activeCampaigns = campaigns.filter((campaign) => {
     const now = new Date();
@@ -46,17 +45,11 @@ export function HeroBanner({ campaigns, className }: HeroBannerProps) {
       : null;
 
   const handleCampaignClick = (campaign: Campaign) => {
-    setCurrentCampaign(campaign);
+    // Добавляем параметр campaign к текущему URL
+    const currentUrl = new URL(window.location.href);
+    currentUrl.searchParams.set('campaign', campaign.id);
+    router.push(currentUrl.pathname + currentUrl.search);
   };
-
-  const handleCloseModal = () => {
-    setCurrentCampaign(null);
-  };
-
-  // const handleCampaignUpdated = (updatedCampaign: Campaign) => {
-  //   onCampaignUpdated?.(updatedCampaign);
-  //   setCurrentCampaign(null);
-  // };
 
   if (!heroCampaign) {
     return (
@@ -99,24 +92,12 @@ export function HeroBanner({ campaigns, className }: HeroBannerProps) {
                 ON AIR
               </div>
             )}
-            <div className="flex items-center gap-2 mb-4">
-              <span
-                className={`px-3 rounded-full text-sm font-medium h-8 flex items-center justify-center max-w-32 overflow-hidden min-w-0 flex-shrink-0 ${
-                  heroCampaign.campaign_vertical === 'Авито'
-                    ? 'text-black'
-                    : 'text-white'
-                }`}
-                style={getVerticalColorClass(heroCampaign.campaign_vertical)}
-              >
-                <span className="truncate whitespace-nowrap">
-                  {heroCampaign.campaign_vertical}
-                </span>
-              </span>
-              <span className="px-3 rounded-full text-sm font-medium border border-white text-white bg-transparent h-8 flex items-center justify-center max-w-32 overflow-hidden min-w-0 flex-shrink-0">
-                <span className="truncate whitespace-nowrap">
-                  {heroCampaign.campaign_type}
-                </span>
-              </span>
+            <div className="mb-4">
+              <CampaignBadgeGroup 
+                vertical={heroCampaign.campaign_vertical}
+                type={heroCampaign.campaign_type}
+                className="flex-wrap max-w-sm"
+              />
             </div>
             <h3 className="text-3xl font-extrabold mb-3 text-black line-clamp-2">
               {heroCampaign.campaign_name}
@@ -159,10 +140,6 @@ export function HeroBanner({ campaigns, className }: HeroBannerProps) {
             />
           ))}
         </div>
-      )}
-
-      {currentCampaign && (
-        <CampaignModal campaign={currentCampaign} onClose={handleCloseModal} />
       )}
     </div>
   );

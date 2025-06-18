@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
+import { useState, useMemo, useEffect, useCallback, useRef, Suspense } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Campaign } from '@/lib/types';
 import {
   Chart as ChartJS,
@@ -18,7 +19,7 @@ import { format, isPast, isWithinInterval } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { getVerticalColorClass } from '@/lib/utils';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
-import { CampaignModal } from '@/components/features/CampaignModal';
+import { CampaignFormModal } from '@/components/features/campaign/CampaignFormModal';
 
 ChartJS.register(
   ArcElement,
@@ -30,7 +31,7 @@ ChartJS.register(
   Title
 );
 
-export default function Analytics() {
+function AnalyticsContent() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedVertical, setSelectedVertical] = useState<string>('all');
@@ -40,10 +41,14 @@ export default function Analytics() {
   const [selectedChannelCampaigns, setSelectedChannelCampaigns] = useState<
     Campaign[]
   >([]);
-  const [selectedCampaignForModal, setSelectedCampaignForModal] =
-    useState<Campaign | null>(null);
+  const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
+  
   const supabase = createClientComponentClient();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const chartRef = useRef(null);
+  
+  const campaignId = searchParams.get('campaign');
 
   // Функция для обработки клика по столбцу канала
   const handleChannelClick = useCallback(
@@ -72,13 +77,49 @@ export default function Analytics() {
     setSelectedChannelCampaigns([]);
   }, []);
 
-  // Функции для модального окна кампании
-  const handleOpenCampaignModal = (campaign: Campaign) => {
-    setSelectedCampaignForModal(campaign);
+  // Функция для открытия кампании
+  const handleOpenCampaign = (campaign: Campaign) => {
+    // Добавляем параметр campaign к текущему URL
+    const currentUrl = new URL(window.location.href);
+    currentUrl.searchParams.set('campaign', campaign.id);
+    router.push(currentUrl.pathname + currentUrl.search);
   };
 
-  const handleCloseCampaignModal = () => {
-    setSelectedCampaignForModal(null);
+  // Обработка параметра campaign из URL
+  useEffect(() => {
+    if (!campaignId) {
+      setSelectedCampaign(null);
+      return;
+    }
+
+    // Ищем кампанию в уже загруженных
+    const campaign = campaigns.find(c => c.id === campaignId);
+    if (campaign) {
+      setSelectedCampaign(campaign);
+    } else if (campaigns.length > 0) {
+      // Если кампания не найдена, убираем параметр из URL
+      const currentUrl = new URL(window.location.href);
+      currentUrl.searchParams.delete('campaign');
+      router.replace(currentUrl.pathname + currentUrl.search);
+    }
+  }, [campaignId, campaigns, router]);
+
+  const handleCampaignModalClose = () => {
+    setSelectedCampaign(null);
+    // Убираем параметр campaign из URL
+    const currentUrl = new URL(window.location.href);
+    currentUrl.searchParams.delete('campaign');
+    router.replace(currentUrl.pathname + currentUrl.search);
+  };
+
+  const handleCampaignUpdated = (updatedCampaign: Campaign) => {
+    // Обновляем кампанию в списке
+    setCampaigns((prev) =>
+      prev.map((c) =>
+        c.id === updatedCampaign.id ? updatedCampaign : c
+      )
+    );
+    setSelectedCampaign(updatedCampaign);
   };
 
   // Сбрасываем выбранный канал при изменении фильтра вертикали
@@ -607,7 +648,7 @@ export default function Analytics() {
                     <tr
                       key={campaign.id}
                       className="bg-gray-800 border-b border-gray-700 hover:bg-gray-700 cursor-pointer transition-colors"
-                      onClick={() => handleOpenCampaignModal(campaign)}
+                      onClick={() => handleOpenCampaign(campaign)}
                     >
                       <td className="px-6 py-4 font-medium text-white">
                         {campaign.campaign_name}
@@ -656,21 +697,26 @@ export default function Analytics() {
         </div>
       )}
 
+      
+
       {/* Модальное окно детального просмотра кампании */}
-      {selectedCampaignForModal && (
-        <CampaignModal
-          campaign={selectedCampaignForModal}
-          onClose={handleCloseCampaignModal}
-          onCampaignUpdated={(updatedCampaign) => {
-            // Обновляем кампанию в списке, если она была изменена
-            setCampaigns((prev) =>
-              prev.map((c) =>
-                c.id === updatedCampaign.id ? updatedCampaign : c
-              )
-            );
-          }}
+      {selectedCampaign && (
+        <CampaignFormModal
+          campaign={selectedCampaign}
+          onClose={handleCampaignModalClose}
+          onCampaignUpdated={handleCampaignUpdated}
         />
       )}
     </main>
+  );
+}
+
+export default function Analytics() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen w-full">
+      <LoadingSpinner />
+    </div>}>
+      <AnalyticsContent />
+    </Suspense>
   );
 }

@@ -89,7 +89,7 @@ export function VerticalClient({
         Кампании направления "{vertical.name}"
       </h2>
       {verticalCampaigns.length > 0 ? (
-        <CampaignList campaigns={verticalCampaigns} hideVerticalFilter={true} />
+        <CampaignList campaigns={verticalCampaigns} hideFilters={true} />
       ) : (
         <p className="text-gray-400">Кампаний в этом направлении пока нет.</p>
       )}
