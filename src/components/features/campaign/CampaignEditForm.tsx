@@ -259,25 +259,6 @@ export function CampaignEditForm({
               placeholder="ТВ, Радио, Интернет"
             />
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Цели (через запятую или точку)
-            </label>
-            <input
-              type="text"
-              value={
-                Array.isArray(editedCampaign.objectives)
-                  ? editedCampaign.objectives.join(', ')
-                  : typeof editedCampaign.objectives === 'string'
-                    ? editedCampaign.objectives
-                    : ''
-              }
-              onChange={(e) => handleArrayChange('objectives', e.target.value)}
-              className="w-full p-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
-              placeholder="Узнаваемость, Продажи, Лояльность"
-            />
-          </div>
         </div>
       </CampaignSection>
 
@@ -313,8 +294,8 @@ export function CampaignEditForm({
       </CampaignSection>
 
       {/* Тесты */}
-      <CampaignSection 
-        title="Тесты" 
+      <CampaignSection
+        title="Тесты"
         icon={<span>🧪</span>}
         className="md:col-span-2"
       >
@@ -325,7 +306,7 @@ export function CampaignEditForm({
             label="Пре-тесты"
             placeholder="Введите описание пре-тестов или добавьте ссылки на отчеты"
           />
-          
+
           <TestDataEditor
             value={editedCampaign.post_tests}
             onChange={(value) => onInputChange('post_tests', value)}

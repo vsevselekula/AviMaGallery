@@ -21,7 +21,7 @@ export function TestDataEditor({
   value,
   onChange,
   label,
-  placeholder = "Введите текст и/или добавьте ссылки"
+  placeholder = 'Введите текст и/или добавьте ссылки',
 }: TestDataEditorProps) {
   const [textValue, setTextValue] = useState('');
   const [linksValue, setLinksValue] = useState<TestLink[]>([]);
@@ -39,13 +39,14 @@ export function TestDataEditor({
       setLinksValue([]);
     } else if (Array.isArray(value)) {
       // Проверяем, является ли это массивом ссылок
-      const isLinksArray = value.every(item => 
-        typeof item === 'object' && 
-        item !== null && 
-        'label' in item && 
-        'url' in item
+      const isLinksArray = value.every(
+        (item) =>
+          typeof item === 'object' &&
+          item !== null &&
+          'label' in item &&
+          'url' in item
       );
-      
+
       if (isLinksArray) {
         setLinksValue(value as TestLink[]);
         setTextValue('');
@@ -69,7 +70,9 @@ export function TestDataEditor({
   }, [value]);
 
   const updateValue = (newText: string, newLinks: TestLink[]) => {
-    const filteredLinks = newLinks.filter(link => link.label.trim() || link.url.trim());
+    const filteredLinks = newLinks.filter(
+      (link) => link.label.trim() || link.url.trim()
+    );
     const hasText = newText.trim();
     const hasLinks = filteredLinks.length > 0;
 
@@ -83,7 +86,7 @@ export function TestDataEditor({
       // Комбинированный режим
       onChange({
         text: newText,
-        links: filteredLinks
+        links: filteredLinks,
       });
     }
   };
@@ -116,13 +119,13 @@ export function TestDataEditor({
 
   return (
     <div className="space-y-4">
-      <label className="block text-sm font-medium text-gray-300">
-        {label}
-      </label>
-      
+      <label className="block text-sm font-medium text-gray-300">{label}</label>
+
       {/* Текстовое поле */}
       <div>
-        <label className="block text-xs text-gray-400 mb-2">📝 Текстовое описание</label>
+        <label className="block text-xs text-gray-400 mb-2">
+          📝 Текстовое описание
+        </label>
         <textarea
           value={textValue}
           onChange={(e) => handleTextChange(e.target.value)}
@@ -134,14 +137,16 @@ export function TestDataEditor({
 
       {/* Ссылки */}
       <div>
-        <label className="block text-xs text-gray-400 mb-2">🔗 Ссылки на отчеты</label>
+        <label className="block text-xs text-gray-400 mb-2">
+          🔗 Ссылки на отчеты
+        </label>
         <div className="space-y-3">
           {linksValue.length === 0 && (
             <div className="text-center py-3 text-gray-500 text-sm border border-dashed border-gray-600 rounded-lg">
               Нет ссылок. Нажмите "Добавить ссылку" чтобы создать первую.
             </div>
           )}
-          
+
           {linksValue.map((link, index) => (
             <div key={index} className="bg-gray-700 rounded-lg p-3 space-y-2">
               <div className="flex items-center justify-between">
@@ -156,7 +161,7 @@ export function TestDataEditor({
                   ✕ Удалить
                 </button>
               </div>
-              
+
               <div className="space-y-2">
                 <input
                   type="text"
@@ -175,7 +180,7 @@ export function TestDataEditor({
               </div>
             </div>
           ))}
-          
+
           <button
             type="button"
             onClick={addLink}
@@ -187,4 +192,4 @@ export function TestDataEditor({
       </div>
     </div>
   );
-} 
+}

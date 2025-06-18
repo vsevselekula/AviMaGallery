@@ -98,24 +98,37 @@ const renderTestData = (testData: unknown): React.ReactNode => {
   }
 
   // Проверяем наш новый комбинированный формат {text?: string, links?: TestLink[]}
-  if (typeof testData === 'object' && testData !== null && !Array.isArray(testData)) {
-    const data = testData as { text?: string; links?: Array<{ label: string; url: string }> };
-    
+  if (
+    typeof testData === 'object' &&
+    testData !== null &&
+    !Array.isArray(testData)
+  ) {
+    const data = testData as {
+      text?: string;
+      links?: Array<{ label: string; url: string }>;
+    };
+
     if (data.text !== undefined || data.links !== undefined) {
       return (
         <div className="space-y-3">
           {/* Отображаем текст если есть */}
           {data.text && (
             <div className="bg-gray-700 rounded-lg p-3">
-              <h6 className="text-gray-300 text-sm font-semibold mb-2">📝 Описание:</h6>
-              <div className="text-white whitespace-pre-wrap text-sm">{data.text}</div>
+              <h6 className="text-gray-300 text-sm font-semibold mb-2">
+                📝 Описание:
+              </h6>
+              <div className="text-white whitespace-pre-wrap text-sm">
+                {data.text}
+              </div>
             </div>
           )}
-          
+
           {/* Отображаем ссылки если есть */}
           {data.links && data.links.length > 0 && (
             <div className="space-y-2">
-              <h6 className="text-gray-300 text-sm font-semibold">🔗 Ссылки:</h6>
+              <h6 className="text-gray-300 text-sm font-semibold">
+                🔗 Ссылки:
+              </h6>
               {data.links.map((link, index) => (
                 <div key={index} className="bg-gray-700 rounded-lg p-3">
                   <a
