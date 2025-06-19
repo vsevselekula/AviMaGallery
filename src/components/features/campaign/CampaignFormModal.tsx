@@ -77,10 +77,6 @@ export function CampaignFormModal({
   const { notification, showSuccess, showError, hideNotification } =
     useNotification();
 
-
-
-
-
   // Обработчик клика вне модального окна
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -88,7 +84,7 @@ export function CampaignFormModal({
       if (showDeleteConfirm) {
         return;
       }
-      
+
       if (
         modalRef.current &&
         !modalRef.current.contains(event.target as Node)
@@ -281,12 +277,48 @@ export function CampaignFormModal({
         return [];
       };
 
+      // Функция для очистки ссылок от пустых записей
+      const cleanLinks = (links: { label: string; url: string }[] | undefined) => {
+        if (!Array.isArray(links)) return [];
+        return links.filter(link => link.label.trim() || link.url.trim());
+      };
+
+      // Функция для очистки тестов от пустых ссылок
+      const cleanTestData = (testData: unknown) => {
+        if (!testData) return testData;
+        
+        if (typeof testData === 'object' && !Array.isArray(testData)) {
+          const data = testData as { text?: string; links?: { label: string; url: string }[] };
+          if (data.links) {
+            return {
+              ...data,
+              links: cleanLinks(data.links)
+            };
+          }
+        }
+        
+        if (Array.isArray(testData)) {
+          // Если это массив ссылок
+          const isLinksArray = testData.every(
+            (item) => typeof item === 'object' && item !== null && 'label' in item && 'url' in item
+          );
+          if (isLinksArray) {
+            return cleanLinks(testData as { label: string; url: string }[]);
+          }
+        }
+        
+        return testData;
+      };
+
       // Автоматическое определение статуса на основе дат
       const finalCampaign = {
         ...editedCampaign,
         targets: processArrayField(editedCampaign.targets),
         channels: processArrayField(editedCampaign.channels),
         objectives: processArrayField(editedCampaign.objectives),
+        links: cleanLinks(editedCampaign.links),
+        pre_tests: cleanTestData(editedCampaign.pre_tests),
+        post_tests: cleanTestData(editedCampaign.post_tests),
       };
 
       if (
@@ -401,7 +433,9 @@ export function CampaignFormModal({
     if (isCreateMode) return; // Нельзя удалить несуществующую кампанию
 
     if (!userRole || userRole !== 'super_admin') {
-      showError('У вас нет прав для удаления кампаний. Требуется роль super_admin.');
+      showError(
+        'У вас нет прав для удаления кампаний. Требуется роль super_admin.'
+      );
       setShowDeleteConfirm(false);
       return;
     }
@@ -443,8 +477,6 @@ export function CampaignFormModal({
   };
   const handleDeleteCancel = () => setShowDeleteConfirm(false);
 
-
-
   return (
     <>
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm !mt-0">
@@ -455,6 +487,7 @@ export function CampaignFormModal({
         >
           {/* Заголовок с кнопками действий */}
           <CampaignModalHeader
+            campaign={editedCampaign}
             userRole={userRole}
             isEditing={isEditing}
             isSaving={isSaving}

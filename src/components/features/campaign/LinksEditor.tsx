@@ -1,30 +1,22 @@
 import React, { useState, useEffect } from 'react';
 
-interface TestLink {
+interface CampaignLink {
   label: string;
   url: string;
 }
 
-interface TestData {
-  text?: string;
-  links?: TestLink[];
-}
-
-interface TestDataEditorProps {
-  value: unknown;
-  onChange: (value: unknown) => void;
+interface LinksEditorProps {
+  value: CampaignLink[] | unknown;
+  onChange: (value: CampaignLink[]) => void;
   label: string;
-  placeholder?: string;
 }
 
-export function TestDataEditor({
+export function LinksEditor({
   value,
   onChange,
   label,
-  placeholder = 'Введите текст и/или добавьте ссылки',
-}: TestDataEditorProps) {
-  const [textValue, setTextValue] = useState('');
-  const [linksValue, setLinksValue] = useState<TestLink[]>([]);
+}: LinksEditorProps) {
+  const [linksValue, setLinksValue] = useState<CampaignLink[]>([]);
   const [isUpdating, setIsUpdating] = useState(false);
 
   // Инициализируем данные при загрузке
@@ -36,15 +28,11 @@ export function TestDataEditor({
     }
 
     if (!value) {
-      setTextValue('');
       setLinksValue([]);
       return;
     }
 
-    if (typeof value === 'string') {
-      setTextValue(value);
-      setLinksValue([]);
-    } else if (Array.isArray(value)) {
+    if (Array.isArray(value)) {
       // Проверяем, является ли это массивом ссылок
       const isLinksArray = value.every(
         (item) =>
@@ -55,56 +43,27 @@ export function TestDataEditor({
       );
 
       if (isLinksArray) {
-        setLinksValue(value as TestLink[]);
-        setTextValue('');
+        setLinksValue(value as CampaignLink[]);
       } else {
-        // Если это сложный массив - отображаем как текст
-        setTextValue(JSON.stringify(value, null, 2));
+        // Если это не массив ссылок - создаем пустой массив
         setLinksValue([]);
       }
-    } else if (typeof value === 'object' && value !== null) {
-      // Проверяем, если это наш комбинированный формат
-      const testData = value as TestData;
-      if (testData.text !== undefined || testData.links !== undefined) {
-        setTextValue(testData.text || '');
-        setLinksValue(testData.links || []);
-      } else {
-        // Если это другой объект - отображаем как текст
-        setTextValue(JSON.stringify(value, null, 2));
-        setLinksValue([]);
-      }
+    } else {
+      // Если это не массив - создаем пустой массив
+      setLinksValue([]);
     }
   }, [value, isUpdating]);
 
-  const updateValue = (newText: string, newLinks: TestLink[]) => {
-    // Не фильтруем пустые ссылки при редактировании - пользователь должен иметь возможность их заполнить
-    const hasText = newText.trim();
-    const hasLinks = newLinks.length > 0;
-
-    if (!hasText && !hasLinks) {
-      onChange(null);
-    } else if (hasText && !hasLinks) {
-      onChange(newText);
-    } else if (!hasText && hasLinks) {
-      onChange(newLinks);
-    } else {
-      // Комбинированный режим
-      onChange({
-        text: newText,
-        links: newLinks,
-      });
-    }
+  const updateValue = (newLinks: CampaignLink[]) => {
+    // Не фильтруем новые пустые ссылки - пользователь должен иметь возможность их заполнить
+    // Фильтруем только при сохранении формы, а не при каждом изменении
+    onChange(newLinks);
   };
 
-  const handleTextChange = (newText: string) => {
-    setTextValue(newText);
-    updateValue(newText, linksValue);
-  };
-
-  const handleLinksChange = (newLinks: TestLink[]) => {
+  const handleLinksChange = (newLinks: CampaignLink[]) => {
     setIsUpdating(true); // Отмечаем, что мы обновляем изнутри
     setLinksValue(newLinks);
-    updateValue(textValue, newLinks);
+    updateValue(newLinks);
   };
 
   const addLink = (e?: React.MouseEvent) => {
@@ -120,7 +79,7 @@ export function TestDataEditor({
     handleLinksChange(newLinks);
   };
 
-  const updateLink = (index: number, field: keyof TestLink, value: string) => {
+  const updateLink = (index: number, field: keyof CampaignLink, value: string) => {
     const newLinks = [...linksValue];
     newLinks[index] = { ...newLinks[index], [field]: value };
     handleLinksChange(newLinks);
@@ -130,25 +89,8 @@ export function TestDataEditor({
     <div className="space-y-4">
       <label className="block text-sm font-medium text-gray-300">{label}</label>
 
-      {/* Текстовое поле */}
-      <div>
-        <label className="block text-xs text-gray-400 mb-2">
-          📝 Текстовое описание
-        </label>
-        <textarea
-          value={textValue}
-          onChange={(e) => handleTextChange(e.target.value)}
-          placeholder={placeholder}
-          rows={3}
-          className="w-full p-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 resize-vertical"
-        />
-      </div>
-
       {/* Ссылки */}
       <div>
-        <label className="block text-xs text-gray-400 mb-2">
-          🔗 Ссылки на отчеты
-        </label>
         <div className="space-y-3">
           {linksValue.length === 0 && (
             <div className="text-center py-3 text-gray-500 text-sm border border-dashed border-gray-600 rounded-lg">
@@ -201,4 +143,4 @@ export function TestDataEditor({
       </div>
     </div>
   );
-}
+} 

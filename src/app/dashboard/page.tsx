@@ -104,7 +104,7 @@ function DashboardContent() {
   };
 
   const handleCampaignDeleted = (deletedCampaignId: string) => {
-    setCampaigns((prevCampaigns) => 
+    setCampaigns((prevCampaigns) =>
       prevCampaigns.filter((campaign) => campaign.id !== deletedCampaignId)
     );
   };

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Campaign } from '@/lib/types';
 import { CampaignSection } from './CampaignSection';
-import { TestDataEditor } from './TestDataEditor';
+import { TestDataEditor } from '@/components/features/campaign/TestDataEditor';
+import { LinksEditor } from './LinksEditor';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 interface CampaignType {
@@ -292,6 +293,15 @@ export function CampaignEditForm({
         </div>
       </CampaignSection>
 
+      {/* Ссылки */}
+      <CampaignSection title="Ссылки на материалы" icon={<span>🔗</span>}>
+        <LinksEditor
+          value={editedCampaign.links}
+          onChange={(value) => onInputChange('links', value)}
+          label="Ссылки на материалы кампании"
+        />
+      </CampaignSection>
+
       {/* Тесты */}
       <CampaignSection
         title="Тесты"
@@ -301,14 +311,14 @@ export function CampaignEditForm({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <TestDataEditor
             value={editedCampaign.pre_tests}
-            onChange={(value) => onInputChange('pre_tests', value)}
+            onChange={(value: unknown) => onInputChange('pre_tests', value)}
             label="Пре-тесты"
             placeholder="Введите описание пре-тестов или добавьте ссылки на отчеты"
           />
 
           <TestDataEditor
             value={editedCampaign.post_tests}
-            onChange={(value) => onInputChange('post_tests', value)}
+            onChange={(value: unknown) => onInputChange('post_tests', value)}
             label="Пост-тесты"
             placeholder="Введите описание пост-тестов или добавьте ссылки на отчеты"
           />
