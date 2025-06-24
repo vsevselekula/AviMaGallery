@@ -151,3 +151,23 @@ graph TD
 
 _Последнее обновление: декабрь 2024_
 _Система реакций: полностью переработана и оптимизирована_
+
+# Project Progress
+
+## What Works
+
+-   **User Authentication**: Full flow is functional.
+    -   **Security**: Registration is now secured on the server-side with a database trigger, allowing only `@avito.ru` domains.
+-   **Campaign Management (CRUD)**: Fully operational.
+-   **Campaign Visualization**: Fully operational.
+-   **Feedback System**: Fully operational.
+-   **File Uploads**: Working correctly.
+-   **Admin Panel**: Basic infrastructure exists.
+
+## Known Issues & What's Left
+
+-   All major known issues have been resolved.
+-   **Further Development (Potential)**:
+    -   Enhance analytics and reporting features.
+    -   Expand admin panel functionality.
+    -   Refine notification system for campaign updates.

@@ -234,3 +234,16 @@
 6. Оптимизация производительности
 7. Улучшение пользовательского опыта
 8. Расширение функциональности управления данными
+
+# Active Context & Next Steps
+
+## Recently Completed Work
+
+-   **Security Hardening**: A critical security vulnerability was patched. A database trigger (`ensure_avito_domain_on_signup`) was implemented to enforce server-side validation, ensuring that only users with an `@avito.ru` email can register. This complements the existing front-end validation.
+-   **Calendar Rework**: The campaign calendar was refactored to a monthly view.
+-   **Bug Fixes**: Corrected an image upload error and a UI layout issue in the campaign edit modal.
+-   **Configuration Fix**: The Supabase **Site URL** was updated.
+
+## Current Focus & Next Task
+
+All previously identified tasks, including a major security improvement, are complete. I am awaiting direction on the next priority.

@@ -1,3 +1,9 @@
+# Project Brief: Avito Campaign Tracker
+
+## Core Idea
+
+This is an internal corporate tool designed for managing and tracking marketing campaigns at Avito. Its primary goal is to centralize all campaign-related information, providing a unified platform for planning, monitoring, and collaboration for the marketing team.
+
 ## Обзор проекта
 
 **Основная цель:** Создание веб-приложения для управления и просмотра рекламных кампаний.

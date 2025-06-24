@@ -14,18 +14,21 @@ export function generateCampaignAnnouncement(campaign: Campaign): string {
   if (campaign.campaign_type) {
     sections.push(`**Тип кампании:** ${campaign.campaign_type}`);
   }
-  
+
   if (campaign.campaign_vertical) {
     sections.push(`**Вертикаль:** ${campaign.campaign_vertical}`);
   }
 
   if (campaign.status) {
-    const statusEmoji = {
-      'active': '🟢',
-      'planned': '🟡', 
-      'completed': '✅'
-    }[campaign.status] || '⚪';
-    sections.push(`**Статус:** ${statusEmoji} ${getStatusText(campaign.status)}`);
+    const statusEmoji =
+      {
+        active: '🟢',
+        planned: '🟡',
+        completed: '✅',
+      }[campaign.status] || '⚪';
+    sections.push(
+      `**Статус:** ${statusEmoji} ${getStatusText(campaign.status)}`
+    );
   }
   sections.push('');
 
@@ -72,7 +75,7 @@ export function generateCampaignAnnouncement(campaign: Campaign): string {
   // 9. Цели кампании
   if (campaign.objectives && campaign.objectives.length > 0) {
     sections.push(`**🎯 Цели:**`);
-    campaign.objectives.forEach(objective => {
+    campaign.objectives.forEach((objective) => {
       sections.push(`• ${objective}`);
     });
     sections.push('');
@@ -81,7 +84,7 @@ export function generateCampaignAnnouncement(campaign: Campaign): string {
   // 10. Каналы размещения
   if (campaign.channels && campaign.channels.length > 0) {
     sections.push(`**📢 Каналы:**`);
-    campaign.channels.forEach(channel => {
+    campaign.channels.forEach((channel) => {
       sections.push(`• ${channel}`);
     });
     sections.push('');
@@ -90,16 +93,20 @@ export function generateCampaignAnnouncement(campaign: Campaign): string {
   // 11. Таргеты (если есть)
   if (campaign.targets && campaign.targets.length > 0) {
     sections.push(`**🎯 Таргеты:**`);
-    campaign.targets.forEach(target => {
+    campaign.targets.forEach((target) => {
       sections.push(`• ${target}`);
     });
     sections.push('');
   }
 
   // 12. Ссылки на материалы
-  if (campaign.links && Array.isArray(campaign.links) && campaign.links.length > 0) {
+  if (
+    campaign.links &&
+    Array.isArray(campaign.links) &&
+    campaign.links.length > 0
+  ) {
     sections.push(`**🔗 Ссылки на материалы:**`);
-    campaign.links.forEach(link => {
+    campaign.links.forEach((link) => {
       if (link.label && link.url) {
         sections.push(`• **${link.label}:** [${link.url}](${link.url})`);
       }
@@ -110,13 +117,13 @@ export function generateCampaignAnnouncement(campaign: Campaign): string {
   // 13. Тестирование
   if (campaign.pre_tests || campaign.post_tests) {
     sections.push(`**🧪 Тестирование:**`);
-    
+
     if (campaign.pre_tests) {
       sections.push(`**Pre-тесты:**`);
       sections.push(formatTestData(campaign.pre_tests));
       sections.push('');
     }
-    
+
     if (campaign.post_tests) {
       sections.push(`**Post-тесты:**`);
       sections.push(formatTestData(campaign.post_tests));
@@ -135,7 +142,7 @@ function formatDate(dateString: string): string {
   return date.toLocaleDateString('ru-RU', {
     day: '2-digit',
     month: '2-digit',
-    year: 'numeric'
+    year: 'numeric',
   });
 }
 
@@ -144,9 +151,9 @@ function formatDate(dateString: string): string {
  */
 function getStatusText(status: string): string {
   const statusMap: Record<string, string> = {
-    'active': 'Активна',
-    'planned': 'Запланирована',
-    'completed': 'Завершена'
+    active: 'Активна',
+    planned: 'Запланирована',
+    completed: 'Завершена',
   };
   return statusMap[status] || status;
 }
@@ -163,7 +170,11 @@ function formatTestData(testData: unknown): string {
   }
 
   // Проверяем комбинированный формат {text?: string, links?: TestLink[]}
-  if (typeof testData === 'object' && testData !== null && !Array.isArray(testData)) {
+  if (
+    typeof testData === 'object' &&
+    testData !== null &&
+    !Array.isArray(testData)
+  ) {
     const data = testData as {
       text?: string;
       links?: Array<{ label: string; url: string }>;
@@ -171,19 +182,19 @@ function formatTestData(testData: unknown): string {
 
     if (data.text !== undefined || data.links !== undefined) {
       const parts: string[] = [];
-      
+
       if (data.text && data.text.trim()) {
         parts.push(data.text.trim());
       }
-      
+
       if (data.links && data.links.length > 0) {
-        data.links.forEach(link => {
+        data.links.forEach((link) => {
           if (link.label && link.url) {
             parts.push(`[${link.label}](${link.url})`);
           }
         });
       }
-      
+
       return parts.join('\n');
     }
   }
@@ -191,17 +202,19 @@ function formatTestData(testData: unknown): string {
   // Если это массив ссылок (формат TestLink[])
   if (Array.isArray(testData)) {
     const parts: string[] = [];
-    
+
     testData.forEach((item, index) => {
       if (typeof item === 'object' && item !== null) {
         const link = item as { label?: string; url?: string };
-        
-                 // Проверяем, является ли это объектом ссылки
-         if (link.label && link.url) {
-           parts.push(`[${link.label}](${link.url})`);
-         } else {
+
+        // Проверяем, является ли это объектом ссылки
+        if (link.label && link.url) {
+          parts.push(`[${link.label}](${link.url})`);
+        } else {
           // Если это не ссылка, форматируем как сложный объект
-          parts.push(formatComplexObject(item as Record<string, unknown>, index + 1));
+          parts.push(
+            formatComplexObject(item as Record<string, unknown>, index + 1)
+          );
         }
       } else {
         parts.push(`• ${String(item)}`);
@@ -222,9 +235,12 @@ function formatTestData(testData: unknown): string {
 /**
  * Форматирует сложный объект в читаемый текст
  */
-function formatComplexObject(obj: Record<string, unknown>, index?: number): string {
+function formatComplexObject(
+  obj: Record<string, unknown>,
+  index?: number
+): string {
   const parts: string[] = [];
-  
+
   if (index) {
     parts.push(`**Тест ${index}:**`);
   }
@@ -232,19 +248,19 @@ function formatComplexObject(obj: Record<string, unknown>, index?: number): stri
   Object.entries(obj).forEach(([key, value]) => {
     // Переводим ключи на русский и делаем их читаемыми
     const readableKey = translateKey(key);
-    
+
     if (value === null || value === undefined) {
       return; // Пропускаем пустые значения
     }
 
-         if (typeof value === 'string') {
-       if (value.startsWith('http')) {
-         // Это ссылка
-         parts.push(`• **${readableKey}:** [${value}](${value})`);
-       } else {
-         // Обычный текст
-         parts.push(`• **${readableKey}:** ${value}`);
-       }
+    if (typeof value === 'string') {
+      if (value.startsWith('http')) {
+        // Это ссылка
+        parts.push(`• **${readableKey}:** [${value}](${value})`);
+      } else {
+        // Обычный текст
+        parts.push(`• **${readableKey}:** ${value}`);
+      }
     } else if (typeof value === 'number') {
       parts.push(`• **${readableKey}:** ${value}`);
     } else if (typeof value === 'boolean') {
@@ -266,7 +282,7 @@ function formatComplexObject(obj: Record<string, unknown>, index?: number): stri
       // Вложенный объект
       parts.push(`• **${readableKey}:**`);
       const nestedText = formatComplexObject(value as Record<string, unknown>);
-      nestedText.split('\n').forEach(line => {
+      nestedText.split('\n').forEach((line) => {
         if (line.trim()) {
           parts.push(`  ${line}`);
         }
@@ -284,41 +300,41 @@ function formatComplexObject(obj: Record<string, unknown>, index?: number): stri
  */
 function translateKey(key: string): string {
   const translations: Record<string, string> = {
-    'title': 'Название',
-    'name': 'Название',
-    'label': 'Метка',
-    'description': 'Описание',
-    'url': 'Ссылка',
-    'link': 'Ссылка',
-    'href': 'Ссылка',
-    'type': 'Тип',
-    'status': 'Статус',
-    'date': 'Дата',
-    'created_at': 'Создано',
-    'updated_at': 'Обновлено',
-    'start_date': 'Дата начала',
-    'end_date': 'Дата окончания',
-    'results': 'Результаты',
-    'score': 'Оценка',
-    'rating': 'Рейтинг',
-    'feedback': 'Отзыв',
-    'comment': 'Комментарий',
-    'notes': 'Заметки',
-    'conclusion': 'Заключение',
-    'recommendation': 'Рекомендация',
-    'methodology': 'Методология',
-    'sample_size': 'Размер выборки',
-    'target_audience': 'Целевая аудитория',
-    'metrics': 'Метрики',
-    'kpi': 'KPI',
-    'performance': 'Производительность',
-    'effectiveness': 'Эффективность',
-    'awareness': 'Узнаваемость',
-    'recall': 'Запоминаемость',
-    'brand_lift': 'Прирост бренда',
-    'purchase_intent': 'Намерение покупки',
-    'attitude': 'Отношение',
-    'perception': 'Восприятие',
+    title: 'Название',
+    name: 'Название',
+    label: 'Метка',
+    description: 'Описание',
+    url: 'Ссылка',
+    link: 'Ссылка',
+    href: 'Ссылка',
+    type: 'Тип',
+    status: 'Статус',
+    date: 'Дата',
+    created_at: 'Создано',
+    updated_at: 'Обновлено',
+    start_date: 'Дата начала',
+    end_date: 'Дата окончания',
+    results: 'Результаты',
+    score: 'Оценка',
+    rating: 'Рейтинг',
+    feedback: 'Отзыв',
+    comment: 'Комментарий',
+    notes: 'Заметки',
+    conclusion: 'Заключение',
+    recommendation: 'Рекомендация',
+    methodology: 'Методология',
+    sample_size: 'Размер выборки',
+    target_audience: 'Целевая аудитория',
+    metrics: 'Метрики',
+    kpi: 'KPI',
+    performance: 'Производительность',
+    effectiveness: 'Эффективность',
+    awareness: 'Узнаваемость',
+    recall: 'Запоминаемость',
+    brand_lift: 'Прирост бренда',
+    purchase_intent: 'Намерение покупки',
+    attitude: 'Отношение',
+    perception: 'Восприятие',
   };
 
   // Сначала проверяем точное совпадение
@@ -337,6 +353,6 @@ function translateKey(key: string): string {
   return key
     .replace(/([A-Z])/g, ' $1') // Разделяем camelCase
     .replace(/[_-]/g, ' ') // Заменяем подчеркивания и дефисы на пробелы
-    .replace(/^\w/, c => c.toUpperCase()) // Первая буква заглавная
+    .replace(/^\w/, (c) => c.toUpperCase()) // Первая буква заглавная
     .trim();
-} 
+}

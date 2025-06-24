@@ -1,3 +1,24 @@
+# Product Context
+
+## Problem Space
+
+Before this tool, campaign information was likely decentralized across various documents, spreadsheets, and communication channels. This leads to several problems:
+- Lack of a single source of truth.
+- Difficulty in tracking the status and performance of multiple campaigns simultaneously.
+- Inefficient collaboration and feedback loops between team members.
+- No unified calendar view for all marketing activities.
+
+## User & Goal
+
+The primary users are members of the Avito marketing team, including managers, specialists, and designers.
+
+The main goal is to provide them with a clear, efficient, and centralized system to:
+- **Plan** new campaigns.
+- **Track** the status of active campaigns (Planned, Active, Completed).
+- **Review** campaign details, including objectives, target audience, and creative materials (images, videos).
+- **Collaborate** through a system of reactions and feedback.
+- **Visualize** all activities on a shared calendar.
+
 ## Контекст продукта
 
 **Почему этот проект существует (Проблемы, которые он решает):**

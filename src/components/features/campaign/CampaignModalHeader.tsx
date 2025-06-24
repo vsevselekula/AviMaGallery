@@ -36,19 +36,20 @@ export function CampaignModalHeader({
     try {
       const announcement = generateCampaignAnnouncement(campaign);
       await navigator.clipboard.writeText(announcement);
-      
+
       // Показываем временное уведомление
       const notification = document.createElement('div');
-      notification.className = 'fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-[100] animate-fade-in';
+      notification.className =
+        'fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-[100] animate-fade-in';
       notification.textContent = 'Анонс скопирован в буфер обмена!';
       document.body.appendChild(notification);
-      
+
       setTimeout(() => {
         document.body.removeChild(notification);
       }, 3000);
     } catch (error) {
       console.error('Ошибка копирования в буфер обмена:', error);
-      
+
       // Fallback - показываем текст в новом окне
       const newWindow = window.open('', '_blank');
       if (newWindow) {

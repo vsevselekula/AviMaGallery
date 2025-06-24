@@ -104,6 +104,11 @@
 
 ### Frontend
 
+- **Framework**: Next.js (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **State Management**: Primarily React hooks (`useState`, `useEffect`, `useContext`) and custom hooks for data fetching (`useCampaigns`, `useFeedback`).
+- **Testing**: Jest, likely with React Testing Library for component tests.
 - React 18
 - TypeScript
 - Next.js 14 (App Router). **Настроена поддержка внешних доменов изображений (images.unsplash.com) в next.config.js с использованием `images.remotePatterns`.**
@@ -119,13 +124,11 @@
 
 ### Backend
 
-- Supabase
-  - Authentication
-  - Database (включая таблицы для профилей пользователей, их ролей, вертикалей и членов команды)
-    - **Важно: Настроены политики Row Level Security (RLS) для таблицы `campaigns` для обеспечения безопасного доступа к данным. Для отображения кампаний настроена политика, разрешающая чтение данных.**
-    - **Все операции CRUD для кампаний используют уникальный `id` (UUID) кампании для идентификации, а не `campaign_name`.**
-  - Storage (планируется для хранения фото профиля и изображений вертикалей)
-  - Edge Functions
+- **Platform**: Supabase
+- **Database**: PostgreSQL
+- **Authentication**: Supabase Auth
+- **Storage**: Supabase Storage
+- **Realtime**: Supabase Realtime for live updates (e.g., reactions).
 
 ### Инструменты разработки
 
@@ -200,3 +203,9 @@ src/
 - INSERT: `auth.role() = 'authenticated'`
 - UPDATE: `auth.role() = 'authenticated'`
 - DELETE: `auth.role() = 'authenticated'`
+
+## Development & Tooling
+
+- **Package Manager**: npm
+- **Environment Variables**: Managed via `.env.local` for Supabase keys and other secrets.
+- **Code Quality**: TypeScript for type safety.

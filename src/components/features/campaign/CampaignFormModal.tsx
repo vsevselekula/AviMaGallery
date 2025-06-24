@@ -278,35 +278,44 @@ export function CampaignFormModal({
       };
 
       // Функция для очистки ссылок от пустых записей
-      const cleanLinks = (links: { label: string; url: string }[] | undefined) => {
+      const cleanLinks = (
+        links: { label: string; url: string }[] | undefined
+      ) => {
         if (!Array.isArray(links)) return [];
-        return links.filter(link => link.label.trim() || link.url.trim());
+        return links.filter((link) => link.label.trim() || link.url.trim());
       };
 
       // Функция для очистки тестов от пустых ссылок
       const cleanTestData = (testData: unknown) => {
         if (!testData) return testData;
-        
+
         if (typeof testData === 'object' && !Array.isArray(testData)) {
-          const data = testData as { text?: string; links?: { label: string; url: string }[] };
+          const data = testData as {
+            text?: string;
+            links?: { label: string; url: string }[];
+          };
           if (data.links) {
             return {
               ...data,
-              links: cleanLinks(data.links)
+              links: cleanLinks(data.links),
             };
           }
         }
-        
+
         if (Array.isArray(testData)) {
           // Если это массив ссылок
           const isLinksArray = testData.every(
-            (item) => typeof item === 'object' && item !== null && 'label' in item && 'url' in item
+            (item) =>
+              typeof item === 'object' &&
+              item !== null &&
+              'label' in item &&
+              'url' in item
           );
           if (isLinksArray) {
             return cleanLinks(testData as { label: string; url: string }[]);
           }
         }
-        
+
         return testData;
       };
 

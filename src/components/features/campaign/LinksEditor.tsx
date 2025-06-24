@@ -11,11 +11,7 @@ interface LinksEditorProps {
   label: string;
 }
 
-export function LinksEditor({
-  value,
-  onChange,
-  label,
-}: LinksEditorProps) {
+export function LinksEditor({ value, onChange, label }: LinksEditorProps) {
   const [linksValue, setLinksValue] = useState<CampaignLink[]>([]);
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -79,7 +75,11 @@ export function LinksEditor({
     handleLinksChange(newLinks);
   };
 
-  const updateLink = (index: number, field: keyof CampaignLink, value: string) => {
+  const updateLink = (
+    index: number,
+    field: keyof CampaignLink,
+    value: string
+  ) => {
     const newLinks = [...linksValue];
     newLinks[index] = { ...newLinks[index], [field]: value };
     handleLinksChange(newLinks);
@@ -143,4 +143,4 @@ export function LinksEditor({
       </div>
     </div>
   );
-} 
+}
