@@ -36,12 +36,6 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 npm run dev
 ```
 
-## Тестовые аккаунты
-
-- Super Admin: admin@avito.ru / password123
-- Editor: editor@avito.ru / password123
-- Viewer: viewer@avito.ru / password123
-
 ## Функциональность
 
 - Netflix-подобный интерфейс с горизонтальным скроллом
