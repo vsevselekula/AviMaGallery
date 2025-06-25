@@ -1,16 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { Campaign } from '@/lib/types';
+import { Campaign, CampaignInsert, CampaignUpdate } from '@/types/campaign';
 
 interface UseCampaignsReturn {
   campaigns: Campaign[];
   loading: boolean;
   error: string | null;
   refetch: () => Promise<void>;
-  createCampaign: (
-    campaign: Omit<Campaign, 'id' | 'created_at' | 'updated_at'>
-  ) => Promise<Campaign | null>;
-  updateCampaign: (id: string, updates: Partial<Campaign>) => Promise<boolean>;
+  createCampaign: (campaign: CampaignInsert) => Promise<Campaign | null>;
+  updateCampaign: (id: string, updates: CampaignUpdate) => Promise<boolean>;
   deleteCampaign: (id: string) => Promise<boolean>;
 }
 
@@ -49,9 +47,7 @@ export function useCampaigns(): UseCampaignsReturn {
 
   // Создание новой кампании
   const createCampaign = useCallback(
-    async (
-      campaignData: Omit<Campaign, 'id' | 'created_at' | 'updated_at'>
-    ): Promise<Campaign | null> => {
+    async (campaignData: CampaignInsert): Promise<Campaign | null> => {
       try {
         setError(null);
 
@@ -66,10 +62,14 @@ export function useCampaigns(): UseCampaignsReturn {
           return 'active';
         };
 
-        const status = getStatusFromDates(
-          campaignData.flight_period.start_date,
-          campaignData.flight_period.end_date
-        );
+        const flightPeriod = campaignData.flight_period as {
+          start_date: string;
+          end_date: string;
+        } | null;
+
+        const status = flightPeriod
+          ? getStatusFromDates(flightPeriod.start_date, flightPeriod.end_date)
+          : 'planned';
 
         const { data, error: createError } = await supabase
           .from('campaigns')
@@ -98,7 +98,7 @@ export function useCampaigns(): UseCampaignsReturn {
 
   // Обновление кампании
   const updateCampaign = useCallback(
-    async (id: string, updates: Partial<Campaign>): Promise<boolean> => {
+    async (id: string, updates: CampaignUpdate): Promise<boolean> => {
       try {
         setError(null);
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Campaign } from '@/lib/types';
+import { Campaign } from '@/types/campaign';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { CampaignList } from '@/components/features/CampaignList';
 

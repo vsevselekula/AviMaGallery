@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
-import { Campaign } from '@/lib/types';
+import { Campaign } from '@/types/campaign';
 
 export interface FilterState {
   searchQuery: string;

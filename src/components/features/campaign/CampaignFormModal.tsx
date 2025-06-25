@@ -1,6 +1,6 @@
 'use client';
 
-import { Campaign } from '@/lib/types';
+import { Campaign } from '@/types/campaign';
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { Notification } from '@/components/ui/Notification';
@@ -25,7 +25,7 @@ interface CampaignFormModalProps {
 
 // Пустая кампания для создания
 const createEmptyCampaign = (): Campaign => ({
-  id: '',
+  id: '', // Будет сгенерирован базой данных
   campaign_name: '',
   campaign_type: '', // Будет установлено пользователем
   key_message: '',
@@ -48,6 +48,8 @@ const createEmptyCampaign = (): Campaign => ({
   targets: [],
   pre_tests: null,
   post_tests: null,
+  created_at: null, // Будет установлено базой данных
+  updated_at: null, // Будет установлено базой данных
 });
 
 export function CampaignFormModal({
@@ -262,7 +264,7 @@ export function CampaignFormModal({
     try {
       // Преобразуем строковые поля в массивы перед сохранением
       const processArrayField = (
-        field: string[] | string | undefined
+        field: string[] | string | null | undefined
       ): string[] => {
         if (Array.isArray(field)) {
           return field;
@@ -279,7 +281,7 @@ export function CampaignFormModal({
 
       // Функция для очистки ссылок от пустых записей
       const cleanLinks = (
-        links: { label: string; url: string }[] | undefined
+        links: { label: string; url: string }[] | null | undefined
       ) => {
         if (!Array.isArray(links)) return [];
         return links.filter((link) => link.label.trim() || link.url.trim());

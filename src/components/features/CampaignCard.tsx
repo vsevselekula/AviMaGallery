@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { Campaign } from '@/lib/types';
+import { Campaign } from '@/types/campaign';
 import { cn } from '@/lib/utils';
 import { isValidImageUrl } from '@/lib/imageUtils';
 import { CampaignReactionsDisplay } from '@/components/ui/CampaignReactions';
@@ -19,7 +19,9 @@ export function CampaignCard({
   reactionCounts = {},
   showReactions = true,
 }: CampaignCardProps) {
-  const isActive = new Date(campaign.flight_period.end_date) > new Date();
+  const isActive = campaign.flight_period
+    ? new Date(campaign.flight_period.end_date) > new Date()
+    : false;
   const hasImage = isValidImageUrl(campaign.image_url);
 
   return (
@@ -86,9 +88,11 @@ export function CampaignCard({
         </p>
         <div className="mt-2 flex items-center justify-between">
           <span className="text-xs text-gray-400">
-            {new Date(campaign.flight_period.start_date).toLocaleDateString(
-              'ru-RU'
-            )}
+            {campaign.flight_period
+              ? new Date(campaign.flight_period.start_date).toLocaleDateString(
+                  'ru-RU'
+                )
+              : 'Дата не указана'}
           </span>
           {showReactions && (
             <CampaignReactionsDisplay

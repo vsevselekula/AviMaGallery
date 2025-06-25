@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { Campaign } from '@/lib/types';
+import { Campaign } from '@/types/campaign';
 import { CampaignCard } from './CampaignCard';
 import { CampaignFilters } from './CampaignFilters';
 import { useReactionsSimple as useReactions } from '@/hooks/useReactionsSimple';

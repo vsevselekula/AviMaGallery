@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Campaign } from '@/lib/types';
+import { Campaign } from '@/types/campaign';
 import { CampaignSection } from './CampaignSection';
 import { TestDataEditor } from '@/components/features/campaign/TestDataEditor';
 import { LinksEditor } from './LinksEditor';

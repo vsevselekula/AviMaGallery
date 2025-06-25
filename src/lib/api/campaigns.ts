@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { Campaign } from '@/lib/types';
+import { Campaign } from '@/types/campaign';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,

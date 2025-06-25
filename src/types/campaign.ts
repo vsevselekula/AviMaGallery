@@ -1,30 +1,36 @@
-export interface Campaign {
-  id: string;
-  campaign_name: string;
-  campaign_type: string;
-  key_message?: string;
-  flight_period: {
-    start_date: string;
-    end_date: string;
-  };
-  status: 'active' | 'completed' | 'planned';
-  campaign_vertical: string;
-  geo?: string;
-  audience?: string;
-  objectives?: string[];
-  channels?: string[];
-  links?: {
-    label: string;
-    url: string;
-  }[];
-  image_url?: string;
-  video_url?: string | null;
-  type?: string;
-  slogan?: string;
-  description?: string;
-  created_at?: string;
-  updated_at?: string;
-  targets?: string[];
-  pre_tests?: unknown;
-  post_tests?: unknown;
+import { Database } from '@/lib/database.types';
+
+// Базовые типы из автоматически сгенерированной схемы
+type BaseCampaign = Database['public']['Tables']['campaigns']['Row'];
+type BaseCampaignInsert = Database['public']['Tables']['campaigns']['Insert'];
+type BaseCampaignUpdate = Database['public']['Tables']['campaigns']['Update'];
+
+// Конкретные типы для JSON-полей
+export interface FlightPeriod {
+  start_date: string;
+  end_date: string;
+}
+
+export interface CampaignLink {
+  label: string;
+  url: string;
+}
+
+// Переопределяем типы с конкретными JSON-структурами
+export interface Campaign
+  extends Omit<BaseCampaign, 'flight_period' | 'links'> {
+  flight_period: FlightPeriod | null;
+  links: CampaignLink[] | null;
+}
+
+export interface CampaignInsert
+  extends Omit<BaseCampaignInsert, 'flight_period' | 'links'> {
+  flight_period?: FlightPeriod | null;
+  links?: CampaignLink[] | null;
+}
+
+export interface CampaignUpdate
+  extends Omit<BaseCampaignUpdate, 'flight_period' | 'links'> {
+  flight_period?: FlightPeriod | null;
+  links?: CampaignLink[] | null;
 }

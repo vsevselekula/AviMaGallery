@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { Campaign } from '@/lib/types';
+import { Campaign } from '@/types/campaign';
 import { GenericBadge } from '@/components/ui/CampaignBadges';
 
 interface Vertical {

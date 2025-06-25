@@ -1,4 +1,4 @@
-import { Campaign } from './types';
+import { Campaign } from '@/types/campaign';
 
 /**
  * Генерирует анонс кампании в текстовом формате для мессенджера

@@ -10,7 +10,7 @@ import {
 } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Campaign } from '@/lib/types';
+import { Campaign } from '@/types/campaign';
 import {
   Chart as ChartJS,
   ArcElement,
@@ -182,15 +182,18 @@ function AnalyticsContent() {
         ? campaigns
         : campaigns.filter((c) => c.campaign_vertical === selectedVertical);
 
-    const active = campaigns.filter((campaign) =>
-      isWithinInterval(now, {
-        start: new Date(campaign.flight_period.start_date),
-        end: new Date(campaign.flight_period.end_date),
-      })
+    const active = campaigns.filter(
+      (campaign) =>
+        campaign.flight_period &&
+        isWithinInterval(now, {
+          start: new Date(campaign.flight_period.start_date),
+          end: new Date(campaign.flight_period.end_date),
+        })
     ).length;
 
     const completed = campaigns.filter(
       (campaign) =>
+        campaign.flight_period &&
         isPast(new Date(campaign.flight_period.end_date)) &&
         !isWithinInterval(now, {
           start: new Date(campaign.flight_period.start_date),
@@ -253,7 +256,9 @@ function AnalyticsContent() {
     const monthCounts: { [key: string]: number } = {};
 
     // Находим диапазон дат для всех кампаний (не только отфильтрованных)
-    const allDates = campaigns.map((c) => new Date(c.flight_period.start_date));
+    const allDates = campaigns
+      .filter((c) => c.flight_period)
+      .map((c) => new Date(c.flight_period!.start_date));
     const minDate =
       allDates.length > 0
         ? new Date(Math.min(...allDates.map((d) => d.getTime())))
@@ -280,9 +285,11 @@ function AnalyticsContent() {
 
     // Заполняем реальными данными
     filteredCampaignsForTimeline.forEach((c) => {
-      const startDate = new Date(c.flight_period.start_date);
-      const monthYear = format(startDate, 'LLLL yyyy', { locale: ru });
-      monthCounts[monthYear] = (monthCounts[monthYear] || 0) + 1;
+      if (c.flight_period) {
+        const startDate = new Date(c.flight_period.start_date);
+        const monthYear = format(startDate, 'LLLL yyyy', { locale: ru });
+        monthCounts[monthYear] = (monthCounts[monthYear] || 0) + 1;
+      }
     });
 
     // Сортируем месяцы по датам

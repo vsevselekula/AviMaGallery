@@ -2,7 +2,7 @@ import React from 'react';
 import Image from 'next/image';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import { Campaign } from '@/lib/types';
+import { Campaign } from '@/types/campaign';
 import { VideoPlayer } from '@/components/ui/VideoPlayer';
 import { ImageUpload } from '@/components/ui/ImageUpload';
 import {
@@ -32,7 +32,7 @@ export function CampaignModalHero({
         {campaign.video_url ? (
           <VideoPlayer
             videoUrl={campaign.video_url}
-            posterUrl={campaign.image_url}
+            posterUrl={campaign.image_url || undefined}
             className={`w-full h-full object-cover transition-all duration-300 ${
               isEditing ? 'blur-md scale-105' : ''
             }`}
@@ -70,7 +70,7 @@ export function CampaignModalHero({
         {isEditing && (
           <div className="absolute top-4 left-4 max-w-xs">
             <ImageUpload
-              value={editedCampaign.image_url}
+              value={editedCampaign.image_url || undefined}
               onChange={onImageUpdate}
               campaignId={campaign.id}
               className="compact-mode"

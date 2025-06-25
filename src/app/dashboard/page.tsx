@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { Campaign } from '@/lib/types';
+import { Campaign } from '@/types/campaign';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { CampaignList } from '@/components/features/CampaignList';
 import { HeroBanner } from '@/components/features/HeroBanner';

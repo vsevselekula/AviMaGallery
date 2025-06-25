@@ -1,6 +1,6 @@
 'use client';
 
-import { Campaign } from '@/lib/types';
+import { Campaign } from '@/types/campaign';
 import React, { useRef, useEffect } from 'react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';

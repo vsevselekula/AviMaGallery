@@ -1,5 +1,5 @@
 import React from 'react';
-import { Campaign } from '@/lib/types';
+import { Campaign } from '@/types/campaign';
 import { CampaignSection } from './CampaignSection';
 import { CampaignTag } from './CampaignTag';
 

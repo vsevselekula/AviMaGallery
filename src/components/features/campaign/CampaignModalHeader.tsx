@@ -1,6 +1,6 @@
 import React from 'react';
 import { generateCampaignAnnouncement } from '@/lib/campaignAnnouncement';
-import { Campaign } from '@/lib/types';
+import { Campaign } from '@/types/campaign';
 
 interface CampaignModalHeaderProps {
   campaign: Campaign;

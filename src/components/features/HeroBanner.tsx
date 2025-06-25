@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Campaign } from '@/lib/types';
+import { Campaign } from '@/types/campaign';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { CampaignBadgeGroup } from '@/components/ui/CampaignBadges';
@@ -19,6 +19,7 @@ export function HeroBanner({ campaigns, className }: HeroBannerProps) {
   const router = useRouter();
 
   const activeCampaigns = campaigns.filter((campaign) => {
+    if (!campaign.flight_period) return false;
     const now = new Date();
     const startDate = new Date(campaign.flight_period.start_date);
     const endDate = new Date(campaign.flight_period.end_date);
@@ -62,7 +63,9 @@ export function HeroBanner({ campaigns, className }: HeroBannerProps) {
   }
 
   const hasImage = isValidImageUrl(heroCampaign.image_url);
-  const isActive = new Date(heroCampaign.flight_period.end_date) > new Date();
+  const isActive = heroCampaign.flight_period
+    ? new Date(heroCampaign.flight_period.end_date) > new Date()
+    : false;
 
   return (
     <div
@@ -106,16 +109,22 @@ export function HeroBanner({ campaigns, className }: HeroBannerProps) {
               {heroCampaign.key_message}
             </p>
             <div className="text-sm text-gray-600 mb-4">
-              {format(
-                new Date(heroCampaign.flight_period.start_date),
-                'dd.MM.yyyy',
-                { locale: ru }
-              )}{' '}
-              -{' '}
-              {format(
-                new Date(heroCampaign.flight_period.end_date),
-                'dd.MM.yyyy',
-                { locale: ru }
+              {heroCampaign.flight_period ? (
+                <>
+                  {format(
+                    new Date(heroCampaign.flight_period.start_date),
+                    'dd.MM.yyyy',
+                    { locale: ru }
+                  )}{' '}
+                  -{' '}
+                  {format(
+                    new Date(heroCampaign.flight_period.end_date),
+                    'dd.MM.yyyy',
+                    { locale: ru }
+                  )}
+                </>
+              ) : (
+                'Даты не указаны'
               )}
             </div>
             <button

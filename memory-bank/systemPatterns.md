@@ -4,9 +4,9 @@
 
 - **Framework**: The application is built with **Next.js** using the **App Router** paradigm. This means the file system in `src/app` dictates the application's routes.
 - **Backend-as-a-Service (BaaS)**: **Supabase** is the cornerstone of the backend. It provides:
-    - **Database**: A PostgreSQL database to store structured data like campaigns, users, and feedback.
-    - **Authentication**: Manages user sign-up, login, and session management.
-    - **Storage**: Used for handling file uploads, such as campaign banners and attachments in feedback.
+  - **Database**: A PostgreSQL database to store structured data like campaigns, users, and feedback.
+  - **Authentication**: Manages user sign-up, login, and session management.
+  - **Storage**: Used for handling file uploads, such as campaign banners and attachments in feedback.
 - **Client-Server Interaction**: The frontend interacts with Supabase primarily through the `@supabase/auth-helpers-nextjs` library, using `createClientComponentClient` for client-side data fetching and mutations. API routes in `src/app/api` are used for more complex or sensitive backend logic.
 
 ## Key Data Structures
@@ -16,9 +16,9 @@
 ## Important Patterns
 
 - **Authentication Flow**:
-    1.  User registers. The frontend UI enforces an `@avito.ru` email.
-    2.  Supabase sends a confirmation email. The link's domain is configured in the Supabase project's **Site URL**.
-    3.  The link points to the application's `/auth/callback` page for session exchange.
+  1.  User registers. The frontend UI enforces an `@avito.ru` email.
+  2.  Supabase sends a confirmation email. The link's domain is configured in the Supabase project's **Site URL**.
+  3.  The link points to the application's `/auth/callback` page for session exchange.
 - **Server-Side Validation**: A PostgreSQL trigger (`ensure_avito_domain_on_signup` on the `auth.users` table) provides robust, backend-level protection, rejecting any registration attempt with a non-`@avito.ru` email. This is the primary security measure against unauthorized domain registrations.
 - **Modal-based Interface**: Most interactions, like viewing campaign details or editing a campaign, are handled within modal dialogs, keeping the user within the main dashboard context.
 
