@@ -1,6 +1,6 @@
-# 🎬 Memory Bank - Внутренняя галерея маркетинговых кампаний Avito
+Галерея маркетинговых кампаний
 
-> Современная платформа в стиле Netflix для управления, обмена и анализа рекламных кампаний между вертикалями бизнеса Avito.
+> Современная платформа для управления, обмена и анализа рекламных кампаний между вертикалями бизнеса Avito.
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
 ![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white)
