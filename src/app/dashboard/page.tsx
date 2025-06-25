@@ -8,48 +8,24 @@ import { CampaignList } from '@/components/features/CampaignList';
 import { HeroBanner } from '@/components/features/HeroBanner';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { CampaignFormModal } from '@/components/features/campaign/CampaignFormModal';
+import { useCampaigns } from '@/hooks/useCampaignsQuery';
 
 function DashboardContent() {
-  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
-  const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(
-    null
-  );
+  const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
 
   const searchParams = useSearchParams();
   const router = useRouter();
   const supabase = createClientComponentClient();
 
+  // Используем TanStack Query для получения кампаний
+  const { data: campaigns = [], isLoading, error } = useCampaigns();
+
   const campaignId = searchParams.get('campaign');
 
+  // Получение роли пользователя (пока оставляем как есть, позже тоже переведем на Query)
   useEffect(() => {
-    const fetchCampaigns = async () => {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('campaigns_v2')
-        .select('*')
-        .order('flight_period->>start_date', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching campaigns_v2:', error);
-
-        // Если это сетевая ошибка, попробуем еще раз через 2 секунды
-        if (error.message?.includes('Failed to fetch') || error.code === '') {
-          setTimeout(() => {
-            fetchCampaigns();
-          }, 2000);
-          return;
-        }
-
-        setLoading(false);
-      } else {
-        setCampaigns(data as Campaign[]);
-        setLoading(false);
-      }
-    };
-
     const fetchUserRole = async () => {
       const {
         data: { user: supabaseUser },
@@ -66,7 +42,6 @@ function DashboardContent() {
       }
     };
 
-    fetchCampaigns();
     fetchUserRole();
   }, [supabase]);
 
@@ -91,24 +66,6 @@ function DashboardContent() {
     // Если campaigns.length === 0, значит кампании еще загружаются, ждем
   }, [campaignId, campaigns, router]);
 
-  const handleCampaignUpdated = (updatedCampaign: Campaign) => {
-    setCampaigns((prevCampaigns) =>
-      prevCampaigns.map((campaign) =>
-        campaign.id === updatedCampaign.id ? updatedCampaign : campaign
-      )
-    );
-  };
-
-  const handleCampaignCreated = (newCampaign: Campaign) => {
-    setCampaigns((prevCampaigns) => [newCampaign, ...prevCampaigns]);
-  };
-
-  const handleCampaignDeleted = (deletedCampaignId: string) => {
-    setCampaigns((prevCampaigns) =>
-      prevCampaigns.filter((campaign) => campaign.id !== deletedCampaignId)
-    );
-  };
-
   const handleCampaignModalClose = () => {
     setSelectedCampaign(null);
     // Убираем параметр campaign из URL
@@ -117,10 +74,22 @@ function DashboardContent() {
     router.replace(currentUrl.pathname + currentUrl.search);
   };
 
-  const canCreateCampaigns =
-    userRole === 'super_admin' || userRole === 'editor';
+  const canCreateCampaigns = userRole === 'super_admin' || userRole === 'editor';
 
-  if (loading) {
+  // Показываем ошибку, если есть
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen w-full">
+        <div className="text-center">
+          <div className="text-red-500 text-xl mb-4">Ошибка загрузки кампаний</div>
+          <div className="text-gray-400">{error.message}</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Показываем загрузку
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen w-full">
         <LoadingSpinner />
@@ -150,7 +119,7 @@ function DashboardContent() {
       {showCreateModal && (
         <CampaignFormModal
           onClose={() => setShowCreateModal(false)}
-          onCampaignCreated={handleCampaignCreated}
+          // Не нужно передавать onCampaignCreated - TanStack Query автоматически обновит кэш
         />
       )}
 
@@ -158,8 +127,7 @@ function DashboardContent() {
         <CampaignFormModal
           campaign={selectedCampaign}
           onClose={handleCampaignModalClose}
-          onCampaignUpdated={handleCampaignUpdated}
-          onCampaignDeleted={handleCampaignDeleted}
+          // Не нужно передавать onCampaignUpdated и onCampaignDeleted - TanStack Query автоматически обновит кэш
         />
       )}
     </div>

@@ -6,6 +6,7 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { Notification } from '@/components/ui/Notification';
 import { useNotification } from '@/hooks/useNotification';
 import { logger } from '@/lib/logger';
+import type { Json } from '@/lib/database.types';
 
 // Импортируем компоненты
 import { CampaignModalHeader } from './CampaignModalHeader';
@@ -14,6 +15,12 @@ import { CampaignModalReactions } from './CampaignModalReactions';
 import { CampaignDeleteConfirm } from './CampaignDeleteConfirm';
 import { CampaignModalContent } from './CampaignModalContent';
 import { CampaignEditForm } from './CampaignEditForm';
+import { 
+  useCreateCampaign, 
+  useUpdateCampaign, 
+  useDeleteCampaign,
+  useVerticals 
+} from '@/hooks/useCampaignsQuery';
 
 interface CampaignFormModalProps {
   campaign?: Campaign; // Если undefined - режим создания
@@ -70,14 +77,16 @@ export function CampaignFormModal({
       : createEmptyCampaign()
   );
   const [userRole, setUserRole] = useState<string | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [availableVerticals, setAvailableVerticals] = useState<string[]>([]);
 
   const supabase = useMemo(() => createClientComponentClient(), []);
-  const { notification, showSuccess, showError, hideNotification } =
-    useNotification();
+  const { notification, showError, hideNotification } = useNotification();
+
+  // TanStack Query хуки
+  const createCampaignMutation = useCreateCampaign();
+  const updateCampaignMutation = useUpdateCampaign();
+  const deleteCampaignMutation = useDeleteCampaign();
+  const { data: availableVerticals = [] } = useVerticals();
 
   // Обработчик клика вне модального окна
   useEffect(() => {
@@ -135,29 +144,6 @@ export function CampaignFormModal({
     };
 
     fetchUserRole();
-  }, [supabase]);
-
-  // Получение доступных вертикалей
-  useEffect(() => {
-    const fetchVerticals = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('campaigns_v2')
-          .select('campaign_vertical')
-          .not('campaign_vertical', 'is', null);
-
-        if (error) throw error;
-
-        const uniqueVerticals = Array.from(
-          new Set(data?.map((item) => item.campaign_vertical).filter(Boolean))
-        );
-        setAvailableVerticals(uniqueVerticals);
-      } catch (error) {
-        logger.error('DB', 'Failed to fetch verticals', String(error));
-      }
-    };
-
-    fetchVerticals();
   }, [supabase]);
 
   // Сброс состояния при изменении кампании
@@ -226,13 +212,12 @@ export function CampaignFormModal({
       new Date(editedCampaign.flight_period.start_date) >=
       new Date(editedCampaign.flight_period.end_date)
     ) {
-      showError('Дата окончания должна быть позже даты начала');
+      showError('Дата начала должна быть раньше даты окончания');
       return false;
     }
     return true;
   };
 
-  // Автоматическое определение статуса
   const getStatusFromDates = (
     startDate: string,
     endDate: string
@@ -241,13 +226,9 @@ export function CampaignFormModal({
     const start = new Date(startDate);
     const end = new Date(endDate);
 
-    if (now < start) {
-      return 'planned';
-    } else if (now > end) {
-      return 'completed';
-    } else {
-      return 'active';
-    }
+    if (now < start) return 'planned';
+    if (now > end) return 'completed';
+    return 'active';
   };
 
   const handleSave = async () => {
@@ -260,7 +241,6 @@ export function CampaignFormModal({
       return;
     }
 
-    setIsSaving(true);
     try {
       // Преобразуем строковые поля в массивы перед сохранением
       const processArrayField = (
@@ -288,8 +268,8 @@ export function CampaignFormModal({
       };
 
       // Функция для очистки тестов от пустых ссылок
-      const cleanTestData = (testData: unknown) => {
-        if (!testData) return testData;
+      const cleanTestData = (testData: unknown): Json | null => {
+        if (!testData) return null;
 
         if (typeof testData === 'object' && !Array.isArray(testData)) {
           const data = testData as {
@@ -300,7 +280,7 @@ export function CampaignFormModal({
             return {
               ...data,
               links: cleanLinks(data.links),
-            };
+            } as Json;
           }
         }
 
@@ -314,11 +294,11 @@ export function CampaignFormModal({
               'url' in item
           );
           if (isLinksArray) {
-            return cleanLinks(testData as { label: string; url: string }[]);
+            return cleanLinks(testData as { label: string; url: string }[]) as Json;
           }
         }
 
-        return testData;
+        return testData as Json;
       };
 
       // Автоматическое определение статуса на основе дат
@@ -343,100 +323,27 @@ export function CampaignFormModal({
       }
 
       if (isCreateMode) {
-        // Создание новой кампании
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { id, created_at, updated_at, ...insertData } = finalCampaign;
-
-        logger.info(
-          'DB',
-          'Creating campaign with data:',
-          JSON.stringify(insertData, null, 2)
-        );
-
-        const { data, error } = await supabase
-          .from('campaigns_v2')
-          .insert(insertData)
-          .select()
-          .single();
-
-        if (error) {
-          logger.error(
-            'DB',
-            `Supabase error: ${error.message}`,
-            JSON.stringify(
-              {
-                code: error.code,
-                details: error.details,
-                hint: error.hint,
-              },
-              null,
-              2
-            )
-          );
-          throw error;
-        }
-
-        onCampaignCreated?.(data);
-        showSuccess('Кампания успешно создана!');
-        logger.info(
-          'DB',
-          `Campaign created successfully: ${data.campaign_name}`
-        );
+        // Создание новой кампании через TanStack Query
+        const result = await createCampaignMutation.mutateAsync(finalCampaign);
+        onCampaignCreated?.(result);
         onClose();
       } else {
-        // Обновление существующей кампании
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { created_at, updated_at, ...updateData } = finalCampaign;
-
-        logger.info(
-          'DB',
-          `Updating campaign ${campaign!.id} with role: ${userRole}`
-        );
-
-        const { data, error } = await supabase
-          .from('campaigns_v2')
-          .update(updateData)
-          .eq('id', campaign!.id)
-          .select()
-          .single();
-
-        if (error) {
-          logger.error(
-            'DB',
-            `Supabase error: ${error.message}`,
-            JSON.stringify(
-              {
-                code: error.code,
-                details: error.details,
-                hint: error.hint,
-              },
-              null,
-              2
-            )
-          );
-          throw error;
-        }
-
-        setEditedCampaign(data);
+        // Обновление существующей кампании через TanStack Query
+        const result = await updateCampaignMutation.mutateAsync({
+          id: campaign!.id,
+          updates: finalCampaign,
+        });
+        setEditedCampaign(result);
         setIsEditing(false);
-        onCampaignUpdated?.(data);
-        showSuccess('Кампания успешно обновлена!');
-        logger.info(
-          'DB',
-          `Campaign updated successfully: ${data.campaign_name}`
-        );
+        onCampaignUpdated?.(result);
       }
     } catch (error) {
+      // Ошибки уже обрабатываются в хуках мутаций
       logger.error(
         'DB',
         `Failed to ${isCreateMode ? 'create' : 'update'} campaign`,
         String(error)
       );
-      showError(
-        `Ошибка при ${isCreateMode ? 'создании' : 'сохранении'} кампании`
-      );
-    } finally {
-      setIsSaving(false);
     }
   };
 
@@ -451,34 +358,14 @@ export function CampaignFormModal({
       return;
     }
 
-    setIsDeleting(true);
     try {
-      const { error } = await supabase
-        .from('campaigns_v2')
-        .delete()
-        .eq('id', campaign!.id);
-
-      if (error) {
-        throw error;
-      }
-      showSuccess('Кампания успешно удалена!');
-      logger.info(
-        'DB',
-        `Campaign deleted successfully: ${campaign!.campaign_name}`
-      );
-
-      // Уведомляем родительский компонент об удалении
+      await deleteCampaignMutation.mutateAsync(campaign!.id);
       onCampaignDeleted?.(campaign!.id);
       onClose();
     } catch (error) {
-      logger.error(
-        'DB',
-        `Failed to delete campaign ${campaign!.id}`,
-        String(error)
-      );
-      showError('Ошибка при удалении кампании');
+      // Ошибки уже обрабатываются в хуке мутации
+      logger.error('DB', 'Failed to delete campaign', String(error));
     } finally {
-      setIsDeleting(false);
       setShowDeleteConfirm(false);
     }
   };
@@ -486,7 +373,11 @@ export function CampaignFormModal({
   const handleDeleteClick = () => {
     setShowDeleteConfirm(true);
   };
+
   const handleDeleteCancel = () => setShowDeleteConfirm(false);
+
+  const isSaving = createCampaignMutation.isPending || updateCampaignMutation.isPending;
+  const isDeleting = deleteCampaignMutation.isPending;
 
   return (
     <>
