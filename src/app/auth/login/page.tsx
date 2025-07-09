@@ -1,5 +1,7 @@
 import { Metadata } from 'next';
+import { Suspense } from 'react';
 import { LoginForm } from '@/components/features/auth/LoginForm';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 
 export const metadata: Metadata = {
   title: 'Вход | Avito Gallery',
@@ -25,7 +27,9 @@ export default function LoginPage() {
           </p>
         </div>
         <div className="bg-gray-800 p-8 rounded-lg shadow-lg">
-          <LoginForm />
+          <Suspense fallback={<LoadingSpinner />}>
+            <LoginForm />
+          </Suspense>
         </div>
       </div>
     </div>
