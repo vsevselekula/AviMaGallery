@@ -1,0 +1,260 @@
+[
+  {
+    "campaign_type": "T1",
+    "campaign_vertical": "Авто",
+    "campaign_name": "Авто",
+    "flight_period": {
+      "start_date": "2023-06-12",
+      "end_date": "2023-08-13"
+    },
+    "geo": "",
+    "audience": "селлеры машин 2 млн+",
+    "objectives": [],
+    "key_message": "выгодно продать авто",
+    "channels": ["TV", "OOH", "OLV", "Digital"],
+    "materials": ["TV", "OOH", "OLV", "Digital"],
+    "links": [
+      {
+        "label": "Бриф",
+        "url": "https://docs.google.com/document/d/1kAq4-AH3Rc8e5qvchsFuvatoY454DJfD6r0C9l2iPOQ/edit"
+      }
+    ],
+    "attachments": [
+      {
+        "label": "TV-ролик",
+        "url": "https://drive.google.com/file/d/1cNwV-MMQ0A4iRkeTYTHe4oNASoIu17w1/view?usp=share_link"
+      }
+    ]
+  },
+  {
+    "campaign_type": "T1",
+    "campaign_vertical": "Работа",
+    "campaign_name": "Работа",
+    "flight_period": {
+      "start_date": "2023-05-22",
+      "end_date": "2023-07-17"
+    },
+    "geo": "Вся Россия",
+    "audience": "вся Россия, 25-45 лет, мужчины и женщины в равных пропорциях. По сегментам: синие и офисные профессии",
+    "objectives": [],
+    "key_message": "На Авито такой большой выбор вакансий, что ты всегда сможешь найти то, что подходит именно тебе",
+    "channels": ["TV", "OOH", "OLV", "Digital"],
+    "materials": ["TV", "OOH", "OLV", "Digital"],
+    "links": [
+      {
+        "label": "Бриф",
+        "url": "https://docs.google.com/document/d/13WgY9dHbPu_ZJT1z4k7C6uyWruDsILjW/edit"
+      }
+    ],
+    "attachments": [
+      {
+        "label": "TV-ролик",
+        "url": "https://drive.google.com/drive/folders/1iicu-ZoreE-91ZqW4_7UnDdeIicXybvD"
+      },
+      {
+        "label": "ООН",
+        "url": "https://drive.google.com/drive/folders/19w6c_v2s6SfY-Git6-Oz5peM-jml9fDY"
+      },
+      {
+        "label": "Digital banners",
+        "url": "https://drive.google.com/drive/folders/1li-q5_0Sv2lZh9UbZnnIUoo53s3EVyV8"
+      }
+    ]
+  },
+  {
+    "campaign_type": "T2",
+    "campaign_vertical": "Работа",
+    "campaign_name": "Работа",
+    "flight_period": {
+      "start_date": "2023-05-08",
+      "end_date": "2023-07-16"
+    },
+    "geo": "",
+    "audience": "вся Россия с фокусом на студенческие города, 14-24 лет, М/Ж — ученики старших классов или студенты (ВУЗы, ССУЗы). Сегмент: преимущественно синие воротнички",
+    "objectives": [],
+    "key_message": "Найди подработку на лето на Авито",
+    "channels": ["TV", "OOH", "OLV", "Digital"],
+    "materials": ["TV", "OOH", "OLV", "Digital"],
+    "links": [
+      {
+        "label": "Бриф",
+        "url": "https://docs.google.com/document/d/1522HyiAsCYOL3AVcoezT84f_ghBtMzn3fdemPuFACfg/edit"
+      }
+    ],
+    "attachments": [
+      {
+        "label": "Ролик",
+        "url": "https://drive.google.com/drive/folders/1simSY6zY7k1GY_TCgv3Py5U150HMZ8CL"
+      },
+      {
+        "label": "ООН",
+        "url": "https://drive.google.com/drive/folders/1nqFQ15rxLzWVsUEM9NSq4iwgx8HnNllY"
+      },
+      {
+        "label": "Digital banners",
+        "url": "https://drive.google.com/drive/folders/1UhIt7_LVRWVrB2fju8SZRvkUl2mxMBPo"
+      }
+    ]
+  },
+  {
+    "campaign_type": "T2",
+    "campaign_vertical": "Товары",
+    "campaign_name": "РК Фильтр-бренд",
+    "flight_period": {
+      "start_date": "2023-05-29",
+      "end_date": "2023-06-26"
+    },
+    "geo": "",
+    "audience": "18-45, М/Ж, вся РФ. Регулярно покупают онлайн продукты из целевой категории",
+    "objectives": [],
+    "key_message": "Покупайте брендовые вещи от х руб",
+    "channels": ["OLV", "Digital banners"],
+    "materials": ["OLV", "Digital banners"],
+    "links": [
+      {
+        "label": "Бриф",
+        "url": "https://docs.google.com/document/d/1XpZeZITyWOV2Pxs1hj-u7srcD1-bWoPaFHuAAJzliGI/edit#heading=h.gxqanwmlmc9f"
+      }
+    ],
+    "attachments": [
+      {
+        "label": "OLV",
+        "url": "https://drive.google.com/drive/folders/1_zTNesdWU2Wl021r5K5yj0tHCQWV32ep?usp=share_link"
+      },
+      {
+        "label": "Digital banners",
+        "url": "https://www.figma.com/file/dSjO1JIpE97mjJgW2EEt4E/%D0%A4%D0%B8%D0%BB%D1%8C%D1%82%D1%80-%D0%B1%D1%80%D0%B5%D0%BD%D0%B4-2.0?type=design&node-id=0%3A1&t=iGIZXO8CX8WHDCwI-1"
+      }
+    ]
+  },
+  {
+    "campaign_type": "T2",
+    "campaign_vertical": "Товары",
+    "campaign_name": "РК Оригинал",
+    "flight_period": {
+      "start_date": "2023-06-19",
+      "end_date": "2023-07-24"
+    },
+    "geo": "",
+    "audience": "М/Ж, 18-34, МСК, СПБ. Регулярно покупают одежду брендовую онлайн, но не рассматривают вариант покупки на сайтах объявлений / Авито",
+    "objectives": [],
+    "key_message": "На Авито можно уверенно покупать оригинальную одежду ушедших брендов под любой бюджет",
+    "channels": ["OLV", "Digital banners"],
+    "materials": ["OLV", "Digital banners"],
+    "links": [
+      {
+        "label": "Бриф",
+        "url": "https://docs.google.com/document/d/1ftOvbDavRayQroIecPvDTbKeC7F11OsiQVNyK5wgetA/edit#"
+      }
+    ],
+    "attachments": [
+      {
+        "label": "OLV",
+        "url": "https://drive.google.com/drive/folders/1yVOlUccksEZ9YV5oxamBB6D80ZmZfmtD?usp=share_link"
+      },
+      {
+        "label": "Digital banners",
+        "url": "https://www.figma.com/file/IkMmIeKUdglOOOx3Ou15L8/%D0%90%D1%83%D1%82%D0%B5%D0%BD%D1%82%D0%B8%D1%84%D0%B8%D0%BA%D0%B0%D1%86%D0%B8%D1%8F-%2F-%D0%92%D0%B0%D1%80%D0%BD%D0%B0%D0%B2%D0%B0?type=design&node-id=4-2312&t=VAfAShI2drxbfKeg-0"
+      }
+    ]
+  },
+  {
+    "campaign_type": "T1",
+    "campaign_vertical": "Товары",
+    "campaign_name": "РК Стройка",
+    "flight_period": {
+      "start_date": "2023-04-01",
+      "end_date": "2023-04-30"
+    },
+    "geo": "",
+    "audience": "Широкий соц.дем: 30-55, М, вся РФ",
+    "objectives": [],
+    "key_message": "Покупайте все для ремонта и строительства/дачи по ценам ХХХ% ниже рынка.",
+    "channels": ["TV", "OOH/DOOH", "AoA banners"],
+    "materials": ["TV", "OOH/DOOH", "AoA banners"],
+    "links": [
+      {
+        "label": "Бриф",
+        "url": "https://docs.google.com/document/d/12Fk9Z6Iz5qqyUsCO-5mYNmVisBrqZ4aVr-K_jjxHs6I/edit#"
+      }
+    ],
+    "attachments": [
+      {
+        "label": "TV-ролики",
+        "url": "https://drive.google.com/drive/folders/1eDcwvSGKTvtAvAIWeclFhfzbIJZtRAC_?usp=share_link"
+      },
+      {
+        "label": "ООН/DOOH",
+        "url": "https://drive.google.com/drive/folders/11CRahaajohWJlALNrOrgT_a06omCKI5D?usp=share_link"
+      },
+      {
+        "label": "AoA banners",
+        "url": "https://drive.google.com/drive/folders/1xHxv6X8vi28DL_s5J8bUQyucy_PiLZru?usp=share_link"
+      }
+    ]
+  },
+  {
+    "campaign_type": "T1",
+    "campaign_vertical": "Недвижимость",
+    "campaign_name": "STR. Лето",
+    "flight_period": {
+      "start_date": "2023-06-01",
+      "end_date": "2023-08-31"
+    },
+    "geo": "",
+    "audience": "Пользуются/планируют пользоваться сервисами бронирования жилья, 20-45 лет, не используют Авито",
+    "objectives": [],
+    "key_message": "Безопасное бронирование посуточной аренды",
+    "channels": [
+      "TV",
+      "OOH & Indoor",
+      "Digital Media (OLV, Banners)",
+      "Radio",
+      "Non-standard"
+    ],
+    "materials": [
+      "TV",
+      "OOH & Indoor",
+      "Digital Media (OLV, Banners)",
+      "Radio",
+      "Non-standard"
+    ],
+    "links": [
+      {
+        "label": "Бриф",
+        "url": "https://docs.google.com/document/d/1MThUoxsKSuetHB3mpJRIWp1mp9ANkeBMSKsrGaZEqR0/edit#"
+      }
+    ],
+    "attachments": [
+      {
+        "label": "TV-ролик (июнь)",
+        "url": "https://drive.google.com/drive/folders/1cFoXAxTMXxVBEtS2X8vSL4cmyQV7Gc5Y"
+      }
+    ]
+  },
+  {
+    "campaign_type": "T1",
+    "campaign_vertical": "Услуги",
+    "campaign_name": "Весенняя РК",
+    "flight_period": {
+      "start_date": "2023-04-17",
+      "end_date": "2023-06-18"
+    },
+    "geo": "",
+    "audience": "Логкат «Ремонт и стройка»: М/Ж 40-50 лет, регионы; логкаты «Красота и здоровье», «Организация мероприятий»: М/Ж 30-40 лет, регионы",
+    "objectives": [
+      "Простроить восприятие \"Авито — лучший выбор для поиска исполнителей\"",
+      "Повысить привычку заказывать услуги онлайн"
+    ],
+    "key_message": "Мастера для ваших свершений / Мастера для ваших событий",
+    "channels": ["TV", "OLV", "OOH", "Digital"],
+    "materials": ["TV", "OLV", "OOH", "Digital"],
+    "links": [
+      {
+        "label": "Бриф",
+        "url": "https://docs.google.com/document/d/1w_hsGcOHQJ3dz96bzX7vKkAO6zkA5CYW/edit?usp=sharing"
+      }
+    ],
+    "attachments": []
+  }
+]
