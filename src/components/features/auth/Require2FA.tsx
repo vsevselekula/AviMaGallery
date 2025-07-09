@@ -20,9 +20,12 @@ export function Require2FA({ children }: Require2FAProps) {
   const check2FAStatus = useCallback(async () => {
     try {
       setIsLoading(true);
-      
+
       // Проверяем аутентификацию
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
       if (authError || !user) {
         logger.auth.info('User not authenticated, redirecting to login');
         router.push('/auth/login');
@@ -32,8 +35,9 @@ export function Require2FA({ children }: Require2FAProps) {
       setIsAuthenticated(true);
 
       // Проверяем AAL уровень
-      const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-      
+      const { data: aal } =
+        await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+
       if (aal && aal.currentLevel === 'aal2') {
         // Пользователь уже прошел 2FA верификацию
         setHas2FA(true);
@@ -41,11 +45,15 @@ export function Require2FA({ children }: Require2FAProps) {
       } else {
         // Проверяем есть ли настроенные факторы
         const { data: factors } = await supabase.auth.mfa.listFactors();
-        const hasActiveFactor = factors?.totp?.some(factor => factor.status === 'verified');
-        
+        const hasActiveFactor = factors?.totp?.some(
+          (factor) => factor.status === 'verified'
+        );
+
         if (hasActiveFactor) {
           // 2FA настроена, но не пройдена - перенаправляем на логин
-          logger.auth.info('2FA configured but not verified, redirecting to login');
+          logger.auth.info(
+            '2FA configured but not verified, redirecting to login'
+          );
           await supabase.auth.signOut();
           router.push('/auth/login?require2fa=true');
         } else {
@@ -69,7 +77,9 @@ export function Require2FA({ children }: Require2FAProps) {
 
   // Обновляем статус при изменении аутентификации
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_OUT' || !session) {
         router.push('/auth/login');
       } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
@@ -111,21 +121,21 @@ export function Require2FA({ children }: Require2FAProps) {
               🔒 Обязательная настройка 2FA
             </h2>
             <p className="text-red-200 text-sm mb-3">
-              В соответствии с политикой безопасности Avito, все пользователи 
+              В соответствии с политикой безопасности Avito, все пользователи
               обязаны настроить двухфакторную аутентификацию.
             </p>
             <p className="text-red-200 text-sm">
               Доступ к системе будет предоставлен только после настройки 2FA.
             </p>
           </div>
-          
-          <Setup2FA 
+
+          <Setup2FA
             onSetupComplete={() => {
               logger.auth.info('2FA setup completed via Require2FA guard');
               setHas2FA(true);
-            }} 
+            }}
           />
-          
+
           <div className="mt-6 text-center">
             <button
               onClick={async () => {
@@ -143,4 +153,4 @@ export function Require2FA({ children }: Require2FAProps) {
   }
 
   return <>{children}</>;
-} 
+}

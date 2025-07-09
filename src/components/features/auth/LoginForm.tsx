@@ -19,16 +19,18 @@ export function LoginForm() {
   const [showMFA, setShowMFA] = useState(false);
   const [showSetup2FA, setShowSetup2FA] = useState(false);
   const [requireSetup, setRequireSetup] = useState(false);
-  const [require2FAMessage, setRequire2FAMessage] = useState<string | null>(null);
+  const [require2FAMessage, setRequire2FAMessage] = useState<string | null>(
+    null
+  );
 
   useEffect(() => {
     // Проверяем параметр require2fa из URL
     const require2fa = searchParams?.get('require2fa');
     const redirectedFrom = searchParams?.get('redirectedFrom');
-    
+
     if (require2fa === 'true') {
       setRequire2FAMessage(
-        redirectedFrom 
+        redirectedFrom
           ? `Для доступа к ${redirectedFrom} требуется подтверждение 2FA. Пожалуйста, войдите заново.`
           : 'Для доступа к системе требуется подтверждение 2FA. Пожалуйста, войдите заново.'
       );
@@ -38,7 +40,9 @@ export function LoginForm() {
   const check2FAStatus = async () => {
     try {
       const { data } = await supabase.auth.mfa.listFactors();
-      const hasActiveFactor = data?.totp?.some(factor => factor.status === 'verified');
+      const hasActiveFactor = data?.totp?.some(
+        (factor) => factor.status === 'verified'
+      );
       return hasActiveFactor;
     } catch (error) {
       logger.auth.error('Error checking 2FA status:', error);
@@ -65,7 +69,10 @@ export function LoginForm() {
 
       if (signInError) {
         // Проверяем, требуется ли MFA
-        if (signInError.message.includes('MFA') || signInError.message.includes('factor')) {
+        if (
+          signInError.message.includes('MFA') ||
+          signInError.message.includes('factor')
+        ) {
           setShowMFA(true);
           setIsLoading(false);
           return;
@@ -78,7 +85,7 @@ export function LoginForm() {
 
       // Проверяем статус 2FA после успешного входа по паролю
       const has2FA = await check2FAStatus();
-      
+
       if (has2FA) {
         // Если 2FA настроена, требуем её подтверждение
         logger.auth.info('2FA detected, requiring verification');
@@ -130,13 +137,13 @@ export function LoginForm() {
             🔒 Обязательная настройка двухфакторной аутентификации
           </h3>
           <p className="text-yellow-200 text-sm">
-            Для обеспечения безопасности все пользователи должны настроить 2FA. 
+            Для обеспечения безопасности все пользователи должны настроить 2FA.
             Вы не сможете продолжить работу без её настройки.
           </p>
         </div>
-        
+
         <Setup2FA onSetupComplete={handle2FASetupComplete} />
-        
+
         {!requireSetup && (
           <div className="text-center">
             <Button
@@ -161,14 +168,12 @@ export function LoginForm() {
             🔐 Подтверждение входа
           </h3>
           <p className="text-blue-200 text-sm">
-            Пароль принят. Теперь введите код из приложения-аутентификатора для завершения входа.
+            Пароль принят. Теперь введите код из приложения-аутентификатора для
+            завершения входа.
           </p>
         </div>
-        
-        <Verify2FA
-          onSuccess={handleMFASuccess}
-          onCancel={handleCancel}
-        />
+
+        <Verify2FA onSuccess={handleMFASuccess} onCancel={handleCancel} />
       </div>
     );
   }
@@ -180,12 +185,10 @@ export function LoginForm() {
           <h3 className="font-medium text-orange-200 mb-2">
             🔐 Требуется подтверждение 2FA
           </h3>
-          <p className="text-orange-200 text-sm">
-            {require2FAMessage}
-          </p>
+          <p className="text-orange-200 text-sm">{require2FAMessage}</p>
         </div>
       )}
-      
+
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-4">
           <div>
@@ -247,13 +250,14 @@ export function LoginForm() {
           {isLoading ? 'Вход...' : 'Войти'}
         </Button>
       </form>
-      
+
       <div className="bg-blue-900/50 p-4 rounded-lg border border-blue-500">
         <h3 className="font-medium text-blue-200 mb-2">
           🔒 Безопасность Avito
         </h3>
         <p className="text-blue-200 text-sm">
-          Все пользователи должны настроить двухфакторную аутентификацию для защиты корпоративных данных.
+          Все пользователи должны настроить двухфакторную аутентификацию для
+          защиты корпоративных данных.
         </p>
       </div>
     </div>

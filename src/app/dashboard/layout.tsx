@@ -5,9 +5,5 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <Require2FA>
-      {children}
-    </Require2FA>
-  );
-} 
+  return <Require2FA>{children}</Require2FA>;
+}

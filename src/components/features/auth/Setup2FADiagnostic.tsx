@@ -52,9 +52,12 @@ export function Setup2FADiagnostic() {
       newDiagnostics.supabaseVersion = supabase?.['version'] || 'unknown';
 
       // 2. Проверяем аутентификацию пользователя
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
       newDiagnostics.userAuthenticated = !!user && !authError;
-      
+
       if (authError) {
         newDiagnostics.error = `Auth error: ${authError.message}`;
         setDiagnostics(newDiagnostics);
@@ -70,15 +73,17 @@ export function Setup2FADiagnostic() {
       // 3. Проверяем доступность MFA API
       try {
         if (!supabase.auth.mfa) {
-          newDiagnostics.error = 'MFA methods not available in this Supabase version';
+          newDiagnostics.error =
+            'MFA methods not available in this Supabase version';
           newDiagnostics.mfaAvailable = false;
         } else if (!supabase.auth.mfa.listFactors) {
           newDiagnostics.error = 'MFA listFactors method not available';
           newDiagnostics.mfaAvailable = false;
         } else {
           // Пробуем список факторов
-          const { data: factors, error: mfaError } = await supabase.auth.mfa.listFactors();
-          
+          const { data: factors, error: mfaError } =
+            await supabase.auth.mfa.listFactors();
+
           if (mfaError) {
             if (mfaError.message.includes('MFA is not enabled')) {
               newDiagnostics.error = 'MFA не включена в Supabase Dashboard';
@@ -89,10 +94,12 @@ export function Setup2FADiagnostic() {
             }
           } else {
             newDiagnostics.mfaAvailable = true;
-            
+
             if (factors?.totp && factors.totp.length > 0) {
               newDiagnostics.existingFactors = factors.totp;
-              newDiagnostics.hasActiveFactors = factors.totp.some(f => f.status === 'verified');
+              newDiagnostics.hasActiveFactors = factors.totp.some(
+                (f) => f.status === 'verified'
+              );
             } else {
               newDiagnostics.hasActiveFactors = false;
             }
@@ -100,16 +107,21 @@ export function Setup2FADiagnostic() {
             // 4. Тестируем enroll API
             try {
               logger.auth.info('Testing MFA enroll API...');
-              
+
               const enrollTest = await supabase.auth.mfa.enroll({
                 factorType: 'totp',
               });
-              
+
               if (enrollTest.error) {
                 // Проверяем код ошибки
-                if (enrollTest.error.message.includes('already has this factor') || 
-                    enrollTest.error.message.includes('already enrolled')) {
-                  newDiagnostics.enrollTest = '✅ MFA API работает (уже есть фактор)';
+                if (
+                  enrollTest.error.message.includes(
+                    'already has this factor'
+                  ) ||
+                  enrollTest.error.message.includes('already enrolled')
+                ) {
+                  newDiagnostics.enrollTest =
+                    '✅ MFA API работает (уже есть фактор)';
                   newDiagnostics.error = null;
                 } else {
                   newDiagnostics.enrollTest = `❌ Enroll Error: ${enrollTest.error.message}`;
@@ -118,21 +130,29 @@ export function Setup2FADiagnostic() {
               } else {
                 // Если создался тестовый фактор, удаляем его
                 if (enrollTest.data?.id) {
-                  await supabase.auth.mfa.unenroll({ factorId: enrollTest.data.id });
-                  newDiagnostics.enrollTest = '✅ MFA Enroll API полностью работает!';
+                  await supabase.auth.mfa.unenroll({
+                    factorId: enrollTest.data.id,
+                  });
+                  newDiagnostics.enrollTest =
+                    '✅ MFA Enroll API полностью работает!';
                   newDiagnostics.error = null;
                 }
               }
             } catch (enrollError) {
-              const errorMessage = enrollError instanceof Error ? enrollError.message : 'Unknown error';
+              const errorMessage =
+                enrollError instanceof Error
+                  ? enrollError.message
+                  : 'Unknown error';
               newDiagnostics.enrollTest = `❌ Enroll Test Error: ${errorMessage}`;
               newDiagnostics.mfaAvailable = false;
-              
+
               // Детальная диагностика ошибки 422
               if (enrollError instanceof Error && 'status' in enrollError) {
-                const statusCode = (enrollError as Error & { status: number }).status;
+                const statusCode = (enrollError as Error & { status: number })
+                  .status;
                 if (statusCode === 422) {
-                  newDiagnostics.error = '422 Ошибка: Проверьте настройки MFA в Supabase Dashboard';
+                  newDiagnostics.error =
+                    '422 Ошибка: Проверьте настройки MFA в Supabase Dashboard';
                 } else {
                   newDiagnostics.error = `HTTP ${statusCode}: ${errorMessage}`;
                 }
@@ -143,13 +163,16 @@ export function Setup2FADiagnostic() {
           }
         }
       } catch (mfaCheckError: unknown) {
-        const errorMessage = mfaCheckError instanceof Error ? mfaCheckError.message : 'Unknown error';
+        const errorMessage =
+          mfaCheckError instanceof Error
+            ? mfaCheckError.message
+            : 'Unknown error';
         newDiagnostics.error = `MFA check failed: ${errorMessage}`;
         newDiagnostics.mfaAvailable = false;
       }
-
     } catch (generalError: unknown) {
-      const errorMessage = generalError instanceof Error ? generalError.message : 'Unknown error';
+      const errorMessage =
+        generalError instanceof Error ? generalError.message : 'Unknown error';
       newDiagnostics.error = `General error: ${errorMessage}`;
       logger.auth.error('Diagnostics failed:', generalError);
     } finally {
@@ -167,7 +190,11 @@ export function Setup2FADiagnostic() {
     return status ? '✅' : '❌';
   };
 
-  const getStatusText = (status: boolean | null, successText: string, failText: string) => {
+  const getStatusText = (
+    status: boolean | null,
+    successText: string,
+    failText: string
+  ) => {
     if (status === null) return 'Проверка...';
     return status ? successText : failText;
   };
@@ -175,9 +202,7 @@ export function Setup2FADiagnostic() {
   return (
     <div className="max-w-2xl mx-auto p-6 bg-gray-800 rounded-lg">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-white">
-          🔧 Диагностика 2FA
-        </h2>
+        <h2 className="text-2xl font-bold text-white">🔧 Диагностика 2FA</h2>
         <Button
           onClick={runDiagnostics}
           disabled={isChecking}
@@ -191,11 +216,19 @@ export function Setup2FADiagnostic() {
         {/* Статус аутентификации */}
         <div className="flex items-center justify-between p-4 bg-gray-700 rounded-lg">
           <div className="flex items-center space-x-3">
-            <span className="text-2xl">{getStatusIcon(diagnostics.userAuthenticated)}</span>
+            <span className="text-2xl">
+              {getStatusIcon(diagnostics.userAuthenticated)}
+            </span>
             <div>
-              <h3 className="font-medium text-white">Аутентификация пользователя</h3>
+              <h3 className="font-medium text-white">
+                Аутентификация пользователя
+              </h3>
               <p className="text-sm text-gray-400">
-                {getStatusText(diagnostics.userAuthenticated, 'Пользователь аутентифицирован', 'Требуется вход в систему')}
+                {getStatusText(
+                  diagnostics.userAuthenticated,
+                  'Пользователь аутентифицирован',
+                  'Требуется вход в систему'
+                )}
               </p>
             </div>
           </div>
@@ -204,11 +237,17 @@ export function Setup2FADiagnostic() {
         {/* Доступность MFA */}
         <div className="flex items-center justify-between p-4 bg-gray-700 rounded-lg">
           <div className="flex items-center space-x-3">
-            <span className="text-2xl">{getStatusIcon(diagnostics.mfaAvailable)}</span>
+            <span className="text-2xl">
+              {getStatusIcon(diagnostics.mfaAvailable)}
+            </span>
             <div>
               <h3 className="font-medium text-white">Доступность MFA API</h3>
               <p className="text-sm text-gray-400">
-                {getStatusText(diagnostics.mfaAvailable, 'MFA API работает корректно', 'MFA API недоступно')}
+                {getStatusText(
+                  diagnostics.mfaAvailable,
+                  'MFA API работает корректно',
+                  'MFA API недоступно'
+                )}
               </p>
             </div>
           </div>
@@ -230,7 +269,9 @@ export function Setup2FADiagnostic() {
         {/* Тест Enroll API */}
         {diagnostics.enrollTest && (
           <div className="p-4 bg-purple-900/50 rounded border border-purple-500">
-            <h3 className="font-medium text-purple-200 mb-2">🧪 Тест Enroll API:</h3>
+            <h3 className="font-medium text-purple-200 mb-2">
+              🧪 Тест Enroll API:
+            </h3>
             <p className="text-sm text-purple-200">{diagnostics.enrollTest}</p>
           </div>
         )}
@@ -238,22 +279,29 @@ export function Setup2FADiagnostic() {
         {/* Существующие факторы */}
         {diagnostics.existingFactors.length > 0 && (
           <div className="p-4 bg-blue-900/50 rounded border border-blue-500">
-            <h3 className="font-medium text-blue-200 mb-2">🔐 Существующие 2FA факторы:</h3>
+            <h3 className="font-medium text-blue-200 mb-2">
+              🔐 Существующие 2FA факторы:
+            </h3>
             <ul className="space-y-2">
               {diagnostics.existingFactors.map((factor) => (
-                <li key={factor.id} className="text-sm text-blue-200 flex items-center justify-between">
+                <li
+                  key={factor.id}
+                  className="text-sm text-blue-200 flex items-center justify-between"
+                >
                   <span>• {factor.friendly_name || 'Без названия'}</span>
-                  <span className={`px-2 py-1 rounded text-xs ${
-                    factor.status === 'verified' 
-                      ? 'bg-green-800 text-green-200' 
-                      : 'bg-yellow-800 text-yellow-200'
-                  }`}>
+                  <span
+                    className={`px-2 py-1 rounded text-xs ${
+                      factor.status === 'verified'
+                        ? 'bg-green-800 text-green-200'
+                        : 'bg-yellow-800 text-yellow-200'
+                    }`}
+                  >
                     {factor.status}
                   </span>
                 </li>
               ))}
             </ul>
-            
+
             {diagnostics.hasActiveFactors && (
               <p className="text-sm text-green-200 mt-2">
                 ✅ У вас есть активные 2FA факторы!
@@ -273,35 +321,56 @@ export function Setup2FADiagnostic() {
         {/* Инструкции по решению */}
         {diagnostics.mfaAvailable === false && (
           <div className="p-4 bg-yellow-900/50 rounded border border-yellow-500">
-            <h3 className="font-medium text-yellow-200 mb-2">📋 Как исправить:</h3>
+            <h3 className="font-medium text-yellow-200 mb-2">
+              📋 Как исправить:
+            </h3>
             <ol className="text-sm text-yellow-200 space-y-2 list-decimal list-inside">
-              <li>Откройте <strong>Supabase Dashboard</strong></li>
-              <li>Перейдите в <strong>Authentication → Settings</strong></li>
-              <li>Найдите раздел <strong>"Multi-Factor Authentication (MFA)"</strong></li>
-              <li>Включите <strong>"Enable MFA"</strong></li>
-              <li>Выберите <strong>"TOTP (Time-based One-Time Password)"</strong></li>
+              <li>
+                Откройте <strong>Supabase Dashboard</strong>
+              </li>
+              <li>
+                Перейдите в <strong>Authentication → Settings</strong>
+              </li>
+              <li>
+                Найдите раздел{' '}
+                <strong>"Multi-Factor Authentication (MFA)"</strong>
+              </li>
+              <li>
+                Включите <strong>"Enable MFA"</strong>
+              </li>
+              <li>
+                Выберите <strong>"TOTP (Time-based One-Time Password)"</strong>
+              </li>
               <li>Сохраните настройки и попробуйте снова</li>
             </ol>
           </div>
         )}
 
         {/* Успешная диагностика */}
-        {diagnostics.mfaAvailable === true && diagnostics.userAuthenticated === true && (
-          <div className="p-4 bg-green-900/50 rounded border border-green-500">
-            <h3 className="font-medium text-green-200 mb-2">🎉 Всё готово!</h3>
-            <p className="text-sm text-green-200">
-              MFA API работает корректно. Можно настраивать двухфакторную аутентификацию.
-            </p>
-          </div>
-        )}
+        {diagnostics.mfaAvailable === true &&
+          diagnostics.userAuthenticated === true && (
+            <div className="p-4 bg-green-900/50 rounded border border-green-500">
+              <h3 className="font-medium text-green-200 mb-2">
+                🎉 Всё готово!
+              </h3>
+              <p className="text-sm text-green-200">
+                MFA API работает корректно. Можно настраивать двухфакторную
+                аутентификацию.
+              </p>
+            </div>
+          )}
       </div>
 
       {/* Дополнительная информация */}
       <div className="mt-6 p-4 bg-blue-900/50 rounded border border-blue-500">
-        <h3 className="font-medium text-blue-200 mb-2">💡 Полезная информация:</h3>
+        <h3 className="font-medium text-blue-200 mb-2">
+          💡 Полезная информация:
+        </h3>
         <ul className="text-sm text-blue-200 space-y-1 list-disc list-inside">
           <li>MFA в Supabase требует аутентифицированного пользователя</li>
-          <li>TOTP работает с Google Authenticator, Authy, 1Password и другими</li>
+          <li>
+            TOTP работает с Google Authenticator, Authy, 1Password и другими
+          </li>
           <li>После активации 2FA потребуется при каждом входе</li>
           <li>Ошибка 422 обычно означает, что MFA не включена в Dashboard</li>
         </ul>

@@ -38,24 +38,25 @@ export async function middleware(req: NextRequest) {
     // Проверяем AAL для защищенных маршрутов
     if (!isPublicPath && !req.nextUrl.pathname.startsWith('/auth')) {
       try {
-        const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-        
+        const { data: aal } =
+          await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+
         // Если AAL не достаточный (не AAL2), перенаправляем на логин для прохождения 2FA
         if (!aal || aal.currentLevel !== 'aal2') {
           logger.auth.info('User needs 2FA authentication', {
             currentAAL: aal?.currentLevel || 'none',
             requestedPath: req.nextUrl.pathname,
           });
-          
+
           // НЕ выходим из сессии здесь - пусть Require2FA компонент обрабатывает это
-          
+
           const redirectUrl = req.nextUrl.clone();
           redirectUrl.pathname = '/auth/login';
           redirectUrl.searchParams.set('redirectedFrom', req.nextUrl.pathname);
           redirectUrl.searchParams.set('require2fa', 'true');
           return NextResponse.redirect(redirectUrl);
         }
-        
+
         logger.auth.debug('User has valid 2FA authentication', {
           currentAAL: aal.currentLevel,
         });

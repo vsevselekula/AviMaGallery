@@ -19,11 +19,13 @@ export function Setup2FA({ onSetupComplete }: Setup2FAProps) {
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState<'generate' | 'verify'>('generate');
   const [factorId, setFactorId] = useState<string | null>(null);
-  const [existingFactors, setExistingFactors] = useState<Array<{
-    id: string;
-    friendly_name?: string;
-    status: string;
-  }>>([]);
+  const [existingFactors, setExistingFactors] = useState<
+    Array<{
+      id: string;
+      friendly_name?: string;
+      status: string;
+    }>
+  >([]);
   const [showExistingOptions, setShowExistingOptions] = useState(false);
 
   const checkExistingFactors = async () => {
@@ -44,9 +46,14 @@ export function Setup2FA({ onSetupComplete }: Setup2FAProps) {
 
     try {
       // Сначала проверим аутентификацию
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
       if (authError || !user) {
-        throw new Error('Пользователь не аутентифицирован. Пожалуйста, войдите в систему.');
+        throw new Error(
+          'Пользователь не аутентифицирован. Пожалуйста, войдите в систему.'
+        );
       }
 
       // Проверим доступность MFA API
@@ -72,11 +79,15 @@ export function Setup2FA({ onSetupComplete }: Setup2FAProps) {
       });
 
       // Если конфликт имен, пробуем с уникальным именем
-      if (enrollResult.error && 
-          enrollResult.error.message.includes('already exists') &&
-          ('code' in enrollResult.error && enrollResult.error.code === 'mfa_factor_name_conflict')) {
-        
-        logger.auth.info('Name conflict detected, retrying with unique name...');
+      if (
+        enrollResult.error &&
+        enrollResult.error.message.includes('already exists') &&
+        'code' in enrollResult.error &&
+        enrollResult.error.code === 'mfa_factor_name_conflict'
+      ) {
+        logger.auth.info(
+          'Name conflict detected, retrying with unique name...'
+        );
         const uniqueName = `TOTP-${Date.now()}`;
         enrollResult = await supabase.auth.mfa.enroll({
           factorType: 'totp',
@@ -88,15 +99,24 @@ export function Setup2FA({ onSetupComplete }: Setup2FAProps) {
 
       if (error) {
         if (error.message.includes('MFA is not enabled')) {
-          throw new Error('MFA не включена в Supabase Dashboard. Обратитесь к администратору или включите в Authentication → Settings → MFA');
-        } else if (error.message.includes('already enrolled') || error.message.includes('already exists')) {
+          throw new Error(
+            'MFA не включена в Supabase Dashboard. Обратитесь к администратору или включите в Authentication → Settings → MFA'
+          );
+        } else if (
+          error.message.includes('already enrolled') ||
+          error.message.includes('already exists')
+        ) {
           // Если уже есть факторы, покажем варианты
           const factors = await checkExistingFactors(); // Обновим список
           if (factors.length > 0) {
-            setError('У вас уже есть настроенные 2FA факторы. Выберите один из вариантов ниже.');
+            setError(
+              'У вас уже есть настроенные 2FA факторы. Выберите один из вариантов ниже.'
+            );
             setShowExistingOptions(true);
           } else {
-            setError('Конфликт имен факторов. Попробуйте очистить проблемные факторы на странице диагностики.');
+            setError(
+              'Конфликт имен факторов. Попробуйте очистить проблемные факторы на странице диагностики.'
+            );
           }
           setIsLoading(false);
           return;
@@ -113,7 +133,8 @@ export function Setup2FA({ onSetupComplete }: Setup2FAProps) {
       }
     } catch (err) {
       logger.auth.error('2FA setup error:', err);
-      const errorMessage = err instanceof Error ? err.message : '2FA setup failed';
+      const errorMessage =
+        err instanceof Error ? err.message : '2FA setup failed';
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -136,9 +157,10 @@ export function Setup2FA({ onSetupComplete }: Setup2FAProps) {
 
     try {
       // Создаем challenge для верификации
-      const { data: challenge, error: challengeError } = await supabase.auth.mfa.challenge({
-        factorId: factorId,
-      });
+      const { data: challenge, error: challengeError } =
+        await supabase.auth.mfa.challenge({
+          factorId: factorId,
+        });
 
       if (challengeError) throw challengeError;
 
@@ -167,7 +189,7 @@ export function Setup2FA({ onSetupComplete }: Setup2FAProps) {
       setIsLoading(true);
       const { error } = await supabase.auth.mfa.unenroll({ factorId });
       if (error) throw error;
-      
+
       logger.auth.info('Existing factor removed');
       // После удаления создаем новый
       await generateQRCode();
@@ -184,7 +206,7 @@ export function Setup2FA({ onSetupComplete }: Setup2FAProps) {
   };
 
   useEffect(() => {
-    checkExistingFactors().then(factors => {
+    checkExistingFactors().then((factors) => {
       if (factors.length === 0) {
         generateQRCode();
       } else {
@@ -200,18 +222,18 @@ export function Setup2FA({ onSetupComplete }: Setup2FAProps) {
         <h2 className="text-2xl font-bold text-white mb-4">
           2FA уже настроена
         </h2>
-        
+
         <div className="space-y-4">
           <div className="bg-blue-900/50 p-4 rounded border border-blue-500">
             <p className="text-blue-200 text-sm mb-2">
               У вас уже есть настроенные факторы двухфакторной аутентификации:
             </p>
             <ul className="space-y-1">
-                             {existingFactors.map((factor) => (
-                 <li key={factor.id} className="text-blue-200 text-sm">
-                   • {factor.friendly_name || 'Без названия'} ({factor.status})
-                 </li>
-               ))}
+              {existingFactors.map((factor) => (
+                <li key={factor.id} className="text-blue-200 text-sm">
+                  • {factor.friendly_name || 'Без названия'} ({factor.status})
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -248,7 +270,9 @@ export function Setup2FA({ onSetupComplete }: Setup2FAProps) {
                 className="w-full border-red-500 text-red-400 hover:bg-red-900/50"
                 disabled={isLoading}
               >
-                {isLoading ? 'Удаление...' : 'Удалить существующую и создать новую'}
+                {isLoading
+                  ? 'Удаление...'
+                  : 'Удалить существующую и создать новую'}
               </Button>
             )}
           </div>
@@ -263,25 +287,31 @@ export function Setup2FA({ onSetupComplete }: Setup2FAProps) {
         <h2 className="text-2xl font-bold text-white mb-4">
           Настройка двухфакторной аутентификации
         </h2>
-        
+
         <div className="space-y-4">
           <p className="text-gray-300">
             Сканируйте QR-код в приложении-аутентификаторе:
           </p>
-          
+
           {isLoading && (
             <div className="bg-gray-700 p-4 rounded-lg text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto"></div>
               <p className="text-gray-300 mt-2">Генерируем QR-код...</p>
             </div>
           )}
-          
+
           {qrCode && (
             <div className="bg-white p-4 rounded-lg text-center">
-              <Image src={qrCode} alt="QR Code" width={256} height={256} className="mx-auto" />
+              <Image
+                src={qrCode}
+                alt="QR Code"
+                width={256}
+                height={256}
+                className="mx-auto"
+              />
             </div>
           )}
-          
+
           {secret && (
             <div>
               <p className="text-sm text-gray-400 mb-2">
@@ -328,17 +358,19 @@ export function Setup2FA({ onSetupComplete }: Setup2FAProps) {
       <h2 className="text-2xl font-bold text-white mb-4">
         Подтверждение настройки 2FA
       </h2>
-      
+
       <div className="space-y-4">
         <p className="text-gray-300">
           Введите 6-значный код из приложения-аутентификатора:
         </p>
-        
+
         <Input
           type="text"
           placeholder="123456"
           value={verifyCode}
-          onChange={(e) => setVerifyCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+          onChange={(e) =>
+            setVerifyCode(e.target.value.replace(/\D/g, '').slice(0, 6))
+          }
           className="text-center text-xl tracking-widest bg-gray-700 border-gray-600 text-white"
           maxLength={6}
         />
@@ -369,4 +401,4 @@ export function Setup2FA({ onSetupComplete }: Setup2FAProps) {
       </div>
     </div>
   );
-} 
+}

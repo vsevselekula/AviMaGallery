@@ -28,16 +28,19 @@ export function Verify2FA({ onSuccess, onCancel }: Verify2FAProps) {
     try {
       // Получаем активные MFA факторы
       const { data: factors } = await supabase.auth.mfa.listFactors();
-      const activeFactor = factors?.totp?.find(factor => factor.status === 'verified');
-      
+      const activeFactor = factors?.totp?.find(
+        (factor) => factor.status === 'verified'
+      );
+
       if (!activeFactor) {
         throw new Error('2FA не настроена');
       }
 
       // Создаем challenge для проверки
-      const { data: challenge, error: challengeError } = await supabase.auth.mfa.challenge({
-        factorId: activeFactor.id,
-      });
+      const { data: challenge, error: challengeError } =
+        await supabase.auth.mfa.challenge({
+          factorId: activeFactor.id,
+        });
 
       if (challengeError) throw challengeError;
 
@@ -72,17 +75,19 @@ export function Verify2FA({ onSuccess, onCancel }: Verify2FAProps) {
       <h2 className="text-2xl font-bold text-white mb-4">
         Двухфакторная аутентификация
       </h2>
-      
+
       <div className="space-y-4">
         <p className="text-gray-300">
           Введите код из приложения-аутентификатора:
         </p>
-        
+
         <Input
           type="text"
           placeholder="123456"
           value={code}
-          onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+          onChange={(e) =>
+            setCode(e.target.value.replace(/\D/g, '').slice(0, 6))
+          }
           onKeyPress={handleKeyPress}
           className="text-center text-xl tracking-widest bg-gray-700 border-gray-600 text-white"
           maxLength={6}
@@ -96,10 +101,8 @@ export function Verify2FA({ onSuccess, onCancel }: Verify2FAProps) {
         )}
 
         <div className="text-center">
-          <p className="text-sm text-gray-400 mb-2">
-            Не получаете код?
-          </p>
-          <button 
+          <p className="text-sm text-gray-400 mb-2">Не получаете код?</p>
+          <button
             className="text-sm text-blue-400 hover:text-blue-300"
             onClick={() => {
               setError(null);
@@ -130,4 +133,4 @@ export function Verify2FA({ onSuccess, onCancel }: Verify2FAProps) {
       </div>
     </div>
   );
-} 
+}
